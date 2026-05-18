@@ -271,69 +271,113 @@ button { font-family: inherit; }
 /* ============================== ACTION DOCK ============================== */
 .action-dock { position: absolute; left: 16px; right: 16px; bottom: 16px; display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 10px 16px; background: rgba(15,15,18,0.55); backdrop-filter: blur(20px) saturate(150%); -webkit-backdrop-filter: blur(20px) saturate(150%); border: 1px solid rgba(255,255,255,0.08); border-radius: 18px; box-shadow: 0 -8px 32px rgba(0,0,0,0.4), inset 0 1px 0 rgba(255,255,255,0.06); z-index: 20; min-height: 64px; }
 
-/* Category wheel — round control in the center of the dock */
-.cat-wheel-wrap { position: relative; width: 140px; height: 140px; flex-shrink: 0; margin: -50px 8px -10px; }
-.cat-wheel-disc {
-  position: absolute; inset: 0; border-radius: 50%;
-  background: radial-gradient(circle at 50% 30%, rgba(157,225,52,0.12), rgba(15,15,18,0.95) 70%);
-  border: 1px solid rgba(157,225,52,0.3);
-  box-shadow: 0 12px 40px rgba(0,0,0,0.6), 0 0 40px rgba(157,225,52,0.15), inset 0 1px 0 rgba(255,255,255,0.08);
-  backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px);
+/* Half-sphere category slider — dome shape with categories along the curve */
+.dome-nav {
+  position: relative;
+  width: 520px; height: 110px;
+  flex-shrink: 0;
+  margin: -40px 12px -8px;
+  perspective: 800px;
 }
-.cat-wheel-disc::before {
-  content: ''; position: absolute; inset: 6px; border-radius: 50%;
-  border: 1px dashed rgba(157,225,52,0.25);
-  animation: cat-ring-spin 24s linear infinite;
+.dome-bg {
+  position: absolute; bottom: 0; left: 0; right: 0;
+  height: 110px;
+  border-radius: 260px 260px 0 0 / 110px 110px 0 0;
+  background: linear-gradient(180deg, rgba(157,225,52,0.10) 0%, rgba(157,225,52,0.04) 30%, rgba(15,15,18,0.85) 100%);
+  border: 1px solid rgba(157,225,52,0.25);
+  border-bottom: none;
+  box-shadow: 0 -8px 32px rgba(0,0,0,0.5), 0 0 40px rgba(157,225,52,0.12), inset 0 1px 0 rgba(255,255,255,0.06);
+  backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);
+  pointer-events: none;
 }
-@keyframes cat-ring-spin { from { transform: rotate(0); } to { transform: rotate(360deg); } }
-.cat-seg {
-  position: absolute; top: 50%; left: 50%;
-  width: 44px; height: 44px; border-radius: 50%;
+/* Inner accent line tracing the dome's inner curve */
+.dome-bg::before {
+  content: ''; position: absolute; inset: 4px 4px 0;
+  border-radius: 260px 260px 0 0 / 106px 106px 0 0;
+  border-top: 1px dashed rgba(157,225,52,0.4);
+  border-left: 1px dashed rgba(157,225,52,0.2);
+  border-right: 1px dashed rgba(157,225,52,0.2);
+}
+/* Apex glow at the top of the dome */
+.dome-bg::after {
+  content: ''; position: absolute; top: 0; left: 50%; transform: translateX(-50%);
+  width: 80px; height: 4px; border-radius: 2px;
+  background: linear-gradient(90deg, transparent, #9DE134 30%, #9DE134 70%, transparent);
+  box-shadow: 0 0 16px #9DE134;
+  filter: blur(0.5px);
+}
+/* Category items — positioned via data-pos attribute */
+.dome-cat {
+  position: absolute; bottom: 14px; left: 50%;
+  width: 64px; height: 64px;
+  border-radius: 50%;
+  background: rgba(15,15,18,0.85);
+  border: 2px solid rgba(255,255,255,0.1);
   display: grid; place-items: center;
-  background: rgba(255,255,255,0.04);
-  border: 1px solid rgba(255,255,255,0.1);
-  cursor: pointer; transition: all .25s cubic-bezier(.4,1.5,.5,1);
-  margin-left: -22px; margin-top: -22px;
+  cursor: pointer; transition: all 0.55s cubic-bezier(.5,1.5,.5,1);
   font-family: inherit; color: white;
-  z-index: 2;
+  transform-origin: center bottom;
+  backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px);
+  z-index: 3;
 }
-.cat-seg .seg-icon { font-size: 18px; line-height: 1; }
-.cat-seg .seg-lbl  { display: none; }
-.cat-seg:hover { background: rgba(157,225,52,0.18); border-color: #9DE134; transform: translate(var(--tx,0), var(--ty,0)) scale(1.18); box-shadow: 0 0 20px rgba(157,225,52,0.5); }
-.cat-seg.active { background: linear-gradient(180deg, #B5F04D, #9DE134); border-color: #fff; box-shadow: 0 0 24px rgba(157,225,52,0.7), inset 0 1px 0 rgba(255,255,255,0.5); color: #0a0a0a; }
-.cat-seg.active .seg-icon { color: #0a0a0a; }
-/* Position each segment around the wheel using transform via inline --tx/--ty */
-.cat-seg.s-top   { transform: translate(0, -52px); --tx: 0; --ty: -52px; }
-.cat-seg.s-tr    { transform: translate(50px, -16px); --tx: 50px; --ty: -16px; }
-.cat-seg.s-br    { transform: translate(31px, 41px); --tx: 31px; --ty: 41px; }
-.cat-seg.s-bl    { transform: translate(-31px, 41px); --tx: -31px; --ty: 41px; }
-.cat-seg.s-tl    { transform: translate(-50px, -16px); --tx: -50px; --ty: -16px; }
-/* Center button — primary action */
-.cat-center {
-  position: absolute; top: 50%; left: 50%;
-  width: 52px; height: 52px; border-radius: 50%;
-  margin-left: -26px; margin-top: -26px;
-  background: linear-gradient(180deg, #B5F04D, #9DE134 50%, #76B524);
-  border: 2px solid rgba(255,255,255,0.4);
+.dome-cat .cat-emoji { font-size: 26px; line-height: 1; transition: transform .3s; }
+.dome-cat .cat-label {
+  position: absolute; top: calc(100% + 6px); left: 50%; transform: translateX(-50%);
+  font-family: 'Orbitron'; font-size: 9px; font-weight: 800; letter-spacing: 2px;
+  color: #9DE134; white-space: nowrap; opacity: 0; transition: opacity 0.4s;
+  text-shadow: 0 0 8px rgba(157,225,52,0.6);
+}
+.dome-cat:hover .cat-emoji { transform: scale(1.15); }
+
+/* Position rules based on data-pos relative to the active (0 = center top) */
+.dome-cat[data-pos="0"] {
+  transform: translate(-50%, -36px) scale(1.3) rotateY(0deg);
+  width: 70px; height: 70px;
+  background: linear-gradient(180deg, #B5F04D 0%, #9DE134 50%, #76B524 100%);
+  border-color: rgba(255,255,255,0.6);
+  color: #0a0a0a;
+  box-shadow: 0 0 36px rgba(157,225,52,0.7), 0 12px 30px rgba(0,0,0,0.5), inset 0 2px 0 rgba(255,255,255,0.5);
+  z-index: 10;
+}
+.dome-cat[data-pos="0"] .cat-emoji { font-size: 30px; }
+.dome-cat[data-pos="0"] .cat-label { opacity: 1; }
+.dome-cat[data-pos="-1"] { transform: translate(calc(-50% - 100px), -10px) scale(0.95) rotateY(25deg); opacity: 0.9; z-index: 8; }
+.dome-cat[data-pos="1"]  { transform: translate(calc(-50% + 100px), -10px) scale(0.95) rotateY(-25deg); opacity: 0.9; z-index: 8; }
+.dome-cat[data-pos="-2"] { transform: translate(calc(-50% - 180px), 16px) scale(0.7) rotateY(42deg); opacity: 0.55; z-index: 6; }
+.dome-cat[data-pos="2"]  { transform: translate(calc(-50% + 180px), 16px) scale(0.7) rotateY(-42deg); opacity: 0.55; z-index: 6; }
+/* Hidden positions (off-dome) — for >5 categories or wrap-around */
+.dome-cat[data-pos="-3"], .dome-cat[data-pos="3"],
+.dome-cat[data-pos="-4"], .dome-cat[data-pos="4"] { opacity: 0; pointer-events: none; transform: translate(-50%, 0) scale(0.3); }
+
+/* Slide arrows */
+.dome-arrow-d {
+  position: absolute; top: 38px;
+  width: 38px; height: 38px;
+  border-radius: 50%;
+  background: rgba(15,15,18,0.9);
+  border: 1px solid rgba(157,225,52,0.35);
+  color: #9DE134;
+  cursor: pointer; transition: all 0.2s;
+  font-size: 20px; font-weight: 900;
   display: grid; place-items: center;
-  cursor: pointer; transition: transform .15s;
-  box-shadow: 0 6px 0 #5a8a1a, 0 0 32px rgba(157,225,52,0.6), inset 0 2px 0 rgba(255,255,255,0.5);
-  z-index: 3; font-family: inherit;
+  z-index: 15; font-family: inherit;
+  box-shadow: 0 4px 16px rgba(0,0,0,0.5), 0 0 16px rgba(157,225,52,0.15);
 }
-.cat-center:hover { box-shadow: 0 6px 0 #5a8a1a, 0 0 48px rgba(157,225,52,0.9), inset 0 2px 0 rgba(255,255,255,0.5); }
-.cat-center:active { transform: translateY(4px); box-shadow: 0 2px 0 #5a8a1a, 0 0 24px rgba(157,225,52,0.6), inset 0 2px 0 rgba(255,255,255,0.5); }
-.cat-center .ico { font-size: 18px; color: #0a0a0a; }
-.cat-center .lbl { position: absolute; bottom: -22px; left: 50%; transform: translateX(-50%); font-size: 9px; font-weight: 800; letter-spacing: 2px; color: #9DE134; text-shadow: 0 0 8px rgba(157,225,52,0.6); white-space: nowrap; }
-/* Currently-selected category label, shown at the top of the wheel */
-.cat-current-lbl {
-  position: absolute; top: -8px; left: 50%; transform: translateX(-50%);
-  padding: 3px 12px; border-radius: 999px;
-  background: rgba(15,15,18,0.95); border: 1px solid rgba(157,225,52,0.4);
+.dome-arrow-d:hover { background: rgba(157,225,52,0.2); border-color: #9DE134; box-shadow: 0 4px 16px rgba(0,0,0,0.5), 0 0 24px rgba(157,225,52,0.5); transform: scale(1.08); }
+.dome-arrow-d:active { transform: scale(0.92); }
+.dome-arrow-d.left  { left: -6px; }
+.dome-arrow-d.right { right: -6px; }
+/* PLAY/LOBBY label at the bottom of the dome */
+.dome-confirm {
+  position: absolute; bottom: -8px; left: 50%; transform: translateX(-50%);
+  padding: 3px 14px; border-radius: 999px;
+  background: rgba(15,15,18,0.95); border: 1px solid rgba(157,225,52,0.5);
   font-family: 'Orbitron'; font-weight: 800; font-size: 9px; color: #9DE134;
   letter-spacing: 2px; white-space: nowrap;
   box-shadow: 0 0 12px rgba(157,225,52,0.3);
-  z-index: 4;
+  z-index: 4; cursor: pointer; transition: all 0.2s;
 }
+.dome-confirm:hover { background: #9DE134; color: #0a0a0a; transform: translateX(-50%) translateY(-2px); }
 .dock-section { display: flex; gap: 8px; align-items: center; }
 .dock-btn { display: flex; flex-direction: column; align-items: center; gap: 2px; padding: 6px 14px; border: 1px solid rgba(255,255,255,0.08); border-radius: 12px; background: rgba(255,255,255,0.02); cursor: pointer; transition: all .2s; color: #A1A1AA; font-family: inherit; min-width: 64px; }
 .dock-btn:hover { border-color: rgba(157,225,52,0.4); background: rgba(157,225,52,0.06); color: white; transform: translateY(-2px); }

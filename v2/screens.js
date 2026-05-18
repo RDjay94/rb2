@@ -156,6 +156,31 @@ const CategoryWheel = [
   { key:'fishing', icon:'🎣', label:'FISHING', target:'fishing', pos:'s-tl'  },
 ];
 
+// Half-sphere dome state — index of category at the apex (center top)
+let domeIndex = 0;
+function domeRotate(dir){
+  const N = CategoryWheel.length;
+  domeIndex = (domeIndex + dir + N) % N;
+  document.getElementById('dock-root').innerHTML = ActionDock(currentScreen);
+  beep(400, 30);
+}
+function domeSelectOrNav(idx){
+  // If clicking the already-centered item, navigate to it.
+  // Otherwise, rotate it to the center first.
+  if (idx === domeIndex) {
+    setScreen(CategoryWheel[idx].target);
+  } else {
+    domeIndex = idx;
+    document.getElementById('dock-root').innerHTML = ActionDock(currentScreen);
+    beep(500, 40);
+  }
+}
+// Keep the dome's centered item in sync with whichever category screen is active.
+function syncDomeToScreen(screen){
+  const idx = CategoryWheel.findIndex(c => c.target === screen);
+  if (idx !== -1) domeIndex = idx;
+}
+
 function ActionDock(active){
   const map = {
     lobby:'play', slots:'slots', fishing:'fishing',
@@ -168,9 +193,13 @@ function ActionDock(active){
   };
   const hi = map[active] || '';
   const utilBtn = (key, icon, lbl, target) => `<button class="dock-btn ${hi===key?'active':''}" onclick="setScreen('${target}')"><span class="icon">${icon}</span><span class="lbl">${lbl}</span></button>`;
-  // Find currently active category for the wheel center label
-  const activeCat = CategoryWheel.find(c => c.key === hi);
-  const centerLbl = active === 'lobby' ? 'LOBBY' : (activeCat ? activeCat.label : 'BACK');
+  syncDomeToScreen(active);
+  const N = CategoryWheel.length;
+  const centeredCat = CategoryWheel[domeIndex];
+  const confirmLbl = active === 'lobby'
+    ? `▶ ${centeredCat.label}`
+    : (hi === centeredCat.key ? '⌂ LOBBY' : `▶ ${centeredCat.label}`);
+  const confirmTarget = (active === 'lobby' || hi !== centeredCat.key) ? centeredCat.target : 'lobby';
   return `
   <div class="action-dock">
     <!-- Left utility buttons -->
@@ -179,12 +208,21 @@ function ActionDock(active){
       ${utilBtn('shop','🛒','SHOP','shop')}
       ${utilBtn('missions','🎯','MISSIONS','missions')}
     </div>
-    <!-- Center round category wheel -->
-    <div class="cat-wheel-wrap" title="Tap a segment to navigate · center to return to Lobby">
-      <div class="cat-current-lbl">${centerLbl}</div>
-      <div class="cat-wheel-disc"></div>
-      ${CategoryWheel.map(c => `<button class="cat-seg ${c.pos} ${hi===c.key?'active':''}" onclick="setScreen('${c.target}')" title="${c.label}"><span class="seg-icon">${c.icon}</span></button>`).join('')}
-      <button class="cat-center" onclick="setScreen('lobby')" title="Return to Lobby"><span class="ico">${active==='lobby'?'⌂':'⌂'}</span><span class="lbl">${centerLbl}</span></button>
+    <!-- Half-sphere dome category slider -->
+    <div class="dome-nav" title="Slide ← / → to find a category · tap the centered one to play">
+      <div class="dome-bg"></div>
+      <button class="dome-arrow-d left" onclick="domeRotate(-1)" title="Previous">‹</button>
+      <button class="dome-arrow-d right" onclick="domeRotate(1)" title="Next">›</button>
+      ${CategoryWheel.map((c, i) => {
+        let pos = i - domeIndex;
+        if (pos > N/2) pos -= N;
+        if (pos < -N/2) pos += N;
+        return `<button class="dome-cat" data-pos="${pos}" onclick="domeSelectOrNav(${i})" title="${c.label}">
+          <span class="cat-emoji">${c.icon}</span>
+          <span class="cat-label">${c.label}</span>
+        </button>`;
+      }).join('')}
+      <button class="dome-confirm" onclick="setScreen('${confirmTarget}')" title="${confirmTarget==='lobby'?'Return to Lobby':'Go to '+centeredCat.label}">${confirmLbl}</button>
     </div>
     <!-- Right utility buttons -->
     <div class="dock-section">
