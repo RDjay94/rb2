@@ -74,8 +74,64 @@ button { font-family: inherit; }
 .particle { position: absolute; width: 3px; height: 3px; border-radius: 50%; background: #9DE134; box-shadow: 0 0 6px #9DE134, 0 0 12px #9DE134; opacity: 0.45; }
 @keyframes drift-up { 0% { transform: translate(0, 0); opacity: 0; } 10% { opacity: 0.6; } 90% { opacity: 0.35; } 100% { transform: translate(var(--dx, 0px), -100vh); opacity: 0; } }
 
+/* ============================== LOCKED SITE HEADER (top) ============================== */
+.site-header {
+  position: absolute; top: 0; left: 0; right: 0;
+  height: 32px; padding: 0 16px;
+  display: flex; align-items: center; gap: 14px;
+  background: linear-gradient(180deg, rgba(15,15,18,0.92) 0%, rgba(15,15,18,0.75) 100%);
+  backdrop-filter: blur(16px) saturate(150%); -webkit-backdrop-filter: blur(16px) saturate(150%);
+  border-bottom: 1px solid rgba(157,225,52,0.18);
+  box-shadow: 0 1px 0 rgba(255,255,255,0.04);
+  z-index: 50;
+  font-size: 10px;
+}
+.sh-brand { display: flex; align-items: center; gap: 8px; }
+.sh-brand .sh-logo {
+  width: 22px; height: 22px; border-radius: 6px;
+  background: linear-gradient(135deg, #B5F04D, #9DE134);
+  color: #0a0a0a; font-family: 'Orbitron'; font-weight: 900; font-size: 13px;
+  display: grid; place-items: center;
+  box-shadow: 0 0 12px rgba(157,225,52,0.5);
+}
+.sh-brand .sh-name { font-family: 'Orbitron'; font-weight: 800; font-size: 12px; letter-spacing: 2px; background: linear-gradient(180deg, #fff, #9DE134); -webkit-background-clip: text; background-clip: text; color: transparent; }
+.sh-brand .sh-flag { font-size: 14px; }
+.sh-tags { display: flex; align-items: center; gap: 8px; flex: 1; min-width: 0; }
+.sh-tag { padding: 3px 9px; border-radius: 999px; font-size: 9px; font-weight: 700; letter-spacing: 1px; background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.06); color: #A1A1AA; white-space: nowrap; }
+.sh-tag.warn { background: rgba(239,68,68,0.12); color: #ef4444; border-color: rgba(239,68,68,0.3); }
+.sh-tag.license { background: rgba(34,211,238,0.08); color: #22D3EE; border-color: rgba(34,211,238,0.25); }
+.sh-tag.live { background: rgba(157,225,52,0.1); color: #9DE134; border-color: rgba(157,225,52,0.3); display: flex; align-items: center; gap: 5px; }
+.sh-tag.live::before { content: ''; width: 5px; height: 5px; border-radius: 50%; background: #9DE134; box-shadow: 0 0 6px #9DE134; animation: live-pulse 1.4s infinite; }
+.sh-actions { display: flex; align-items: center; gap: 6px; flex-shrink: 0; }
+.sh-actions button { padding: 4px 10px; border-radius: 6px; background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.08); color: #D4D4D8; font-size: 10px; font-weight: 600; cursor: pointer; font-family: inherit; transition: all .15s; }
+.sh-actions button:hover { background: rgba(157,225,52,0.1); border-color: rgba(157,225,52,0.3); color: white; }
+
+/* ============================== LOCKED SITE FOOTER (bottom) ============================== */
+.site-footer {
+  position: absolute; bottom: 0; left: 0; right: 0;
+  height: 34px; padding: 0 16px;
+  display: flex; align-items: center; gap: 14px;
+  background: linear-gradient(0deg, rgba(15,15,18,0.92) 0%, rgba(15,15,18,0.75) 100%);
+  backdrop-filter: blur(16px) saturate(150%); -webkit-backdrop-filter: blur(16px) saturate(150%);
+  border-top: 1px solid rgba(255,255,255,0.05);
+  z-index: 30;
+  font-size: 10px;
+}
+.sf-trust { display: flex; align-items: center; gap: 6px; flex-shrink: 0; }
+.sf-trust-item { padding: 3px 8px; border-radius: 6px; font-size: 9px; font-weight: 700; color: #A1A1AA; background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.06); }
+.sf-payments { display: flex; align-items: center; gap: 6px; flex: 1; min-width: 0; overflow: hidden; }
+.sf-payments .sf-label { font-size: 9px; color: #71717A; font-weight: 700; letter-spacing: 1px; margin-right: 4px; }
+.sf-pay-item { padding: 3px 9px; border-radius: 6px; font-size: 9px; font-weight: 800; color: #D4D4D8; background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.06); }
+.sf-pay-item.bkash { color: #E2136E; border-color: rgba(226,19,110,0.3); background: rgba(226,19,110,0.05); }
+.sf-pay-item.nagad { color: #F77B1C; border-color: rgba(247,123,28,0.3); background: rgba(247,123,28,0.05); }
+.sf-pay-item.rocket { color: #8E1656; border-color: rgba(142,22,86,0.3); background: rgba(142,22,86,0.05); }
+.sf-links { display: flex; align-items: center; gap: 10px; flex-shrink: 0; }
+.sf-links a { color: #71717A; text-decoration: none; cursor: pointer; transition: color .15s; }
+.sf-links a:hover { color: #9DE134; }
+.sf-copy { color: #52525B; font-size: 9px; padding-left: 8px; border-left: 1px solid rgba(255,255,255,0.08); margin-left: 4px; }
+
 /* ============================== TOP BAR ============================== */
-.topbar { position: absolute; top: 16px; left: 16px; right: 16px; display: flex; align-items: center; gap: 12px; padding: 10px 14px; background: rgba(15,15,18,0.55); backdrop-filter: blur(20px) saturate(150%); -webkit-backdrop-filter: blur(20px) saturate(150%); border: 1px solid rgba(255,255,255,0.08); border-radius: 18px; box-shadow: 0 8px 32px rgba(0,0,0,0.4), inset 0 1px 0 rgba(255,255,255,0.06); z-index: 20; }
+.topbar { position: absolute; top: 48px; left: 16px; right: 16px; display: flex; align-items: center; gap: 12px; padding: 10px 14px; background: rgba(15,15,18,0.55); backdrop-filter: blur(20px) saturate(150%); -webkit-backdrop-filter: blur(20px) saturate(150%); border: 1px solid rgba(255,255,255,0.08); border-radius: 18px; box-shadow: 0 8px 32px rgba(0,0,0,0.4), inset 0 1px 0 rgba(255,255,255,0.06); z-index: 20; }
 .tb-back { padding: 8px 14px; border-radius: 10px; background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.08); color: #9DE134; cursor: pointer; font-weight: 700; font-size: 12px; transition: all .2s; }
 .tb-back:hover { background: rgba(157,225,52,0.1); border-color: #9DE134; }
 .avatar-chip { width: 36px; height: 36px; border-radius: 12px; background: linear-gradient(135deg, #9DE134, rgba(157,225,52,0.4)); display: grid; place-items: center; font-family: 'Space Grotesk'; font-weight: 900; color: #0a0a0a; font-size: 14px; box-shadow: 0 0 20px rgba(157,225,52,0.5); position: relative; cursor: pointer; }
@@ -268,7 +324,7 @@ button { font-family: inherit; }
 .tab-pills button:not(.active):hover { color: white; background: rgba(255,255,255,0.04); }
 
 /* ============================== ACTION DOCK ============================== */
-.action-dock { position: absolute; left: 16px; right: 16px; bottom: 16px; display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 10px 16px; background: rgba(15,15,18,0.55); backdrop-filter: blur(20px) saturate(150%); -webkit-backdrop-filter: blur(20px) saturate(150%); border: 1px solid rgba(255,255,255,0.08); border-radius: 18px; box-shadow: 0 -8px 32px rgba(0,0,0,0.4), inset 0 1px 0 rgba(255,255,255,0.06); z-index: 20; min-height: 64px; }
+.action-dock { position: absolute; left: 16px; right: 16px; bottom: 48px; display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 10px 16px; background: rgba(15,15,18,0.55); backdrop-filter: blur(20px) saturate(150%); -webkit-backdrop-filter: blur(20px) saturate(150%); border: 1px solid rgba(255,255,255,0.08); border-radius: 18px; box-shadow: 0 -8px 32px rgba(0,0,0,0.4), inset 0 1px 0 rgba(255,255,255,0.06); z-index: 20; min-height: 64px; }
 
 /* Half-sphere category slider — dome shape with categories along the curve */
 .dome-nav {
@@ -396,7 +452,7 @@ button { font-family: inherit; }
 @keyframes wins-scroll { from { transform: translateX(0); } to { transform: translateX(-50%); } }
 
 /* ============================== LAYOUT REGIONS ============================== */
-.screen-root { position: absolute; inset: 80px 16px 100px 16px; z-index: 10; }
+.screen-root { position: absolute; inset: 112px 16px 132px 16px; z-index: 10; }
 /* Slide-in animation when switching screens (slower, more deliberate) */
 @keyframes screen-slide-in {
   0%   { transform: translateX(80px) scale(0.97); opacity: 0; filter: blur(4px); }
@@ -470,8 +526,17 @@ button { font-family: inherit; }
 /* Activates on tablet landscape, mobile landscape, and any narrow window.
    Targets: viewport < 1100px wide OR < 500px tall. */
 @media (max-width: 1100px), (max-height: 500px) {
-  /* TOP BAR — compact */
-  .topbar { padding: 6px 10px; gap: 8px; top: 10px; left: 10px; right: 10px; }
+  /* SITE HEADER + FOOTER — compact */
+  .site-header { height: 28px; padding: 0 10px; gap: 8px; }
+  .site-header .sh-tag { font-size: 8px; padding: 2px 7px; }
+  .site-header .sh-actions button { padding: 3px 8px; font-size: 9px; }
+  .site-footer { height: 28px; padding: 0 10px; gap: 8px; }
+  .site-footer .sf-trust-item, .site-footer .sf-pay-item { font-size: 8px; padding: 2px 7px; }
+  .site-footer .sf-links { gap: 8px; font-size: 9px; }
+  .site-footer .sf-label { font-size: 8px; }
+
+  /* TOP BAR — compact (sits below the 28px site header) */
+  .topbar { padding: 6px 10px; gap: 8px; top: 38px; left: 10px; right: 10px; }
   .topbar .user-info { display: none; }
   .topbar .tb-back { padding: 5px 10px; font-size: 11px; }
   .tb-title { display: none; }
@@ -483,8 +548,8 @@ button { font-family: inherit; }
   .bal-chip .num { font-size: 11px; }
   .bal-chip .plus { width: 14px; height: 14px; font-size: 10px; }
 
-  /* SCREEN CONTENT — tighter inset */
-  .screen-root { inset: 60px 10px 80px 10px; }
+  /* SCREEN CONTENT — tighter inset (28 header + 50 topbar + 28 footer + 60 dock = ~166 → 80 top / 110 bot) */
+  .screen-root { inset: 86px 10px 110px 10px; }
 
   /* LOBBY LAYOUT — tighter columns */
   .layout-lobby { grid-template-columns: 170px 1fr 190px; gap: 10px; }
@@ -541,8 +606,8 @@ button { font-family: inherit; }
   .dome-arrow-d { width: 32px; height: 32px; font-size: 18px; top: 30px; }
   .dome-confirm { font-size: 8px; padding: 2px 10px; }
 
-  /* ACTION DOCK — shorter */
-  .action-dock { padding: 8px 12px; min-height: 58px; left: 10px; right: 10px; bottom: 10px; }
+  /* ACTION DOCK — shorter (sits above the 28px site footer) */
+  .action-dock { padding: 8px 12px; min-height: 58px; left: 10px; right: 10px; bottom: 36px; }
   .dock-btn { padding: 4px 10px; min-width: 48px; }
   .dock-btn .icon { font-size: 14px; }
   .dock-btn .lbl { font-size: 8px; }
@@ -605,6 +670,13 @@ button { font-family: inherit; }
 
   /* SLASHES — fewer for performance on small screens */
   .slash { opacity: 0.4; }
+
+  /* SITE HEADER + FOOTER — hide non-essential tags on phone landscape */
+  .site-header .sh-tag.license { display: none; }
+  .site-footer .sf-trust-item:nth-of-type(n+3) { display: none; }
+  .site-footer .sf-pay-item:nth-of-type(n+4) { display: none; }
+  .site-footer .sf-links a:nth-of-type(n+3) { display: none; }
+  .site-footer .sf-copy { display: none; }
 }
 
 /* ============================== RESPONSIVE · LANDSCAPE HEIGHT ONLY ============================== */
@@ -749,6 +821,49 @@ button { font-family: inherit; }
 <body>
 
 <div class="stage" id="stage">
+
+  <!-- LOCKED SITE HEADER — always visible at top -->
+  <div class="site-header">
+    <div class="sh-brand">
+      <div class="sh-logo">R</div>
+      <span class="sh-name">RAJABAJI</span>
+      <span class="sh-flag" title="Bangladesh">🇧🇩</span>
+    </div>
+    <div class="sh-tags">
+      <span class="sh-tag warn">🔞 18+</span>
+      <span class="sh-tag license">✓ Curaçao Licensed</span>
+      <span class="sh-tag live">৯,৮৪২ players online</span>
+    </div>
+    <div class="sh-actions">
+      <button title="Language">🌐 EN</button>
+      <button title="Live support">💬 Support</button>
+    </div>
+  </div>
+
+  <!-- LOCKED SITE FOOTER — always visible at bottom -->
+  <div class="site-footer">
+    <div class="sf-trust">
+      <span class="sf-trust-item">🔞 18+ Only</span>
+      <span class="sf-trust-item">🛡 Responsible Play</span>
+      <span class="sf-trust-item">🔒 SSL Secured</span>
+      <span class="sf-trust-item">✓ Provably Fair</span>
+    </div>
+    <div class="sf-payments">
+      <span class="sf-label">PAYMENTS:</span>
+      <span class="sf-pay-item bkash">bKash</span>
+      <span class="sf-pay-item nagad">Nagad</span>
+      <span class="sf-pay-item rocket">Rocket</span>
+      <span class="sf-pay-item">SureCash</span>
+      <span class="sf-pay-item">USDT</span>
+    </div>
+    <div class="sf-links">
+      <a>Terms</a>
+      <a>Privacy</a>
+      <a>Responsible Play</a>
+      <a>Help</a>
+      <span class="sf-copy">© 2026 RajaBaji</span>
+    </div>
+  </div>
 
   <!-- Background layers — jet black with gentle slash animations -->
   <div class="glow-halo a"></div>
