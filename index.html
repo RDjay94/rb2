@@ -53,6 +53,8 @@ tailwind.config = {
   .spin-slow { animation: spin-slow 18s linear infinite; }
   @keyframes spin-wheel { from { transform: rotate(0) } to { transform: rotate(2880deg) } }
   .spin-wheel { animation: spin-wheel 4s cubic-bezier(.17,.67,.32,1.02) forwards; }
+  @keyframes barrel-spin { 0% { transform: translateX(-50%) } 100% { transform: translateX(calc(-50% - 670px)) } }
+  .barrel-spin { animation: barrel-spin 3.5s cubic-bezier(.17,.67,.32,1.02) forwards; }
   @keyframes reel-spin { from { transform: translateY(0) } to { transform: translateY(-80%) } }
   .reel-spin { animation: reel-spin .12s linear infinite; }
   @keyframes float-up { 0% { transform: translateY(0); opacity: 1 } 100% { transform: translateY(-60px); opacity: 0 } }
@@ -108,6 +110,9 @@ tailwind.config = {
   #gate .err { color: #ef4444; font-size: 11px; margin-top: 8px; text-align: center; min-height: 16px; }
   #gate .footer { text-align: center; font-size: 10px; color: #52525B; margin-top: 18px; }
 </style>
+</head>
+<body class="min-h-screen">
+
 </head>
 <body class="min-h-screen">
 
@@ -547,22 +552,45 @@ const Home = () => `
         <div class="absolute bottom-0 right-2 text-4xl wiggle" style="filter: drop-shadow(0 -4px 8px rgba(157,225,52,.4))">🤴</div>
       </div>
 
-      <!-- Lucky Wheel -->
+      <!-- Lucky Wheel — horizontal spinning prize barrel -->
       <div class="relative rounded-xl overflow-hidden border border-amber-500/40 p-2" style="background: radial-gradient(circle at 50% 50%, rgba(255,182,39,0.15), #0a0a0a 70%)">
-        <div class="absolute top-1.5 left-1.5 text-[8px] px-1.5 py-0.5 rounded bg-amber-500 text-ink-0 font-black z-10">DAILY · FREE</div>
-        <div class="flex items-center gap-3">
-          <div class="relative w-[64px] h-[64px] flex-shrink-0">
-            <div id="wheel" class="w-full h-full rounded-full border-[4px] border-amber-400 relative" style="background: conic-gradient(#9DE134 0deg 45deg, #FFB627 45deg 90deg, #9DE134 90deg 135deg, #FFB627 135deg 180deg, #9DE134 180deg 225deg, #FFB627 225deg 270deg, #9DE134 270deg 315deg, #FFB627 315deg 360deg); box-shadow: 0 0 24px rgba(255,182,39,.4), inset 0 0 12px rgba(0,0,0,.4)">
-              ${[0,45,90,135,180,225,270,315].map((deg,i)=>`<div class="absolute top-1/2 left-1/2 text-[6px] font-black text-ink-0" style="transform: rotate(${deg+22}deg) translateY(-22px); transform-origin: 0 0">${['৳50','৳100','৳500','SPIN','৳1K','৳50','৳200','5K'][i]}</div>`).join('')}
-            </div>
-            <div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-5 h-5 rounded-full bg-ink-0 border border-amber-400 grid place-items-center text-[10px]">🎁</div>
-            <div class="absolute -top-0.5 left-1/2 -translate-x-1/2 w-0 h-0" style="border-left: 5px solid transparent; border-right: 5px solid transparent; border-top: 8px solid #FFB627"></div>
+        <!-- Header row -->
+        <div class="flex items-center justify-between mb-1.5">
+          <span class="text-[8px] px-1.5 py-0.5 rounded bg-amber-500 text-ink-0 font-black">DAILY · FREE</span>
+          <span class="text-[8px] text-zinc-400 num-mono">Resets · 14h 22m</span>
+        </div>
+        <!-- Horizontal prize barrel -->
+        <div class="relative rounded-lg overflow-hidden h-[58px] border border-amber-500/60" style="background: linear-gradient(180deg, #2a1a0a 0%, #1a0a05 50%, #2a1a0a 100%); box-shadow: inset 0 2px 8px rgba(0,0,0,.6), 0 0 20px rgba(255,182,39,.2)">
+          <!-- Side fade overlays -->
+          <div class="absolute left-0 top-0 bottom-0 w-8 z-10 pointer-events-none" style="background: linear-gradient(90deg, #0a0a0a, transparent)"></div>
+          <div class="absolute right-0 top-0 bottom-0 w-8 z-10 pointer-events-none" style="background: linear-gradient(-90deg, #0a0a0a, transparent)"></div>
+          <!-- Center selector indicator -->
+          <div class="absolute left-1/2 -translate-x-1/2 top-0 bottom-0 w-[52px] z-20 pointer-events-none">
+            <div class="absolute inset-x-0 top-0 h-0 mx-auto" style="border-left: 6px solid transparent; border-right: 6px solid transparent; border-top: 7px solid #FFB627; width: 0; filter: drop-shadow(0 1px 2px rgba(0,0,0,.5))"></div>
+            <div class="absolute inset-x-0 bottom-0 h-0 mx-auto" style="border-left: 6px solid transparent; border-right: 6px solid transparent; border-bottom: 7px solid #FFB627; width: 0; filter: drop-shadow(0 -1px 2px rgba(0,0,0,.5))"></div>
+            <div class="absolute inset-y-0 left-0 w-px bg-amber-400/60"></div>
+            <div class="absolute inset-y-0 right-0 w-px bg-amber-400/60"></div>
           </div>
-          <div class="flex-1 min-w-0 pt-3">
-            <div class="text-[9px] text-zinc-400">Win up to</div>
-            <div class="font-display font-black gold-text text-base leading-tight">৳ 5,000</div>
-            <button onclick="protoSpinWheel()" class="mt-1 w-full px-2 py-1 rounded-lg bg-gradient-to-b from-amber-300 to-amber-600 text-ink-0 text-[10px] font-black btn-3d pulse-scale">🎯 SPIN!</button>
+          <!-- Spinning prize strip -->
+          <div id="wheel" class="absolute inset-y-0 flex items-center" style="left: 50%; transform: translateX(-50%); will-change: transform">
+            ${[
+              ['৳50','#9DE134'],['৳100','#FFB627'],['৳500','#9DE134'],['🎁 BONUS','#FFB627'],
+              ['৳1K','#9DE134'],['৳200','#FFB627'],['100 SPINS','#9DE134'],['৳5K','#FFB627'],
+              ['৳50','#9DE134'],['৳100','#FFB627'],['৳500','#9DE134'],['💎 GEMS','#FFB627'],
+              ['৳1K','#9DE134'],['৳200','#FFB627'],['JACKPOT','#FFB627'],['৳5K','#9DE134'],
+            ].map(([prize,color],i)=>`
+              <div class="flex-shrink-0 w-[52px] h-[44px] mx-px rounded grid place-items-center text-[10px] font-black text-ink-0" style="background: ${color}; box-shadow: inset 0 1px 0 rgba(255,255,255,.3), 0 1px 0 rgba(0,0,0,.3)">
+                ${prize}
+              </div>`).join('')}
           </div>
+        </div>
+        <!-- Footer row: prize + spin -->
+        <div class="flex items-center gap-2 mt-1.5">
+          <div class="flex-1 min-w-0">
+            <div class="text-[8px] text-zinc-400 leading-none">Up to</div>
+            <div class="font-display font-black gold-text text-sm leading-tight num-mono">৳ 5,000</div>
+          </div>
+          <button onclick="protoSpinBarrel()" class="px-3 py-1.5 rounded-lg bg-gradient-to-b from-amber-300 to-amber-600 text-ink-0 text-[11px] font-black btn-3d pulse-scale">🎯 SPIN!</button>
         </div>
       </div>
 
@@ -2781,7 +2809,7 @@ function fxBeep(freq=600, dur=80){
   } catch(e){}
 }
 
-// Spin the lucky wheel
+// Spin the lucky wheel (circular)
 function protoSpinWheel(){
   const w = document.getElementById('wheel');
   if (!w) return;
@@ -2790,6 +2818,28 @@ function protoSpinWheel(){
   void w.offsetWidth;
   w.classList.add('spin-wheel');
   setTimeout(()=>{ fxBeep(900,200); spawnConfetti(); protoBumpCoin('cash', 500); }, 4100);
+}
+// Spin the horizontal prize barrel — slides left then settles on a prize
+function protoSpinBarrel(){
+  const w = document.getElementById('wheel');
+  if (!w) return;
+  // Tick-tick-tick sound during spin
+  fxBeep(400,80);
+  let tickCount = 0;
+  const tickTimer = setInterval(()=>{
+    tickCount++;
+    fxBeep(800 - tickCount*40, 30);
+    if (tickCount > 18) clearInterval(tickTimer);
+  }, 180);
+  w.classList.remove('barrel-spin');
+  void w.offsetWidth;
+  w.classList.add('barrel-spin');
+  setTimeout(()=>{
+    clearInterval(tickTimer);
+    fxBeep(1100,250);
+    spawnConfetti();
+    protoBumpCoin('cash', 500);
+  }, 3600);
 }
 
 // Spin slot reels
