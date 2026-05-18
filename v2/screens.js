@@ -1,4 +1,4 @@
-// ============================== SPLINE 3D SCENE CONFIG ==============================
+﻿// ============================== SPLINE 3D SCENE CONFIG ==============================
 // Paste your Spline scene URLs here. Get them from:
 //   spline.design → your scene → Export → Code → copy "Public URL" (ends in .splinecode)
 // Leave a value as '' to fall back to the 2D/CSS version.
@@ -951,130 +951,248 @@ Screens.cricket = () => {
 </div>`;
 };
 
+
 // ============================== LIVE CASINO ==============================
-Screens.live = () => `
-<div class="screen-grid cols-side">
-  <!-- Filter rail -->
-  <div class="glass" style="padding:12px;display:flex;flex-direction:column;gap:10px;">
-    <div>
-      <div class="card-h"><div class="label">TYPE</div></div>
-      <div style="display:flex;flex-direction:column;gap:4px;margin-top:6px;">
-        ${[['All','48','active'],['🎲 Roulette','12',''],['🃏 Blackjack','9',''],['🎴 Baccarat','7',''],['🎡 Game shows','8',''],['🐉 Dragon Tiger','4',''],['🎰 Crash','3',''],['⚡ Quick','5','']].map(([n,c,a])=>`<button style="display:flex;align-items:center;justify-content:space-between;padding:6px 10px;border-radius:8px;cursor:pointer;font-size:11px;font-family:inherit;border:none;${a?'background:#9DE134;color:#0a0a0a;font-weight:800':'background:transparent;color:#D4D4D8'}"><span>${n}</span><span style="font-size:9px;opacity:.7;" class="num-mono">${c}</span></button>`).join('')}
-      </div>
+let liveProvider = 'all';
+const LiveProviders = [
+  { k:'all',       n:'All Live',       e:'🎲', sub:'48 tables · all providers' },
+  { k:'evolution', n:'Evolution',      e:'🎡', sub:'Crazy Time · Lightning · Funky' },
+  { k:'pragmatic', n:'Pragmatic Live', e:'🍭', sub:'Mega Wheel · CandyLand' },
+  { k:'ezugi',     n:'Ezugi',          e:'🃏', sub:'Teen Patti · Andar Bahar' },
+  { k:'aesexy',    n:'AE Sexy',        e:'💃', sub:'Live dealers · Asian focus' },
+  { k:'biggaming', n:'Big Gaming',     e:'🐅', sub:'Bull Bull · Roulette · Sic Bo' },
+  { k:'wmcasino',  n:'WM Casino',      e:'🎴', sub:'Dragon Tiger · Baccarat' },
+  { k:'sagaming',  n:'SA Gaming',      e:'♠️', sub:'Asian live dealers' },
+  { k:'beton',     n:'BetOn Games',    e:'🎯', sub:'Virtual horse · greyhound' },
+];
+function setLiveProvider(p){ liveProvider = p; setScreen('live'); }
+
+const AllLiveGames = [
+  ['Crazy Time','Evolution','evolution','crazy_time',2849,1],
+  ['Lightning Roulette','Evolution','evolution','lightning_roulette',1124,0],
+  ['Funky Time','Evolution','evolution','funky_time',946,0],
+  ['Live Blackjack','Evolution','evolution','super_ace',1289,0],
+  ['Auto Roulette','Evolution','evolution','lightning_roulette',945,0],
+  ['Baccarat A','Evolution','evolution','super_ace',678,0],
+  ['Speed Bacc','Evolution','evolution','lightning_roulette',432,0],
+  ['Big Baller','Evolution','evolution','crazy_time',834,0],
+  ['Dragon Tiger','Evolution','evolution','super_ace',421,0],
+  ['Mega Wheel','Pragmatic','pragmatic','mega_wheel',678,0],
+  ['Candy Land','Pragmatic','pragmatic','sweet_bonanza',512,0],
+  ['Sweet Bonanza Live','Pragmatic','pragmatic','sweet_bonanza',623,0],
+  ['Mega Roulette','Pragmatic','pragmatic','lightning_roulette',445,0],
+  ['Speed Baccarat','Pragmatic','pragmatic','super_ace',389,0],
+  ['Teen Patti','Ezugi','ezugi','super_ace',756,0],
+  ['Andar Bahar','Ezugi','ezugi','super_ace',589,0],
+  ['Auto Roulette','Ezugi','ezugi','lightning_roulette',312,0],
+  ['Sexy Baccarat','AE Sexy','aesexy','super_ace',1156,0],
+  ['Sexy Roulette','AE Sexy','aesexy','lightning_roulette',678,0],
+  ['Bull Bull','Big Gaming','biggaming','super_ace',445,0],
+  ['Sic Bo','Big Gaming','biggaming','crazy_time',289,0],
+  ['Dragon Tiger','WM Casino','wmcasino','super_ace',512,0],
+  ['SA Baccarat','SA Gaming','sagaming','super_ace',423,0],
+  ['Virtual Horse','BetOn','beton','aviator',189,0],
+];
+
+Screens.live = () => {
+  const provider = LiveProviders.find(p => p.k === liveProvider) || LiveProviders[0];
+  const games = liveProvider === 'all' ? AllLiveGames : AllLiveGames.filter(g => g[2] === liveProvider);
+  const featured = games.find(g => g[5] === 1) || games[0];
+  return `
+<div class="stack-col" style="height:100%;gap:10px;">
+  <!-- Live casino provider selector -->
+  <div class="glass" style="padding:10px 12px;display:flex;align-items:center;gap:12px;flex-shrink:0;">
+    <div class="card-h" style="margin:0;flex-shrink:0;"><div class="label">PROVIDER</div></div>
+    <div style="display:flex;gap:6px;overflow-x:auto;flex:1;" class="hide-scroll">
+      ${LiveProviders.map(p => {
+        const act = p.k === liveProvider;
+        return `<button onclick="setLiveProvider('${p.k}')" style="flex-shrink:0;display:flex;align-items:center;gap:8px;padding:6px 12px;border-radius:10px;cursor:pointer;font-family:inherit;border:1px solid ${act?'#9DE134':'rgba(255,255,255,.08)'};${act?'background:rgba(157,225,52,.15);color:white;box-shadow:0 0 12px rgba(157,225,52,.25);':'background:rgba(255,255,255,.04);color:#A1A1AA;'}transition:all .2s;">
+          <span style="font-size:16px;">${p.e}</span>
+          <div style="text-align:left;">
+            <div style="font-size:11px;font-weight:800;">${p.n}</div>
+            <div style="font-size:9px;opacity:.7;">${p.sub}</div>
+          </div>
+        </button>`;
+      }).join('')}
     </div>
-    <div style="border-top:1px solid rgba(255,255,255,.06);padding-top:10px;">
-      <div class="card-h"><div class="label">PROVIDER</div></div>
-      <div style="display:flex;flex-direction:column;gap:4px;margin-top:6px;">
-        ${[['Evolution','24'],['Pragmatic','12'],['JILI','7'],['Ezugi','5']].map(([n,c])=>`<button style="display:flex;align-items:center;justify-content:space-between;padding:6px 10px;border-radius:8px;cursor:pointer;font-size:11px;font-family:inherit;border:none;background:transparent;color:#D4D4D8;"><span>${n}</span><span style="font-size:9px;color:#71717A;" class="num-mono">${c}</span></button>`).join('')}
-      </div>
-    </div>
+    <div style="font-size:10px;color:#9DE134;font-weight:800;flex-shrink:0;display:flex;align-items:center;gap:4px;"><span style="width:6px;height:6px;border-radius:50%;background:#9DE134;animation:live-pulse 1.4s infinite;"></span>${games.length} TABLES</div>
   </div>
 
-  <!-- Grid -->
-  <div class="stack-col">
-    <!-- Featured hero -->
-    <div class="glass" style="padding:0;overflow:hidden;height:140px;display:grid;grid-template-columns:1.5fr 1fr;">
-      <div style="position:relative;">
-        <img src="${GAME_IMG('crazy_time')}" style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover;">
-        <div style="position:absolute;inset:0;background:linear-gradient(90deg,rgba(5,5,7,.4),transparent 60%);"></div>
-        <span class="pill red" style="position:absolute;top:10px;left:10px;display:flex;align-items:center;gap:6px;"><span style="width:6px;height:6px;border-radius:50%;background:white;animation:live-pulse 1.4s infinite;"></span>LIVE NOW</span>
-        <span style="position:absolute;bottom:10px;left:10px;padding:4px 10px;border-radius:6px;background:rgba(0,0,0,.7);font-size:10px;font-weight:700;" class="num-mono">২,৮৪৯ playing</span>
+  <!-- Filter rail + content -->
+  <div class="screen-grid cols-side" style="flex:1;min-height:0;">
+    <div class="glass" style="padding:12px;display:flex;flex-direction:column;gap:10px;">
+      <div>
+        <div class="card-h"><div class="label">TYPE</div></div>
+        <div style="display:flex;flex-direction:column;gap:4px;margin-top:6px;">
+          ${[['All',games.length,'active'],['🎲 Roulette','12',''],['🃏 Blackjack','9',''],['🎴 Baccarat','7',''],['🎡 Game shows','8',''],['🐉 Dragon Tiger','4',''],['🎰 Crash','3',''],['⚡ Quick','5','']].map(([n,c,a])=>`<button style="display:flex;align-items:center;justify-content:space-between;padding:6px 10px;border-radius:8px;cursor:pointer;font-size:11px;font-family:inherit;border:none;${a?'background:#9DE134;color:#0a0a0a;font-weight:800':'background:transparent;color:#D4D4D8'}"><span>${n}</span><span style="font-size:9px;opacity:.7;" class="num-mono">${c}</span></button>`).join('')}
+        </div>
       </div>
-      <div style="padding:14px;display:flex;flex-direction:column;justify-content:space-between;">
-        <div>
-          <div style="font-family:'Orbitron';font-weight:900;font-size:16px;">CRAZY TIME</div>
-          <div style="font-size:10px;color:#71717A;">Evolution · Min ৳20 · Max ৳1L</div>
-          <div style="display:flex;align-items:center;gap:6px;margin-top:8px;">
-            <span style="font-size:9px;color:#71717A;">Last:</span>
-            <div style="display:flex;gap:3px;">
-              ${[2,5,10,1,2,'CT',5].map(v=>`<span style="width:18px;height:18px;border-radius:50%;background:rgba(255,255,255,.06);display:grid;place-items:center;font-size:9px;font-weight:800;">${v}</span>`).join('')}
+      <div style="border-top:1px solid rgba(255,255,255,.06);padding-top:10px;">
+        <div class="card-h"><div class="label">BET LIMITS</div></div>
+        <div style="display:flex;flex-direction:column;gap:4px;margin-top:6px;">
+          ${['৳ 20 – ৳ 500','৳ 500 – ৳ 5K','৳ 5K – ৳ 50K','VIP · ৳ 50K+'].map(n=>`<button style="text-align:left;padding:6px 10px;border-radius:8px;cursor:pointer;font-size:11px;font-family:inherit;border:none;background:transparent;color:#D4D4D8;">${n}</button>`).join('')}
+        </div>
+      </div>
+      <div style="border-top:1px solid rgba(255,255,255,.06);padding-top:10px;">
+        <div style="font-size:9px;color:#9DE134;font-weight:800;letter-spacing:1px;">${provider.n.toUpperCase()}</div>
+        <div style="font-size:9px;color:#71717A;margin-top:2px;line-height:1.4;">${provider.sub}</div>
+      </div>
+    </div>
+
+    <div class="stack-col">
+      ${featured ? `<div class="glass" style="padding:0;overflow:hidden;height:140px;display:grid;grid-template-columns:1.5fr 1fr;">
+        <div style="position:relative;">
+          <img src="${GAME_IMG(featured[3])}" style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover;">
+          <div style="position:absolute;inset:0;background:linear-gradient(90deg,rgba(5,5,7,.4),transparent 60%);"></div>
+          <span class="pill red" style="position:absolute;top:10px;left:10px;display:flex;align-items:center;gap:6px;"><span style="width:6px;height:6px;border-radius:50%;background:white;animation:live-pulse 1.4s infinite;"></span>LIVE NOW</span>
+          <span style="position:absolute;bottom:10px;left:10px;padding:4px 10px;border-radius:6px;background:rgba(0,0,0,.7);font-size:10px;font-weight:700;" class="num-mono">${featured[4].toLocaleString()} playing</span>
+        </div>
+        <div style="padding:14px;display:flex;flex-direction:column;justify-content:space-between;">
+          <div>
+            <div style="font-family:'Orbitron';font-weight:900;font-size:16px;text-transform:uppercase;">${featured[0]}</div>
+            <div style="font-size:10px;color:#71717A;">${featured[1]} · Min ৳20 · Max ৳1L</div>
+            <div style="display:flex;align-items:center;gap:6px;margin-top:8px;">
+              <span style="font-size:9px;color:#71717A;">Last:</span>
+              <div style="display:flex;gap:3px;">
+                ${[2,5,10,1,2,'CT',5].map(v=>`<span style="width:18px;height:18px;border-radius:50%;background:rgba(255,255,255,.06);display:grid;place-items:center;font-size:9px;font-weight:800;">${v}</span>`).join('')}
+              </div>
             </div>
           </div>
+          <button class="cta-neon" onclick="setScreen('slotroom')">JOIN ▶</button>
         </div>
-        <button class="cta-neon" onclick="setScreen('slotroom')">JOIN ▶</button>
+      </div>` : ''}
+      <div class="scroll-y hide-scroll" style="flex:1;display:grid;grid-template-columns:repeat(5,1fr);gap:8px;align-content:start;">
+        ${games.filter(g => g !== featured).map(([n,p,_pkey,img,pl])=>`<button class="glass hover" style="padding:0;overflow:hidden;cursor:pointer;border:none;" onclick="setScreen('slotroom')">
+          <div style="position:relative;aspect-ratio:5/3;">
+            <img src="${GAME_IMG(img)}" style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover;">
+            <div style="position:absolute;inset:0;background:linear-gradient(180deg,transparent 50%,rgba(5,5,7,.85));"></div>
+            <span class="pill red" style="position:absolute;top:6px;left:6px;padding:2px 6px;font-size:8px;display:flex;align-items:center;gap:3px;"><span style="width:4px;height:4px;border-radius:50%;background:white;animation:live-pulse 1.4s infinite;"></span>LIVE</span>
+            <span style="position:absolute;top:6px;right:6px;padding:2px 6px;border-radius:4px;background:rgba(0,0,0,.7);font-size:9px;font-weight:700;" class="num-mono">${pl}</span>
+          </div>
+          <div style="padding:6px 8px;text-align:left;">
+            <div style="font-size:11px;font-weight:800;color:white;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${n}</div>
+            <div style="font-size:9px;color:#71717A;">${p}</div>
+          </div>
+        </button>`).join('')}
+        ${games.length === 0 ? '<div style="grid-column:1/-1;padding:40px;text-align:center;color:#71717A;font-size:12px;">No tables from this provider yet · check back soon</div>' : ''}
       </div>
-    </div>
-    <!-- Tile grid -->
-    <div class="scroll-y hide-scroll" style="flex:1;display:grid;grid-template-columns:repeat(5,1fr);gap:8px;align-content:start;">
-      ${[
-        ['Lightning Roul.','Evo','lightning_roulette',1124],
-        ['Funky Time','Evo','funky_time',946],
-        ['Mega Wheel','PRG','mega_wheel',678],
-        ['Candy Land','PRG','sweet_bonanza',512],
-        ['Big Baller','Evo','crazy_time',834],
-        ['Dragon Tiger','Evo','super_ace',421],
-        ['Live Blackjack','Evo','super_ace',1289],
-        ['Auto Roulette','Evo','lightning_roulette',945],
-        ['Baccarat A','Evo','super_ace',678],
-        ['Speed Bacc','Evo','lightning_roulette',432],
-      ].map(([n,p,img,pl])=>`<button class="glass hover" style="padding:0;overflow:hidden;cursor:pointer;border:none;" onclick="setScreen('slotroom')">
-        <div style="position:relative;aspect-ratio:5/3;">
-          <img src="${GAME_IMG(img)}" style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover;">
-          <div style="position:absolute;inset:0;background:linear-gradient(180deg,transparent 50%,rgba(5,5,7,.85));"></div>
-          <span class="pill red" style="position:absolute;top:6px;left:6px;padding:2px 6px;font-size:8px;display:flex;align-items:center;gap:3px;"><span style="width:4px;height:4px;border-radius:50%;background:white;animation:live-pulse 1.4s infinite;"></span>LIVE</span>
-          <span style="position:absolute;top:6px;right:6px;padding:2px 6px;border-radius:4px;background:rgba(0,0,0,.7);font-size:9px;font-weight:700;" class="num-mono">${pl}</span>
-        </div>
-        <div style="padding:6px 8px;text-align:left;">
-          <div style="font-size:11px;font-weight:800;color:white;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${n}</div>
-          <div style="font-size:9px;color:#71717A;">${p}</div>
-        </div>
-      </button>`).join('')}
     </div>
   </div>
 </div>`;
+};
 
 // ============================== SLOTS LOBBY ==============================
-Screens.slots = () => `
-<div class="screen-grid cols-side">
-  <div class="glass" style="padding:12px;display:flex;flex-direction:column;gap:10px;">
-    <div class="glass amber" style="padding:10px;background:linear-gradient(135deg,rgba(255,182,39,.2),rgba(15,15,18,.4));">
-      <div style="font-size:8px;color:#FFB627;font-weight:800;letter-spacing:1px;">JACKPOT</div>
-      <div style="font-family:'Orbitron';font-weight:900;font-size:18px;background:linear-gradient(180deg,#FFE787,#FFB627);-webkit-background-clip:text;background-clip:text;color:transparent;" class="num-mono" id="jackpot-val">৳ 1,24,87,302</div>
-      <div style="font-size:9px;color:#71717A;">↑ ৳ 234/sec</div>
+let slotsProvider = 'all';
+const SlotsProviders = [
+  { k:'all',         n:'All Slots',      e:'🎰', sub:'312 games · all providers' },
+  { k:'pragmatic',   n:'Pragmatic Play', e:'⚡', sub:'Sweet Bonanza · Olympus · Big Bass' },
+  { k:'jili',        n:'JILI Games',     e:'🃏', sub:'Super Ace · Money Coming · Boom' },
+  { k:'pgsoft',      n:'PG Soft',        e:'🐯', sub:'Mahjong · Aztec · Lucky Neko' },
+  { k:'spribe',      n:'Spribe',         e:'✈️', sub:'Aviator · Plinko · Mini Mines' },
+  { k:'habanero',    n:'Habanero',       e:'🌶️', sub:'Asian-themed slots' },
+  { k:'spadegaming', n:'Spadegaming',    e:'♠️', sub:'Wow Prosperity · Fa Cai Shen' },
+  { k:'cq9',         n:'CQ9 Gaming',     e:'🐉', sub:'Fortune Lions · Dancing Lion' },
+  { k:'redtiger',    n:'Red Tiger',      e:'🐅', sub:'Daily Jackpots · UK favorites' },
+];
+function setSlotsProvider(p){ slotsProvider = p; setScreen('slots'); }
+
+const AllSlotGames = [
+  ['Sweet Bonanza','Pragmatic','pragmatic','sweet_bonanza','96.5'],
+  ['Gates of Olympus','Pragmatic','pragmatic','lightning_roulette','96.5'],
+  ['Wild West Gold','Pragmatic','pragmatic','chicken_road','96.5'],
+  ['Big Bass Bonanza','Pragmatic','pragmatic','big_bass','96.7'],
+  ['The Dog House','Pragmatic','pragmatic','chicken_road','96.5'],
+  ['Sugar Rush','Pragmatic','pragmatic','sweet_bonanza','96.5'],
+  ['Super Ace','JILI','jili','super_ace','96.0'],
+  ['Money Coming','JILI','jili','money_coming','97.0'],
+  ['Boom Legend','JILI','jili','aviator','96.5'],
+  ['Golden Empire','JILI','jili','money_coming','96.7'],
+  ['Fortune Gems','JILI','jili','super_ace','96.0'],
+  ['Crazy 777','JILI','jili','money_coming','96.2'],
+  ['Mahjong Ways','PG Soft','pgsoft','super_ace','96.9'],
+  ['Treasures of Aztec','PG Soft','pgsoft','money_coming','96.7'],
+  ['Lucky Neko','PG Soft','pgsoft','chicken_road','96.7'],
+  ['Fortune Tiger','PG Soft','pgsoft','super_ace','96.8'],
+  ['Fortune Ox','PG Soft','pgsoft','money_coming','96.7'],
+  ['Aviator','Spribe','spribe','aviator','97.0'],
+  ['Plinko','Spribe','spribe','plinko','97.0'],
+  ['Mini Mines','Spribe','spribe','plinko','97.0'],
+  ['Dice','Spribe','spribe','plinko','98.0'],
+  ['Hot Hot Fruit','Habanero','habanero','sweet_bonanza','96.7'],
+  ['Wealth Inn','Habanero','habanero','money_coming','96.7'],
+  ['Wow Prosperity','Spadegaming','spadegaming','money_coming','96.5'],
+  ['Fa Cai Shen','Spadegaming','spadegaming','super_ace','96.6'],
+  ['Fortune Lions','CQ9','cq9','aviator','96.0'],
+  ['Dancing Lion','CQ9','cq9','crazy_time','96.5'],
+  ['Daily Jackpot','Red Tiger','redtiger','lightning_roulette','95.7'],
+];
+
+Screens.slots = () => {
+  const provider = SlotsProviders.find(p => p.k === slotsProvider) || SlotsProviders[0];
+  const games = slotsProvider === 'all' ? AllSlotGames : AllSlotGames.filter(g => g[2] === slotsProvider);
+  return `
+<div class="stack-col" style="height:100%;gap:10px;">
+  <!-- Slots provider selector -->
+  <div class="glass" style="padding:10px 12px;display:flex;align-items:center;gap:12px;flex-shrink:0;">
+    <div class="card-h" style="margin:0;flex-shrink:0;"><div class="label">PROVIDER</div></div>
+    <div style="display:flex;gap:6px;overflow-x:auto;flex:1;" class="hide-scroll">
+      ${SlotsProviders.map(p => {
+        const act = p.k === slotsProvider;
+        return `<button onclick="setSlotsProvider('${p.k}')" style="flex-shrink:0;display:flex;align-items:center;gap:8px;padding:6px 12px;border-radius:10px;cursor:pointer;font-family:inherit;border:1px solid ${act?'#9DE134':'rgba(255,255,255,.08)'};${act?'background:rgba(157,225,52,.15);color:white;box-shadow:0 0 12px rgba(157,225,52,.25);':'background:rgba(255,255,255,.04);color:#A1A1AA;'}transition:all .2s;">
+          <span style="font-size:16px;">${p.e}</span>
+          <div style="text-align:left;">
+            <div style="font-size:11px;font-weight:800;">${p.n}</div>
+            <div style="font-size:9px;opacity:.7;">${p.sub}</div>
+          </div>
+        </button>`;
+      }).join('')}
     </div>
-    <div>
-      <div class="card-h"><div class="label">SORT</div></div>
-      <div style="display:flex;flex-direction:column;gap:4px;margin-top:6px;">
-        ${[['🔥 Hot','active'],['✨ New',''],['🏆 Top wins',''],['📈 RTP',''],['🎯 Megaways',''],['💰 Buy bonus','']].map(([n,a])=>`<button style="text-align:left;padding:6px 10px;border-radius:8px;cursor:pointer;font-size:11px;font-family:inherit;border:none;${a?'background:#9DE134;color:#0a0a0a;font-weight:800':'background:transparent;color:#D4D4D8'}">${n}</button>`).join('')}
-      </div>
-    </div>
-    <div style="border-top:1px solid rgba(255,255,255,.06);padding-top:10px;">
-      <div class="card-h"><div class="label">PROVIDER</div></div>
-      <div style="display:flex;flex-direction:column;gap:4px;margin-top:6px;">
-        ${['Pragmatic','JILI','PG Soft','Spribe','Habanero'].map(p=>`<button style="text-align:left;padding:6px 10px;border-radius:8px;cursor:pointer;font-size:11px;font-family:inherit;border:none;background:transparent;color:#D4D4D8;">${p}</button>`).join('')}
-      </div>
-    </div>
+    <div style="font-size:10px;color:#9DE134;font-weight:800;flex-shrink:0;display:flex;align-items:center;gap:4px;"><span style="width:6px;height:6px;border-radius:50%;background:#9DE134;animation:live-pulse 1.4s infinite;"></span>${games.length} GAMES</div>
   </div>
 
-  <div class="scroll-y hide-scroll" style="display:grid;grid-template-columns:repeat(7,1fr);gap:8px;align-content:start;">
-    ${[
-      ['Sweet Bonanza','PRG','sweet_bonanza','96.5'],
-      ['Gates of Olympus','PRG','lightning_roulette','96.5'],
-      ['Super Ace','JILI','super_ace','96.0'],
-      ['Money Coming','JILI','money_coming','97.0'],
-      ['Wild West Gold','PRG','chicken_road','96.5'],
-      ['Big Bass','PRG','big_bass','96.7'],
-      ['Mahjong Ways','PG','super_ace','96.9'],
-      ['Treasures Aztec','PG','money_coming','96.7'],
-      ['Lucky Neko','PG','chicken_road','96.7'],
-      ['Fortune Tiger','PG','super_ace','96.8'],
-      ['Boom Legend','JILI','aviator','96.5'],
-      ['Golden Empire','JILI','money_coming','96.7'],
-      ['Aviator','SPB','aviator','97.0'],
-      ['Plinko','SPB','plinko','97.0'],
-    ].map(([n,p,img,rtp])=>`<button class="glass hover" style="padding:0;overflow:hidden;cursor:pointer;border:none;" onclick="setScreen('slotroom')">
-      <div style="position:relative;aspect-ratio:1;">
-        <img src="${GAME_IMG(img)}" style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover;">
-        <div style="position:absolute;inset:0;background:linear-gradient(180deg,transparent 50%,rgba(5,5,7,.85));"></div>
-        <span style="position:absolute;top:6px;right:6px;padding:2px 5px;border-radius:4px;background:rgba(0,0,0,.8);color:#9DE134;font-size:9px;font-weight:800;">${rtp}%</span>
+  <!-- Filter rail + game grid -->
+  <div class="screen-grid cols-side" style="flex:1;min-height:0;">
+    <div class="glass" style="padding:12px;display:flex;flex-direction:column;gap:10px;">
+      <div class="glass amber" style="padding:10px;background:linear-gradient(135deg,rgba(255,182,39,.2),rgba(15,15,18,.4));">
+        <div style="font-size:8px;color:#FFB627;font-weight:800;letter-spacing:1px;">JACKPOT</div>
+        <div style="font-family:'Orbitron';font-weight:900;font-size:18px;background:linear-gradient(180deg,#FFE787,#FFB627);-webkit-background-clip:text;background-clip:text;color:transparent;" class="num-mono" id="jackpot-val">৳ 1,24,87,302</div>
+        <div style="font-size:9px;color:#71717A;">↑ ৳ 234/sec</div>
       </div>
-      <div style="padding:5px 7px;text-align:left;">
-        <div style="font-size:10px;font-weight:800;color:white;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${n}</div>
-        <div style="font-size:8px;color:#71717A;">${p}</div>
+      <div>
+        <div class="card-h"><div class="label">SORT</div></div>
+        <div style="display:flex;flex-direction:column;gap:4px;margin-top:6px;">
+          ${[['🔥 Hot','active'],['✨ New',''],['🏆 Top wins',''],['📈 RTP',''],['🎯 Megaways',''],['💰 Buy bonus',''],['💎 Jackpot','']].map(([n,a])=>`<button style="text-align:left;padding:6px 10px;border-radius:8px;cursor:pointer;font-size:11px;font-family:inherit;border:none;${a?'background:#9DE134;color:#0a0a0a;font-weight:800':'background:transparent;color:#D4D4D8'}">${n}</button>`).join('')}
+        </div>
       </div>
-    </button>`).join('')}
+      <div style="border-top:1px solid rgba(255,255,255,.06);padding-top:10px;">
+        <div class="card-h"><div class="label">VOLATILITY</div></div>
+        <div style="display:flex;flex-direction:column;gap:4px;margin-top:6px;">
+          ${['Low','Medium','High','Very High'].map(v=>`<button style="text-align:left;padding:6px 10px;border-radius:8px;cursor:pointer;font-size:11px;font-family:inherit;border:none;background:transparent;color:#D4D4D8;">${v}</button>`).join('')}
+        </div>
+      </div>
+      <div style="border-top:1px solid rgba(255,255,255,.06);padding-top:10px;">
+        <div style="font-size:9px;color:#9DE134;font-weight:800;letter-spacing:1px;">${provider.n.toUpperCase()}</div>
+        <div style="font-size:9px;color:#71717A;margin-top:2px;line-height:1.4;">${provider.sub}</div>
+      </div>
+    </div>
+
+    <div class="scroll-y hide-scroll" style="display:grid;grid-template-columns:repeat(7,1fr);gap:8px;align-content:start;">
+      ${games.map(([n,prov,_pkey,img,rtp])=>`<button class="glass hover" style="padding:0;overflow:hidden;cursor:pointer;border:none;" onclick="setScreen('slotroom')">
+        <div style="position:relative;aspect-ratio:1;">
+          <img src="${GAME_IMG(img)}" style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover;">
+          <div style="position:absolute;inset:0;background:linear-gradient(180deg,transparent 50%,rgba(5,5,7,.85));"></div>
+          <span style="position:absolute;top:6px;right:6px;padding:2px 5px;border-radius:4px;background:rgba(0,0,0,.8);color:#9DE134;font-size:9px;font-weight:800;">${rtp}%</span>
+        </div>
+        <div style="padding:5px 7px;text-align:left;">
+          <div style="font-size:10px;font-weight:800;color:white;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${n}</div>
+          <div style="font-size:8px;color:#71717A;">${prov}</div>
+        </div>
+      </button>`).join('')}
+      ${games.length === 0 ? '<div style="grid-column:1/-1;padding:40px;text-align:center;color:#71717A;font-size:12px;">No games from this provider yet · check back soon</div>' : ''}
+    </div>
   </div>
 </div>`;
+};
 
 // ============================== COIN SHOP (master-detail) ==============================
 let shopCategory = 'skins';
