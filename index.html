@@ -114,6 +114,9 @@ tailwind.config = {
 </head>
 <body class="min-h-screen">
 
+</head>
+<body class="min-h-screen">
+
 <!-- ============================== PASSWORD GATE ============================== -->
 <div id="gate">
   <div class="grid-bg-mask"></div>
@@ -466,100 +469,37 @@ const Login = () => `
 // ===================== 3. HOME / LOBBY (GAMING APP STYLE) =====================
 const Home = () => `
 <div class="absolute inset-0 flex flex-col bg-ink-0 overflow-hidden">
-  <!-- Animated background -->
+  <!-- Ambient background -->
   <div class="absolute inset-0 grid-bg opacity-20 pointer-events-none"></div>
   <div class="absolute -top-20 -left-20 w-96 h-96 rounded-full pointer-events-none" style="background: radial-gradient(circle, rgba(157,225,52,0.12), transparent 60%)"></div>
   <div class="absolute -bottom-32 -right-20 w-96 h-96 rounded-full pointer-events-none" style="background: radial-gradient(circle, rgba(255,182,39,0.08), transparent 60%)"></div>
 
   ${TopBar()}
+
   <div class="flex-1 flex min-h-0 relative">
     ${SideRail('home')}
 
-    <!-- MAIN HERO COLUMN -->
-    <div class="flex-1 grid grid-cols-[1fr_280px] min-h-0 relative">
-      <div class="overflow-hidden p-2.5 flex flex-col gap-2 min-h-0">
-
-        <!-- HERO ROW: Mascot + Lucky Wheel + Daily Bonus collector (compact) -->
-        <div class="grid grid-cols-[1fr_1.3fr_1fr] gap-2 h-[100px] flex-shrink-0">
-          <!-- Mascot card with speech bubble (compact) -->
-          <div class="relative rounded-xl overflow-hidden border border-brand/40 shine" style="background: linear-gradient(135deg, rgba(157,225,52,0.2), #161616 70%)">
-            <div class="absolute inset-0 grid-bg opacity-30"></div>
-            <div class="absolute top-1.5 left-1.5 right-1.5 z-10">
-              <div class="relative rounded-lg bg-ink-0/85 border border-brand/40 px-1.5 py-1">
-                <div class="text-[9px] text-brand font-bold leading-tight">👋 Hey RD!</div>
-                <div class="text-[9px] text-white leading-tight">৳600 bonus <span class="text-brand font-bold">live</span></div>
-                <div class="absolute -bottom-1 left-3 w-1.5 h-1.5 rotate-45 bg-ink-0 border-r border-b border-brand/40"></div>
-              </div>
-            </div>
-            <div class="absolute bottom-0 left-1/2 -translate-x-1/2 text-3xl wiggle" style="filter: drop-shadow(0 -4px 8px rgba(157,225,52,.4))">🤴</div>
-            <button onclick="protoOpenSpin()" class="absolute bottom-1 right-1 w-5 h-5 rounded-full bg-brand text-ink-0 text-[10px] font-black grid place-items-center btn-3d">→</button>
-          </div>
-
-          <!-- LUCKY WHEEL HERO -->
-          <div class="relative rounded-2xl overflow-hidden border border-amber-500/40" style="background: radial-gradient(circle at 50% 50%, rgba(255,182,39,0.15), #0a0a0a 70%)">
-            <div class="absolute inset-0 grid-bg opacity-20"></div>
-            <div class="absolute top-2 left-2 text-[9px] px-2 py-0.5 rounded bg-amber-500 text-ink-0 font-black z-10">DAILY · FREE</div>
-            <div class="absolute top-2 right-2 text-[9px] text-zinc-400 z-10 num-mono">⏱ Resets 14h</div>
-            <div class="relative h-full grid place-items-center pb-5">
-              <div class="relative w-[68px] h-[68px]" id="wheel-container">
-                <!-- Wheel slices -->
-                <div id="wheel" class="w-full h-full rounded-full border-[4px] border-amber-400 relative" style="background: conic-gradient(#9DE134 0deg 45deg, #FFB627 45deg 90deg, #9DE134 90deg 135deg, #FFB627 135deg 180deg, #9DE134 180deg 225deg, #FFB627 225deg 270deg, #9DE134 270deg 315deg, #FFB627 315deg 360deg); box-shadow: 0 0 24px rgba(255,182,39,.4), inset 0 0 12px rgba(0,0,0,.4)">
-                  ${[0,45,90,135,180,225,270,315].map((deg,i)=>`<div class="absolute top-1/2 left-1/2 text-[6px] font-black text-ink-0" style="transform: rotate(${deg+22}deg) translateY(-24px); transform-origin: 0 0">${['৳50','৳100','৳500','SPIN','৳1K','৳50','৳200','5K'][i]}</div>`).join('')}
-                </div>
-                <!-- Center hub -->
-                <div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-5 h-5 rounded-full bg-ink-0 border border-amber-400 grid place-items-center text-[10px]">🎁</div>
-                <!-- Pointer -->
-                <div class="absolute -top-0.5 left-1/2 -translate-x-1/2 w-0 h-0" style="border-left: 5px solid transparent; border-right: 5px solid transparent; border-top: 8px solid #FFB627; filter: drop-shadow(0 2px 4px rgba(0,0,0,.5))"></div>
-              </div>
-            </div>
-            <button onclick="protoSpinWheel()" class="absolute bottom-1 left-1/2 -translate-x-1/2 px-2.5 py-0.5 rounded bg-gradient-to-b from-amber-300 to-amber-600 text-ink-0 text-[9px] font-black btn-3d pulse-scale shadow-lg">🎯 SPIN!</button>
-          </div>
-
-          <!-- Bonus collector + streak (compact) -->
-          <div class="flex flex-col gap-1.5">
-            <button onclick="protoCollectBonus(this)" class="relative rounded-xl overflow-hidden border border-brand/40 flex-1 group" style="background: linear-gradient(135deg, rgba(157,225,52,0.2), #161616 70%)">
-              <div class="absolute inset-0 grid-bg opacity-20"></div>
-              <div class="absolute top-1 left-1 text-[7px] px-1 py-0.5 rounded bg-brand text-ink-0 font-black">FREE COINS</div>
-              <div class="absolute top-1 right-1 text-[7px] text-brand font-mono num-mono" id="bonus-timer">00:14:22</div>
-              <div class="absolute inset-0 grid place-items-center">
-                <div class="text-2xl float-y">💰</div>
-              </div>
-              <div class="absolute bottom-0.5 left-1 right-1 flex items-center justify-between">
-                <div class="text-[8px] font-black gold-text">+10K</div>
-                <div class="text-[7px] text-zinc-400">tap</div>
-              </div>
-            </button>
-            <div class="rounded-xl border border-line bg-ink-2 px-1.5 py-1">
-              <div class="flex items-center justify-between">
-                <span class="text-[8px] text-amber-400 font-black">🔥 STREAK</span>
-                <span class="font-display font-black text-amber-400 text-[10px] num-mono">6/7</span>
-              </div>
-              <div class="flex gap-0.5 mt-0.5">
-                ${[1,1,1,1,1,1,0].map(v=>`<div class="flex-1 h-0.5 rounded-full ${v?'bg-amber-400':'bg-ink-4'}"></div>`).join('')}
-              </div>
-              <button onclick="setProtoScreen('calendar')" class="w-full mt-0.5 text-[8px] text-brand text-center font-bold">View →</button>
-            </div>
-          </div>
+    <!-- CENTER: HOT GAMES — the entire focus of the lobby -->
+    <div class="flex-1 min-w-0 flex flex-col p-3 gap-2 min-h-0">
+      <!-- Hot Games header -->
+      <div class="flex items-center justify-between flex-shrink-0">
+        <div class="flex items-center gap-2.5">
+          <span class="text-[9px] px-2 py-1 rounded-full bg-red-500 font-black light-flicker">🔥 FEATURED</span>
+          <div class="font-display font-black text-2xl neon-text gold-text leading-none">HOT GAMES</div>
+          <span class="text-[10px] text-zinc-500 font-normal flex items-center gap-1"><span class="w-1.5 h-1.5 rounded-full bg-brand live-dot"></span><span class="num-mono">16,842</span> online</span>
         </div>
-
-        <!-- HOT GAMES — focal point of the lobby -->
-        <div class="flex items-center justify-between flex-shrink-0">
-          <div class="flex items-center gap-2.5">
-            <span class="text-[9px] px-2 py-1 rounded-full bg-red-500 font-black light-flicker">🔥 FEATURED</span>
-            <div class="font-display font-black text-xl neon-text gold-text">HOT GAMES</div>
-            <span class="text-[10px] text-zinc-500 font-normal flex items-center gap-1"><span class="w-1.5 h-1.5 rounded-full bg-brand live-dot"></span><span class="num-mono">16,842</span> online now</span>
-          </div>
-          <div class="flex gap-1">
-            <button class="px-2.5 py-1 rounded text-[10px] font-bold bg-brand text-ink-0">All</button>
-            <button class="px-2.5 py-1 rounded text-[10px] font-bold bg-ink-2 border border-line">🔥 Hot</button>
-            <button class="px-2.5 py-1 rounded text-[10px] font-bold bg-ink-2 border border-line">✨ New</button>
-            <button class="px-2.5 py-1 rounded text-[10px] font-bold bg-ink-2 border border-line">💎 Jackpot</button>
-            <button class="px-2.5 py-1 rounded text-[10px] font-bold bg-ink-2 border border-line">View all →</button>
-          </div>
+        <div class="flex gap-1">
+          <button class="px-2.5 py-1 rounded text-[10px] font-bold bg-brand text-ink-0">All</button>
+          <button class="px-2.5 py-1 rounded text-[10px] font-bold bg-ink-2 border border-line">🔥 Hot</button>
+          <button class="px-2.5 py-1 rounded text-[10px] font-bold bg-ink-2 border border-line">✨ New</button>
+          <button class="px-2.5 py-1 rounded text-[10px] font-bold bg-ink-2 border border-line">💎 Jackpot</button>
+          <button class="px-2.5 py-1 rounded text-[10px] font-bold bg-ink-2 border border-line">View all →</button>
         </div>
+      </div>
 
-        <div class="relative rounded-2xl border-2 border-brand/30 p-2 flex-1 min-h-0 overflow-hidden" style="background: linear-gradient(180deg, rgba(157,225,52,0.05), transparent 50%)">
-          <div class="grid grid-cols-6 gap-2 h-full">
+      <!-- Hot Games grid — 4 cols × 2 rows = 8 big tiles -->
+      <div class="relative rounded-2xl border-2 border-brand/30 p-2 flex-1 min-h-0 overflow-hidden" style="background: linear-gradient(180deg, rgba(157,225,52,0.05), transparent 60%)">
+        <div class="grid grid-cols-4 grid-rows-2 gap-2 h-full">
           ${[
             ['Aviator','Spribe','crash','aviator','+2,847','HOT'],
             ['Crazy Time','Evolution','live','crazy_time','+1,782','LIVE'],
@@ -567,126 +507,178 @@ const Home = () => `
             ['Sweet Bonanza','PRG','slots','sweet_bonanza','+1,612','HOT'],
             ['Mega Wheel','PRG','live','mega_wheel','+678','LIVE'],
             ['Plinko','Spribe','crash','plinko','+943','NEW'],
+            ['Lightning Roul.','Evolution','live','lightning_roulette','+1,124','LIVE'],
+            ['Money Coming','JILI','slots','money_coming','+1,456','HOT'],
           ].map(([n,p,k,img,wins,tag])=>`
-            <button onclick="setProtoScreen('${k==='slots'?'slotroom':k==='crash'?'crash':'live'}')" class="card-3d rounded-xl overflow-hidden border border-line text-left relative bg-ink-2">
-              <div class="aspect-[3/4] relative">
+            <button onclick="setProtoScreen('${k==='slots'?'slotroom':k==='crash'?'crash':'live'}')" class="card-3d rounded-xl overflow-hidden border border-line text-left relative bg-ink-2 group">
+              <div class="h-full relative">
                 <img src="game-assets/generated/${img}.png" alt="${n}" class="absolute inset-0 w-full h-full object-cover" loading="lazy">
-                <div class="absolute inset-0 bg-gradient-to-t from-ink-0/70 via-transparent to-ink-0/20"></div>
-                <div class="absolute top-1.5 left-1.5 text-[7px] px-1 py-0.5 rounded font-black ${tag==='HOT'?'bg-red-500':tag==='LIVE'?'bg-red-500 flex items-center gap-0.5':tag==='NEW'?'bg-cyan-500':'bg-brand text-ink-0'}">${tag==='LIVE'?'<span class="w-1 h-1 rounded-full bg-white live-dot"></span>':''}${tag}</div>
-                <div class="absolute top-1.5 right-1.5 text-[7px] px-1 py-0.5 rounded bg-black/80 font-bold num-mono">${wins}</div>
-                <!-- Big win popup -->
-                <div class="absolute inset-x-1 bottom-8 px-1.5 py-0.5 rounded bg-ink-0/85 backdrop-blur border border-brand/30">
-                  <div class="text-[7px] text-brand">M****61 won</div>
-                  <div class="text-[9px] font-black gold-text">৳12,400</div>
+                <div class="absolute inset-0 bg-gradient-to-t from-ink-0/90 via-ink-0/20 to-transparent"></div>
+                <div class="absolute top-1.5 left-1.5 text-[8px] px-1.5 py-0.5 rounded font-black ${tag==='HOT'?'bg-red-500':tag==='LIVE'?'bg-red-500 flex items-center gap-0.5':tag==='NEW'?'bg-cyan-500':'bg-brand text-ink-0'}">${tag==='LIVE'?'<span class="w-1 h-1 rounded-full bg-white live-dot"></span>':''}${tag}</div>
+                <div class="absolute top-1.5 right-1.5 text-[8px] px-1.5 py-0.5 rounded bg-black/80 font-bold num-mono">${wins}</div>
+                <!-- Big-win popup bottom -->
+                <div class="absolute inset-x-2 bottom-9 px-1.5 py-1 rounded bg-ink-0/90 backdrop-blur border border-brand/40">
+                  <div class="text-[8px] text-brand font-bold">M****61 won</div>
+                  <div class="text-[11px] font-black gold-text num-mono">৳ 12,400</div>
+                </div>
+                <!-- Footer with title -->
+                <div class="absolute inset-x-0 bottom-0 px-2 py-1.5 bg-ink-0/85 backdrop-blur">
+                  <div class="text-[12px] font-black truncate">${n}</div>
+                  <div class="text-[9px] text-zinc-500">${p}</div>
                 </div>
               </div>
-              <div class="px-1.5 py-1 bg-ink-0/80 backdrop-blur">
-                <div class="text-[10px] font-black truncate">${n}</div>
-                <div class="text-[7px] text-zinc-500">${p}</div>
-              </div>
             </button>`).join('')}
+        </div>
+      </div>
+    </div>
+
+    <!-- RIGHT RAIL: Everything else, vertically stacked -->
+    <div class="w-[260px] flex-shrink-0 border-l border-line overflow-y-auto hide-scroll p-2 space-y-2">
+      <!-- Mascot + speech bubble -->
+      <div class="relative rounded-xl overflow-hidden border border-brand/40 shine h-[70px]" style="background: linear-gradient(135deg, rgba(157,225,52,0.2), #161616 70%)">
+        <div class="absolute inset-0 grid-bg opacity-30"></div>
+        <div class="absolute top-1.5 left-1.5 z-10">
+          <div class="relative rounded-lg bg-ink-0/85 border border-brand/40 px-2 py-1">
+            <div class="text-[9px] text-brand font-bold leading-tight">👋 Hey RD!</div>
+            <div class="text-[9px] text-white leading-tight">৳600 bonus <span class="text-brand font-bold">live</span></div>
+            <div class="absolute -bottom-1 left-3 w-1.5 h-1.5 rotate-45 bg-ink-0 border-r border-b border-brand/40"></div>
           </div>
         </div>
+        <div class="absolute bottom-0 right-2 text-4xl wiggle" style="filter: drop-shadow(0 -4px 8px rgba(157,225,52,.4))">🤴</div>
+      </div>
 
-        <!-- Bottom strip: Tournament + Jackpot + Quick deposit chips (compact) -->
-        <div class="grid grid-cols-3 gap-2 h-[44px] flex-shrink-0">
-          <button onclick="setProtoScreen('leaderboard')" class="rounded-lg border border-amber-500/40 px-2 py-1 text-left relative overflow-hidden shine flex items-center gap-2" style="background: linear-gradient(135deg, rgba(255,182,39,.15), #161616)">
-            <span class="text-base">🏆</span>
-            <div class="flex-1 min-w-0">
-              <div class="text-[8px] text-amber-400 font-black">TOURNAMENT · 2D 11H</div>
-              <div class="text-[10px] gold-text font-black num-mono truncate">৳ 50,00,000</div>
+      <!-- Lucky Wheel -->
+      <div class="relative rounded-xl overflow-hidden border border-amber-500/40 p-2" style="background: radial-gradient(circle at 50% 50%, rgba(255,182,39,0.15), #0a0a0a 70%)">
+        <div class="absolute top-1.5 left-1.5 text-[8px] px-1.5 py-0.5 rounded bg-amber-500 text-ink-0 font-black z-10">DAILY · FREE</div>
+        <div class="flex items-center gap-3">
+          <div class="relative w-[64px] h-[64px] flex-shrink-0">
+            <div id="wheel" class="w-full h-full rounded-full border-[4px] border-amber-400 relative" style="background: conic-gradient(#9DE134 0deg 45deg, #FFB627 45deg 90deg, #9DE134 90deg 135deg, #FFB627 135deg 180deg, #9DE134 180deg 225deg, #FFB627 225deg 270deg, #9DE134 270deg 315deg, #FFB627 315deg 360deg); box-shadow: 0 0 24px rgba(255,182,39,.4), inset 0 0 12px rgba(0,0,0,.4)">
+              ${[0,45,90,135,180,225,270,315].map((deg,i)=>`<div class="absolute top-1/2 left-1/2 text-[6px] font-black text-ink-0" style="transform: rotate(${deg+22}deg) translateY(-22px); transform-origin: 0 0">${['৳50','৳100','৳500','SPIN','৳1K','৳50','৳200','5K'][i]}</div>`).join('')}
             </div>
-          </button>
-          <button onclick="setProtoScreen('slots')" class="rounded-lg border border-brand/40 px-2 py-1 text-left relative overflow-hidden flex items-center gap-2" style="background: linear-gradient(135deg, rgba(157,225,52,.15), #161616)">
-            <span class="text-base">💎</span>
-            <div class="flex-1 min-w-0">
-              <div class="text-[8px] text-brand font-black">JACKPOT · ↑৳234/sec</div>
-              <div class="font-display font-black text-[12px] num-mono text-brand neon-text truncate" id="jackpot-val">৳ 1,24,87,302</div>
-            </div>
-          </button>
-          <div class="rounded-lg border border-line bg-ink-2 px-1.5 py-1 flex items-center gap-1">
-            <div class="text-[8px] text-zinc-500 font-bold">QUICK</div>
-            ${['500','1k','3k','MAX'].map(a=>`<button onclick="protoOpenDeposit()" class="flex-1 py-1 rounded text-[9px] font-black bg-brand/10 border border-brand/30 text-brand hover:bg-brand hover:text-ink-0">৳${a}</button>`).join('')}
+            <div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-5 h-5 rounded-full bg-ink-0 border border-amber-400 grid place-items-center text-[10px]">🎁</div>
+            <div class="absolute -top-0.5 left-1/2 -translate-x-1/2 w-0 h-0" style="border-left: 5px solid transparent; border-right: 5px solid transparent; border-top: 8px solid #FFB627"></div>
+          </div>
+          <div class="flex-1 min-w-0 pt-3">
+            <div class="text-[9px] text-zinc-400">Win up to</div>
+            <div class="font-display font-black gold-text text-base leading-tight">৳ 5,000</div>
+            <button onclick="protoSpinWheel()" class="mt-1 w-full px-2 py-1 rounded-lg bg-gradient-to-b from-amber-300 to-amber-600 text-ink-0 text-[10px] font-black btn-3d pulse-scale">🎯 SPIN!</button>
           </div>
         </div>
       </div>
 
-      <!-- RIGHT RAIL: Live wins ticker + Friend invites + Active missions -->
-      <div class="border-l border-line p-2.5 flex flex-col gap-2 min-h-0 overflow-hidden">
-        <!-- Live wins falling ticker -->
-        <div class="rounded-xl bg-ink-2 border border-line p-2 relative overflow-hidden flex-1 min-h-0">
-          <div class="flex items-center justify-between mb-1">
-            <div class="text-[10px] font-black flex items-center gap-1"><span class="w-1.5 h-1.5 rounded-full bg-red-500 live-dot"></span>BIG WINS</div>
-            <span class="text-[8px] text-zinc-500">live</span>
+      <!-- Free coins + streak -->
+      <div class="grid grid-cols-2 gap-2">
+        <button onclick="protoCollectBonus(this)" class="relative rounded-xl overflow-hidden border border-brand/40 h-[68px]" style="background: linear-gradient(135deg, rgba(157,225,52,0.2), #161616 70%)">
+          <div class="absolute top-1 left-1 text-[7px] px-1 py-0.5 rounded bg-brand text-ink-0 font-black">FREE COINS</div>
+          <div class="absolute top-1 right-1 text-[7px] text-brand font-mono num-mono" id="bonus-timer">00:14:22</div>
+          <div class="absolute inset-0 grid place-items-center pt-2">
+            <div class="text-2xl float-y">💰</div>
           </div>
-          <div class="relative h-full overflow-hidden">
-            <div class="ticker-up absolute inset-x-0 space-y-1.5">
-              ${[
-                ['M****61','Aviator','৳ 124,000','12.4x','🥇'],
-                ['S****ad','Sweet Bonanza','৳ 89,500','347x','🎰'],
-                ['R****na','Crazy Time','৳ 56,800','25x','🎡'],
-                ['F****ul','Super Ace','৳ 38,200','89x','🎰'],
-                ['A****hi','Aviator','৳ 24,100','4.2x','✈️'],
-                ['K****bd','Mega Wheel','৳ 18,400','12x','🎯'],
-                ['T****is','Lightning','৳ 14,200','41x','⚡'],
-                ['J****la','Plinko','৳ 11,800','100x','🟢'],
-              ].concat([
-                ['M****61','Aviator','৳ 124,000','12.4x','🥇'],
-                ['S****ad','Sweet Bonanza','৳ 89,500','347x','🎰'],
-              ]).map(([u,g,amt,mult,e])=>`
-                <div class="rounded-lg bg-ink-3/60 border border-line p-1.5">
-                  <div class="flex items-center gap-1.5">
-                    <div class="text-base">${e}</div>
-                    <div class="flex-1 min-w-0">
-                      <div class="text-[9px] font-bold truncate">${u}</div>
-                      <div class="text-[8px] text-zinc-500 truncate">${g}</div>
-                    </div>
-                    <span class="text-[7px] px-1 py-0.5 rounded bg-brand/15 text-brand font-bold">${mult}</span>
+          <div class="absolute bottom-1 inset-x-1 flex items-center justify-between">
+            <div class="text-[9px] font-black gold-text">+10K</div>
+            <div class="text-[7px] text-zinc-400">tap</div>
+          </div>
+        </button>
+        <div class="rounded-xl border border-line bg-ink-2 px-1.5 py-1 h-[68px] flex flex-col justify-between">
+          <div class="flex items-center justify-between">
+            <span class="text-[8px] text-amber-400 font-black">🔥 STREAK</span>
+            <span class="font-display font-black text-amber-400 text-[10px] num-mono">6/7</span>
+          </div>
+          <div class="flex gap-0.5">
+            ${[1,1,1,1,1,1,0].map(v=>`<div class="flex-1 h-1 rounded-full ${v?'bg-amber-400':'bg-ink-4'}"></div>`).join('')}
+          </div>
+          <button onclick="setProtoScreen('calendar')" class="w-full text-[8px] text-brand text-center font-bold">View →</button>
+        </div>
+      </div>
+
+      <!-- Tournament -->
+      <button onclick="setProtoScreen('leaderboard')" class="w-full rounded-xl border border-amber-500/40 px-2 py-1.5 text-left relative overflow-hidden shine flex items-center gap-2" style="background: linear-gradient(135deg, rgba(255,182,39,.15), #161616)">
+        <span class="text-2xl">🏆</span>
+        <div class="flex-1 min-w-0">
+          <div class="text-[9px] text-amber-400 font-black">TOURNAMENT · 2D 11H</div>
+          <div class="text-[10px] font-bold leading-tight">Champions Cup</div>
+          <div class="text-[10px] gold-text font-black num-mono">৳ 50,00,000</div>
+        </div>
+        <span class="text-amber-400 text-xs">›</span>
+      </button>
+
+      <!-- Jackpot -->
+      <button onclick="setProtoScreen('slots')" class="w-full rounded-xl border border-brand/40 px-2 py-1.5 text-left flex items-center gap-2" style="background: linear-gradient(135deg, rgba(157,225,52,.15), #161616)">
+        <span class="text-2xl">💎</span>
+        <div class="flex-1 min-w-0">
+          <div class="text-[9px] text-brand font-black">JACKPOT · ↑৳234/sec</div>
+          <div class="font-display font-black text-sm num-mono text-brand neon-text truncate" id="jackpot-val">৳ 1,24,87,302</div>
+        </div>
+        <span class="text-brand text-xs">›</span>
+      </button>
+
+      <!-- Quick deposit chips -->
+      <div class="rounded-xl border border-line bg-ink-2 px-1.5 py-1.5">
+        <div class="text-[8px] text-zinc-500 font-bold mb-1">QUICK TOP-UP</div>
+        <div class="grid grid-cols-4 gap-1">
+          ${['500','1k','3k','MAX'].map(a=>`<button onclick="protoOpenDeposit()" class="py-1 rounded text-[9px] font-black bg-brand/10 border border-brand/30 text-brand hover:bg-brand hover:text-ink-0">৳${a}</button>`).join('')}
+        </div>
+      </div>
+
+      <!-- Live wins ticker -->
+      <div class="rounded-xl bg-ink-2 border border-line p-2">
+        <div class="flex items-center justify-between mb-1">
+          <div class="text-[10px] font-black flex items-center gap-1"><span class="w-1.5 h-1.5 rounded-full bg-red-500 live-dot"></span>BIG WINS</div>
+          <span class="text-[8px] text-zinc-500">live</span>
+        </div>
+        <div class="relative h-[90px] overflow-hidden">
+          <div class="ticker-up absolute inset-x-0 space-y-1.5">
+            ${[
+              ['M****61','Aviator','৳ 124,000','12.4x','🥇'],
+              ['S****ad','Sweet Bonanza','৳ 89,500','347x','🎰'],
+              ['R****na','Crazy Time','৳ 56,800','25x','🎡'],
+              ['F****ul','Super Ace','৳ 38,200','89x','🎰'],
+              ['A****hi','Aviator','৳ 24,100','4.2x','✈️'],
+              ['M****61','Aviator','৳ 124,000','12.4x','🥇'],
+            ].map(([u,g,amt,mult,e])=>`
+              <div class="rounded bg-ink-3/60 border border-line p-1">
+                <div class="flex items-center gap-1.5">
+                  <div class="text-sm">${e}</div>
+                  <div class="flex-1 min-w-0">
+                    <div class="text-[9px] font-bold truncate">${u}</div>
                   </div>
-                  <div class="text-[10px] font-black gold-text num-mono mt-0.5">${amt}</div>
-                </div>`).join('')}
-            </div>
+                  <span class="text-[8px] px-1 py-0.5 rounded bg-brand/15 text-brand font-bold">${mult}</span>
+                </div>
+                <div class="text-[10px] font-black gold-text num-mono">${amt}</div>
+              </div>`).join('')}
           </div>
         </div>
-
-        <!-- Active missions widget -->
-        <button onclick="setProtoScreen('missions')" class="rounded-xl bg-ink-2 border border-brand/30 p-2 text-left">
-          <div class="flex items-center justify-between mb-1">
-            <div class="text-[10px] font-black text-brand">🎯 MISSIONS</div>
-            <div class="text-[9px] font-bold num-mono">2/3</div>
-          </div>
-          <div class="space-y-1">
-            <div class="flex items-center gap-1.5">
-              <span class="text-xs">✅</span>
-              <div class="flex-1 text-[9px] line-through text-zinc-500">Place 3 bets</div>
-              <span class="text-[8px] text-brand font-bold">৳20</span>
-            </div>
-            <div class="flex items-center gap-1.5">
-              <span class="text-xs">✅</span>
-              <div class="flex-1 text-[9px] line-through text-zinc-500">Deposit ৳500</div>
-              <span class="text-[8px] text-brand font-bold">৳30</span>
-            </div>
-            <div class="flex items-center gap-1.5">
-              <span class="w-3 h-3 rounded-full border border-brand grid place-items-center text-[6px] text-brand">●</span>
-              <div class="flex-1 text-[9px] text-white font-bold">Win Baccarat hand</div>
-              <span class="text-[8px] text-brand font-bold">৳100</span>
-            </div>
-          </div>
-        </button>
-
-        <!-- Invite friends -->
-        <button onclick="setProtoScreen('refer')" class="rounded-xl border border-line p-2 text-left relative overflow-hidden" style="background: linear-gradient(135deg, rgba(34,211,238,.1), #161616)">
-          <div class="text-[10px] font-black text-cyan-400">👥 INVITE</div>
-          <div class="text-[9px] mt-0.5">Earn <span class="gold-text font-black">৳500</span> per friend</div>
-          <div class="text-[8px] text-zinc-500">+0.7% lifetime · 23 invited</div>
-        </button>
       </div>
+
+      <!-- Missions -->
+      <button onclick="setProtoScreen('missions')" class="w-full rounded-xl bg-ink-2 border border-brand/30 p-2 text-left">
+        <div class="flex items-center justify-between mb-1">
+          <div class="text-[10px] font-black text-brand">🎯 MISSIONS</div>
+          <div class="text-[9px] font-bold num-mono">2/3 today</div>
+        </div>
+        <div class="space-y-0.5">
+          <div class="flex items-center gap-1.5"><span class="text-[10px]">✅</span><div class="flex-1 text-[9px] line-through text-zinc-500">Place 3 bets</div><span class="text-[8px] text-brand font-bold">৳20</span></div>
+          <div class="flex items-center gap-1.5"><span class="text-[10px]">✅</span><div class="flex-1 text-[9px] line-through text-zinc-500">Deposit ৳500</div><span class="text-[8px] text-brand font-bold">৳30</span></div>
+          <div class="flex items-center gap-1.5"><span class="w-2.5 h-2.5 rounded-full border border-brand"></span><div class="flex-1 text-[9px] font-bold">Win Baccarat hand</div><span class="text-[8px] text-brand font-bold">৳100</span></div>
+        </div>
+      </button>
+
+      <!-- Invite friends -->
+      <button onclick="setProtoScreen('refer')" class="w-full rounded-xl border border-cyan-400/30 p-2 text-left flex items-center gap-2" style="background: linear-gradient(135deg, rgba(34,211,238,.1), #161616)">
+        <span class="text-xl">👥</span>
+        <div class="flex-1 min-w-0">
+          <div class="text-[10px] font-black text-cyan-400">INVITE FRIENDS</div>
+          <div class="text-[9px]">Earn <span class="gold-text font-black">৳500</span> per friend</div>
+          <div class="text-[8px] text-zinc-500">+0.7% lifetime · 23 invited</div>
+        </div>
+        <span class="text-cyan-400 text-xs">›</span>
+      </button>
     </div>
   </div>
   ${BottomBar()}
 
   <!-- Floating support button -->
-  <button onclick="setProtoScreen('support')" class="absolute bottom-14 right-3 w-10 h-10 rounded-full bg-brand text-ink-0 grid place-items-center shadow-glow btn-3d z-30">💬</button>
+  <button onclick="setProtoScreen('support')" class="absolute bottom-14 right-3 w-9 h-9 rounded-full bg-brand text-ink-0 grid place-items-center shadow-glow btn-3d z-30">💬</button>
 </div>`;
 
 // ===================== 4. LIVE CASINO =====================
