@@ -1,110 +1,4 @@
-﻿// ============================== SPLINE 3D SCENE CONFIG ==============================
-// Paste your Spline scene URLs here. Get them from:
-//   spline.design → your scene → Export → Code → copy "Public URL" (ends in .splinecode)
-// Leave a value as '' to fall back to the 2D/CSS version.
-//
-// Tip: Start with templates from spline.design/community — many free 3D characters,
-// wheels, casino-chip stacks, and trophies you can fork and tweak.
-//
-// 👉 STARTER DEMO URLS BELOW — these are PLACEHOLDERS so you can see V2 + Spline
-//    rendering 3D immediately. Replace each with a scene YOU design or fork
-//    from spline.design/community. If a demo URL ever 404s, the fallback
-//    emoji/CSS version renders automatically (see SplineSlot below).
-const SplineScenes = {
-  // ── DEMO: Spline's classic robot/character scene ──
-  // Replace with your own 3D character (see SPLINE_GUIDE.md for how)
-  avatar:    'https://prod.spline.design/6Wq1Q7YGyM-iab9i/scene.splinecode',
-
-  // ── Try these alternative demos for the avatar slot ──
-  // Spline community library: https://app.spline.design/community
-  // Search "3d character", "low poly mascot", "avatar"
-  //
-  // avatar: 'https://prod.spline.design/0NXIKtVdvjpz1QVQ/scene.splinecode',
-  // avatar: 'https://prod.spline.design/0pNZmpx1QSAxYHFp/scene.splinecode',
-
-  // The fortune wheel on Lobby's left card. Try a 3D rotating wheel.
-  wheel:     '',
-
-  // Big 3D RajaBaji logo (used in splash + login). Try animated text or logo mark.
-  logo:      '',
-
-  // Background scene for the lobby. E.g. floating coins, particle system, abstract neon.
-  lobbyBg:   '',
-
-  // Slot machine for Slot Room. E.g. 3D slot machine model.
-  slotMachine: '',
-
-  // Crash/Aviator plane scene.
-  plane:     '',
-
-  // Tournament trophy (Leaderboard hero).
-  trophy:    '',
-
-  // Promotion gift box (Promotions hero + Calendar mystery box).
-  giftBox:   '',
-};
-
-// Render a Spline embed or a CSS fallback if the URL is empty.
-// Usage: ${SplineSlot('avatar', { fallback: '<div>🤴</div>' })}
-// Auto-falls-back to the 2D version if the Spline URL fails to load.
-function SplineSlot(sceneKey, opts = {}){
-  const url = SplineScenes[sceneKey];
-  const id = 'spline-' + sceneKey + '-' + Math.floor(Math.random()*1e9);
-  const fallback = opts.fallback || '';
-  const renderFallback = (statusLabel = 'FALLBACK · 2D') => `<div class="spline-slot" style="${opts.style||''}">
-    ${fallback}
-    ${opts.showStatus ? `<div class="spline-status fallback">${statusLabel}</div>` : ''}
-  </div>`;
-  if (!url) return renderFallback();
-  return `<div class="spline-slot" id="${id}-wrap" style="${opts.style||''}">
-    <div class="spline-loader" id="${id}-loader"><div class="spinner"></div></div>
-    ${opts.fallback ? `<div id="${id}-fallback" style="position:absolute;inset:0;opacity:0;transition:opacity .4s;pointer-events:none;">${opts.fallback}</div>` : ''}
-    <spline-viewer
-      url="${url}"
-      loading-anim-type="spinner-big-light"
-      events-target="global"
-      style="position:relative;z-index:2;"
-      onload="splineSlotLoaded('${id}')"
-      onerror="splineSlotFailed('${id}', this)"
-    ></spline-viewer>
-    ${opts.showStatus ? `<div class="spline-status live" id="${id}-status">3D · LIVE</div>` : ''}
-  </div>`;
-}
-
-// Called by spline-viewer when the scene loads successfully.
-function splineSlotLoaded(id){
-  const loader = document.getElementById(id+'-loader');
-  if (loader) loader.classList.add('hidden');
-}
-// Called when the scene fails. Swap in the 2D fallback gracefully.
-function splineSlotFailed(id, viewer){
-  console.warn('[Spline] scene failed to load, falling back:', id);
-  const wrap = document.getElementById(id+'-wrap');
-  const fallback = document.getElementById(id+'-fallback');
-  const loader = document.getElementById(id+'-loader');
-  const status = document.getElementById(id+'-status');
-  if (viewer) viewer.style.display = 'none';
-  if (fallback) { fallback.style.opacity = '1'; fallback.style.pointerEvents = 'auto'; }
-  if (loader) loader.classList.add('hidden');
-  if (status) { status.className = 'spline-status fallback'; status.textContent = 'FALLBACK · URL DEAD'; }
-}
-// Safety: if spline-viewer doesn't fire onload within 12s, treat it as failed.
-window.addEventListener('load', () => {
-  setTimeout(() => {
-    document.querySelectorAll('.spline-loader:not(.hidden)').forEach(l => {
-      const wrap = l.closest('.spline-slot');
-      if (!wrap) return;
-      const viewer = wrap.querySelector('spline-viewer');
-      // If viewer exists but loader still showing after 12s, it's stuck — fall back.
-      if (viewer && !viewer.hasAttribute('data-loaded')) {
-        const id = wrap.id.replace('-wrap','');
-        splineSlotFailed(id, viewer);
-      }
-    });
-  }, 12000);
-});
-
-// ============================== FRAMEWORK ==============================
+﻿// ============================== FRAMEWORK ==============================
 let currentScreen = 'lobby';
 const Screens = {};
 const DockSlots = {};
@@ -236,13 +130,6 @@ function ActionDock(active){
       ${utilBtn('tourney','🏆','TROPHY','leaderboard')}
       ${utilBtn('refer','👥','REFER','refer')}
       ${utilBtn('profile','👤','PROFILE','profile')}
-    </div>
-  </div>
-  <!-- Wins ticker as a separate strip above the dock -->
-  <div style="position:absolute;left:16px;right:16px;bottom:90px;z-index:19;pointer-events:none;">
-    <div style="background:rgba(15,15,18,.55);backdrop-filter:blur(20px) saturate(150%);-webkit-backdrop-filter:blur(20px) saturate(150%);border:1px solid rgba(255,255,255,.08);border-radius:14px;padding:6px 16px;display:flex;align-items:center;gap:10px;">
-      <span style="font-size:9px;color:#9DE134;font-weight:800;letter-spacing:1px;white-space:nowrap;flex-shrink:0;">🏆 BIG WINS</span>
-      <div class="wins-ticker" style="flex:1;max-width:none;height:32px;"><div class="strip" id="wins-strip-${active}">${winsTickerHTML()}</div></div>
     </div>
   </div>`;
 }
@@ -528,7 +415,6 @@ const QuickPlayGames = [
 ];
 
 Screens.lobby = () => `
-${SplineScenes.lobbyBg ? `<div style="position:absolute;inset:0;z-index:2;pointer-events:none;opacity:.6;">${SplineSlot('lobbyBg')}</div>` : ''}
 <div class="layout-lobby">
   <!-- LEFT -->
   <div class="stack-col">
@@ -569,19 +455,16 @@ ${SplineScenes.lobbyBg ? `<div style="position:absolute;inset:0;z-index:2;pointe
 
   <!-- CENTER: AVATAR + QUICK PLAY GAMES -->
   <div class="stack-col" style="min-height:0;">
-    <!-- Avatar (top) -->
+    <!-- Avatar (top) — pure emoji character -->
     <div class="avatar-stage" style="flex:1;min-height:0;">
       <div class="spotlight"></div>
       <div class="energy-ring-2"></div>
       <div class="energy-ring"></div>
-      <div class="character-wrap" id="character-wrap" onclick="emote()" style="width:200px;height:240px;">
+      <div class="character-wrap" id="character-wrap" onclick="emote()" style="width:220px;height:260px;">
         <div class="tier-emblem" style="z-index:8;"><span class="icon">🥈</span><span class="tier-name">SILVER II</span></div>
-        ${SplineSlot('avatar', {
-          style: 'position:absolute;inset:0;',
-          showStatus: true,
-          fallback: `<div class="orbit" id="orbit"></div><div class="character" id="character" style="position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);font-size:150px;">🤴</div>`
-        })}
-        <div class="name-plate" style="z-index:8;"><div class="name" style="font-size:20px;">RD JAY</div><div class="skin">ROYAL PANJABI</div></div>
+        <div class="orbit" id="orbit"></div>
+        <div class="character" id="character" style="font-size:150px;">🤴</div>
+        <div class="name-plate" style="z-index:8;"><div class="name" style="font-size:22px;">RD JAY</div><div class="skin">ROYAL PANJABI</div></div>
         <div class="bubble" id="bubble" style="z-index:8;"><div class="bn" id="bubble-bn">🏏 চলো খেলি!</div><div class="en" id="bubble-en">Let's play!</div></div>
       </div>
     </div>
