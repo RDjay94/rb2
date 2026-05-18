@@ -476,59 +476,131 @@ const Login = () => `
   </div>
 </div>`;
 
-// ===================== 3. HOME / LOBBY (GAMING APP STYLE) =====================
-const Home = () => `
+// ===================== 3. HOME / LOBBY · V2 PUBG-STYLE =====================
+// State for avatar + emotes
+let avatarSkin = 'panjabi'; // current equipped skin id
+const AvatarSkins = {
+  panjabi:   { e:'🤴', n:'Royal Panjabi',   bg:'linear-gradient(180deg,#3a2a1f,#1a1010)', tier:'free' },
+  cricket:   { e:'🏏', n:'Tiger Cricket',   bg:'linear-gradient(180deg,#1f3a2a,#0a1a10)', tier:'silver' },
+  eid:       { e:'🌙', n:'Eid Premium',     bg:'linear-gradient(180deg,#1a2a3a,#0a1020)', tier:'silver' },
+  streetwear:{ e:'🧢', n:'Dhaka Streetwear',bg:'linear-gradient(180deg,#2a1a3a,#100a20)', tier:'gold' },
+  esports:   { e:'🎮', n:'Esports Pro',     bg:'linear-gradient(180deg,#3a1f2a,#1a0a1a)', tier:'gold' },
+  pohela:    { e:'🎨', n:'Pohela Boishakh', bg:'linear-gradient(180deg,#3a2f1f,#1a1a05)', tier:'platinum' },
+  sultan:    { e:'👑', n:'Royal Sultan',    bg:'linear-gradient(180deg,#3a1f1a,#1a0a05)', tier:'platinum' },
+  sundarbans:{ e:'🐅', n:'Sundarbans Tiger',bg:'linear-gradient(180deg,#3a3a1f,#1a1a05)', tier:'diamond' },
+};
+function getSkin(){ return AvatarSkins[avatarSkin] || AvatarSkins.panjabi; }
+
+const BengaliGreetings = [
+  ['🏏','চলো খেলি!','Let\'s play!'],
+  ['🔥','দারুণ চলছে!','You\'re on fire!'],
+  ['💰','টাকা চাই!','Need money!'],
+  ['🎯','ভাগ্য পরীক্ষা!','Test your luck!'],
+  ['👑','রাজা বাজি!','King\'s bet!'],
+  ['⚡','দ্রুত জিতি!','Win fast!'],
+  ['🎰','ঘুরাও!','Spin it!'],
+];
+
+const Home = () => {
+  const skin = getSkin();
+  return `
 <div class="absolute inset-0 flex flex-col bg-ink-0 overflow-hidden">
-  <!-- Ambient background -->
+  <!-- Ambient -->
   <div class="absolute inset-0 grid-bg opacity-20 pointer-events-none"></div>
-  <div class="absolute -top-20 -left-20 w-96 h-96 rounded-full pointer-events-none" style="background: radial-gradient(circle, rgba(157,225,52,0.12), transparent 60%)"></div>
-  <div class="absolute -bottom-32 -right-20 w-96 h-96 rounded-full pointer-events-none" style="background: radial-gradient(circle, rgba(255,182,39,0.08), transparent 60%)"></div>
+  <div class="absolute -top-20 -left-20 w-96 h-96 rounded-full pointer-events-none" style="background: radial-gradient(circle, rgba(157,225,52,0.15), transparent 60%)"></div>
+  <div class="absolute -bottom-32 -right-20 w-96 h-96 rounded-full pointer-events-none" style="background: radial-gradient(circle, rgba(255,140,0,0.12), transparent 60%)"></div>
+  <!-- Bangla pattern accent -->
+  <div class="absolute top-0 right-0 w-32 h-32 pointer-events-none opacity-10" style="background: repeating-linear-gradient(45deg, #9DE134 0 2px, transparent 2px 12px)"></div>
 
   ${TopBar()}
 
   <div class="flex-1 flex min-h-0 relative">
     ${SideRail('home')}
 
-    <!-- CENTER: HOT GAMES — the entire focus of the lobby -->
-    <div class="flex-1 min-w-0 flex flex-col p-3 gap-2 min-h-0">
-      <!-- Hot Games header — compact -->
-      <div class="flex items-center justify-between gap-2 flex-shrink-0">
-        <div class="flex items-center gap-2 min-w-0">
-          <span class="text-[9px] px-1.5 py-0.5 rounded bg-red-500 font-black light-flicker leading-none">🔥</span>
-          <div class="font-display font-black text-base neon-text gold-text leading-none whitespace-nowrap">HOT GAMES</div>
-          <span class="text-[9px] text-zinc-500 flex items-center gap-1 whitespace-nowrap"><span class="w-1 h-1 rounded-full bg-brand live-dot"></span><span class="num-mono">16,842</span></span>
-        </div>
-        <div class="flex gap-1 flex-shrink-0">
-          <button class="px-2 py-0.5 rounded text-[10px] font-bold bg-brand text-ink-0">All</button>
-          <button class="px-2 py-0.5 rounded text-[10px] font-bold bg-ink-2 border border-line">Hot</button>
-          <button class="px-2 py-0.5 rounded text-[10px] font-bold bg-ink-2 border border-line">New</button>
-          <button class="px-2 py-0.5 rounded text-[10px] font-bold bg-ink-2 border border-line">Jackpot</button>
+    <!-- AVATAR ZONE — left side, prominent PUBG-style character -->
+    <div class="w-[200px] flex-shrink-0 border-r border-line p-2.5 flex flex-col gap-2 relative">
+      <!-- Level + XP banner -->
+      <div class="rounded-lg bg-ink-2 border border-brand/40 px-2 py-1 flex items-center gap-2 flex-shrink-0">
+        <div class="w-7 h-7 rounded-md bg-brand text-ink-0 grid place-items-center font-black text-sm">12</div>
+        <div class="flex-1 min-w-0">
+          <div class="text-[8px] text-zinc-500 font-bold uppercase">XP · Lv 12 → 13</div>
+          <div class="h-1.5 rounded-full bg-ink-3 overflow-hidden mt-0.5"><div class="h-full bg-brand" style="width:33%"></div></div>
         </div>
       </div>
 
-      <!-- Hot Games grid — 4 cols × 2 rows = 8 big tiles -->
+      <!-- BIG AVATAR DISPLAY -->
+      <button onclick="protoAvatarEmote()" id="avatar-card" class="relative flex-1 rounded-2xl overflow-hidden border-2 border-brand/40 group" style="background: ${skin.bg}; box-shadow: inset 0 0 40px rgba(0,0,0,.4)">
+        <div class="absolute inset-0 grid-bg opacity-30"></div>
+        <!-- Spotlight -->
+        <div class="absolute inset-0" style="background: radial-gradient(ellipse at 50% 80%, rgba(157,225,52,.2), transparent 60%)"></div>
+        <!-- Speech bubble (hidden by default, shown on tap) -->
+        <div id="avatar-bubble" class="absolute top-2 left-2 right-2 px-2 py-1 rounded-lg bg-ink-0/95 border border-brand z-20 opacity-0 transition-opacity pointer-events-none">
+          <div class="text-[10px] text-brand font-bold" id="avatar-bubble-bn">চলো খেলি!</div>
+          <div class="text-[9px] text-zinc-400" id="avatar-bubble-en">Let's play!</div>
+        </div>
+        <!-- Tier emblem top-right -->
+        <div class="absolute top-2 right-2 z-10 flex items-center gap-1 px-1.5 py-0.5 rounded bg-ink-0/80 border border-brand/40">
+          <span class="text-xs">🥈</span><span class="text-[8px] font-black text-brand">SILVER II</span>
+        </div>
+        <!-- Character body (idle bobbing) -->
+        <div class="absolute inset-0 grid place-items-center pb-12">
+          <div id="avatar-char" class="text-[110px] float-y" style="filter: drop-shadow(0 8px 24px rgba(0,0,0,.6))">${skin.e}</div>
+        </div>
+        <!-- Tap to emote hint -->
+        <div class="absolute bottom-12 inset-x-0 text-center text-[9px] text-brand font-bold opacity-60 group-hover:opacity-100">✨ Tap to emote</div>
+        <!-- Name bar bottom -->
+        <div class="absolute bottom-0 inset-x-0 bg-ink-0/85 backdrop-blur px-2 py-1.5 border-t border-brand/30">
+          <div class="font-display font-black text-sm">RD JAY</div>
+          <div class="text-[9px] text-zinc-400 truncate">${skin.n}</div>
+        </div>
+      </button>
+
+      <!-- Customize button -->
+      <button onclick="setShopCategory('skins')" class="w-full py-2.5 rounded-xl bg-brand text-ink-0 font-black text-xs btn-3d hover:bg-brand-hover flex items-center justify-center gap-1.5 flex-shrink-0">
+        <span class="text-base">👤</span> CUSTOMIZE AVATAR
+      </button>
+    </div>
+
+    <!-- CENTER: HOT GAMES — bigger tiles, fewer of them, simpler -->
+    <div class="flex-1 min-w-0 flex flex-col p-2.5 gap-2 min-h-0">
+      <div class="flex items-center justify-between gap-2 flex-shrink-0">
+        <div class="flex items-center gap-2">
+          <span class="text-[10px] px-2 py-1 rounded bg-red-500 font-black light-flicker">🔥</span>
+          <div class="font-display font-black text-lg neon-text gold-text leading-none">HOT GAMES</div>
+          <span class="text-[9px] text-zinc-500 num-mono">১৬,৮৪২ <span class="text-[8px]">online</span></span>
+        </div>
+        <div class="flex gap-1.5">
+          <button class="px-3 py-1.5 rounded-lg text-[11px] font-black bg-brand text-ink-0">All</button>
+          <button class="px-3 py-1.5 rounded-lg text-[11px] font-black bg-ink-2 border border-line">Hot</button>
+          <button class="px-3 py-1.5 rounded-lg text-[11px] font-black bg-ink-2 border border-line">New</button>
+          <button class="px-3 py-1.5 rounded-lg text-[11px] font-black bg-ink-2 border border-line">💎</button>
+        </div>
+      </div>
+
+      <!-- 3×2 grid of LARGE PUBG-style tiles -->
       <div class="relative rounded-2xl border-2 border-brand/30 p-2 flex-1 min-h-0 overflow-hidden" style="background: linear-gradient(180deg, rgba(157,225,52,0.05), transparent 60%)">
-        <div class="grid grid-cols-4 grid-rows-2 gap-2 h-full">
+        <div class="grid grid-cols-3 grid-rows-2 gap-2 h-full">
           ${[
-            ['Aviator','Spribe','crash','aviator','+2,847','HOT'],
-            ['Crazy Time','Evolution','live','crazy_time','+1,782','LIVE'],
-            ['Super Ace','JILI','slots','super_ace','+2,103','💎'],
-            ['Sweet Bonanza','PRG','slots','sweet_bonanza','+1,612','HOT'],
-            ['Mega Wheel','PRG','live','mega_wheel','+678','LIVE'],
-            ['Plinko','Spribe','crash','plinko','+943','NEW'],
-            ['Lightning Roul.','Evolution','live','lightning_roulette','+1,124','LIVE'],
-            ['Money Coming','JILI','slots','money_coming','+1,456','HOT'],
-          ].map(([n,p,k,img,wins,tag])=>`
-            <button onclick="setProtoScreen('${k==='slots'?'slotroom':k==='crash'?'crash':'live'}')" class="card-3d rounded-xl overflow-hidden border border-line text-left relative bg-ink-2 group">
+            ['Aviator','Spribe','crash','aviator','HOT','২,৮৪৭'],
+            ['Crazy Time','Evolution','live','crazy_time','LIVE','১,৭৮২'],
+            ['Super Ace','JILI','slots','super_ace','💎','২,১০৩'],
+            ['Sweet Bonanza','PRG','slots','sweet_bonanza','HOT','১,৬১২'],
+            ['Mega Wheel','PRG','live','mega_wheel','LIVE','৬৭৮'],
+            ['Plinko','Spribe','crash','plinko','NEW','৯৪৩'],
+          ].map(([n,p,k,img,tag,wins])=>`
+            <button onclick="setProtoScreen('${k==='slots'?'slotroom':k==='crash'?'crash':'live'}')" class="card-3d rounded-xl overflow-hidden border-2 border-line text-left relative bg-ink-2 group hover:border-brand/60">
               <div class="h-full relative">
                 <img src="game-assets/generated/${img}.png" alt="${n}" class="absolute inset-0 w-full h-full object-cover" loading="lazy">
-                <div class="absolute inset-0 bg-gradient-to-t from-ink-0/90 via-ink-0/10 to-transparent"></div>
-                <div class="absolute top-1.5 left-1.5 text-[8px] px-1.5 py-0.5 rounded font-black ${tag==='HOT'?'bg-red-500':tag==='LIVE'?'bg-red-500 flex items-center gap-0.5':tag==='NEW'?'bg-cyan-500':'bg-brand text-ink-0'}">${tag==='LIVE'?'<span class="w-1 h-1 rounded-full bg-white live-dot"></span>':''}${tag}</div>
-                <div class="absolute top-1.5 right-1.5 text-[8px] px-1.5 py-0.5 rounded bg-black/80 font-bold num-mono">${wins}</div>
-                <!-- Footer with title -->
-                <div class="absolute inset-x-0 bottom-0 px-2 py-1.5 bg-ink-0/85 backdrop-blur">
-                  <div class="text-[12px] font-black truncate">${n}</div>
-                  <div class="text-[9px] text-zinc-500">${p}</div>
+                <div class="absolute inset-0 bg-gradient-to-t from-ink-0 via-ink-0/20 to-transparent"></div>
+                <div class="absolute top-2 left-2 text-[10px] px-2 py-1 rounded font-black ${tag==='HOT'?'bg-red-500':tag==='LIVE'?'bg-red-500 flex items-center gap-1':tag==='NEW'?'bg-cyan-500':'bg-brand text-ink-0'}">${tag==='LIVE'?'<span class="w-1.5 h-1.5 rounded-full bg-white live-dot"></span>':''}${tag}</div>
+                <div class="absolute top-2 right-2 text-[10px] px-2 py-1 rounded bg-black/80 font-bold num-mono flex items-center gap-1"><span class="w-1 h-1 rounded-full bg-brand live-dot"></span>${wins}</div>
+                <div class="absolute inset-x-0 bottom-0 px-3 py-2 bg-ink-0/90 backdrop-blur">
+                  <div class="text-[14px] font-black truncate">${n}</div>
+                  <div class="text-[10px] text-zinc-500">${p}</div>
+                </div>
+                <!-- Hover PLAY overlay -->
+                <div class="absolute inset-0 grid place-items-center bg-ink-0/40 opacity-0 group-hover:opacity-100 transition-opacity">
+                  <div class="px-4 py-2 rounded-xl bg-brand text-ink-0 font-black text-sm">▶ PLAY</div>
                 </div>
               </div>
             </button>`).join('')}
@@ -536,124 +608,65 @@ const Home = () => `
       </div>
     </div>
 
-    <!-- RIGHT RAIL: Everything else, vertically stacked -->
-    <div class="w-[260px] flex-shrink-0 border-l border-line overflow-y-auto hide-scroll p-2 space-y-2">
-      <!-- Mascot + speech bubble -->
-      <div class="relative rounded-xl overflow-hidden border border-brand/40 shine h-[70px]" style="background: linear-gradient(135deg, rgba(157,225,52,0.2), #161616 70%)">
-        <div class="absolute inset-0 grid-bg opacity-30"></div>
-        <div class="absolute top-1.5 left-1.5 z-10">
-          <div class="relative rounded-lg bg-ink-0/85 border border-brand/40 px-2 py-1">
-            <div class="text-[9px] text-brand font-bold leading-tight">👋 Hey RD!</div>
-            <div class="text-[9px] text-white leading-tight">৳600 bonus <span class="text-brand font-bold">live</span></div>
-            <div class="absolute -bottom-1 left-3 w-1.5 h-1.5 rotate-45 bg-ink-0 border-r border-b border-brand/40"></div>
-          </div>
-        </div>
-        <div class="absolute bottom-0 right-2 text-4xl wiggle" style="filter: drop-shadow(0 -4px 8px rgba(157,225,52,.4))">🤴</div>
-      </div>
-
-      <!-- Lucky Wheel — horizontal spinning prize barrel -->
-      <div class="relative rounded-xl overflow-hidden border border-amber-500/40 p-2" style="background: radial-gradient(circle at 50% 50%, rgba(255,182,39,0.15), #0a0a0a 70%)">
-        <!-- Header row -->
+    <!-- RIGHT RAIL: simplified — only essentials -->
+    <div class="w-[220px] flex-shrink-0 border-l border-line p-2.5 flex flex-col gap-2 overflow-y-auto hide-scroll">
+      <!-- Daily prize barrel — horizontal -->
+      <div class="rounded-xl overflow-hidden border-2 border-amber-500/40 p-2 flex-shrink-0" style="background: radial-gradient(circle at 50% 50%, rgba(255,182,39,0.15), #0a0a0a 70%)">
         <div class="flex items-center justify-between mb-1.5">
-          <span class="text-[8px] px-1.5 py-0.5 rounded bg-amber-500 text-ink-0 font-black">DAILY · FREE</span>
-          <span class="text-[8px] text-zinc-400 num-mono">Resets · 14h 22m</span>
+          <span class="text-[9px] px-2 py-0.5 rounded bg-amber-500 text-ink-0 font-black">DAILY · FREE</span>
+          <span class="text-[8px] text-zinc-400 num-mono">14h 22m</span>
         </div>
-        <!-- Horizontal prize barrel -->
-        <div class="relative rounded-lg overflow-hidden h-[58px] border border-amber-500/60" style="background: linear-gradient(180deg, #2a1a0a 0%, #1a0a05 50%, #2a1a0a 100%); box-shadow: inset 0 2px 8px rgba(0,0,0,.6), 0 0 20px rgba(255,182,39,.2)">
-          <!-- Side fade overlays -->
-          <div class="absolute left-0 top-0 bottom-0 w-8 z-10 pointer-events-none" style="background: linear-gradient(90deg, #0a0a0a, transparent)"></div>
-          <div class="absolute right-0 top-0 bottom-0 w-8 z-10 pointer-events-none" style="background: linear-gradient(-90deg, #0a0a0a, transparent)"></div>
-          <!-- Center selector indicator -->
-          <div class="absolute left-1/2 -translate-x-1/2 top-0 bottom-0 w-[52px] z-20 pointer-events-none">
-            <div class="absolute inset-x-0 top-0 h-0 mx-auto" style="border-left: 6px solid transparent; border-right: 6px solid transparent; border-top: 7px solid #FFB627; width: 0; filter: drop-shadow(0 1px 2px rgba(0,0,0,.5))"></div>
-            <div class="absolute inset-x-0 bottom-0 h-0 mx-auto" style="border-left: 6px solid transparent; border-right: 6px solid transparent; border-bottom: 7px solid #FFB627; width: 0; filter: drop-shadow(0 -1px 2px rgba(0,0,0,.5))"></div>
+        <div class="relative rounded-lg overflow-hidden h-[44px] border border-amber-500/60" style="background: linear-gradient(180deg,#2a1a0a,#1a0a05,#2a1a0a); box-shadow: inset 0 2px 8px rgba(0,0,0,.6)">
+          <div class="absolute left-0 top-0 bottom-0 w-6 z-10 pointer-events-none" style="background: linear-gradient(90deg,#0a0a0a,transparent)"></div>
+          <div class="absolute right-0 top-0 bottom-0 w-6 z-10 pointer-events-none" style="background: linear-gradient(-90deg,#0a0a0a,transparent)"></div>
+          <div class="absolute left-1/2 -translate-x-1/2 top-0 bottom-0 w-[44px] z-20 pointer-events-none">
+            <div class="absolute inset-x-0 top-0 mx-auto" style="border-left: 5px solid transparent; border-right: 5px solid transparent; border-top: 6px solid #FFB627; width: 0"></div>
+            <div class="absolute inset-x-0 bottom-0 mx-auto" style="border-left: 5px solid transparent; border-right: 5px solid transparent; border-bottom: 6px solid #FFB627; width: 0"></div>
             <div class="absolute inset-y-0 left-0 w-px bg-amber-400/60"></div>
             <div class="absolute inset-y-0 right-0 w-px bg-amber-400/60"></div>
           </div>
-          <!-- Spinning prize strip -->
           <div id="wheel" class="absolute inset-y-0 flex items-center" style="left: 50%; transform: translateX(-50%); will-change: transform">
             ${[
-              ['৳50','#9DE134'],['৳100','#FFB627'],['৳500','#9DE134'],['🎁 BONUS','#FFB627'],
-              ['৳1K','#9DE134'],['৳200','#FFB627'],['100 SPINS','#9DE134'],['৳5K','#FFB627'],
-              ['৳50','#9DE134'],['৳100','#FFB627'],['৳500','#9DE134'],['💎 GEMS','#FFB627'],
+              ['৳50','#9DE134'],['৳100','#FFB627'],['৳500','#9DE134'],['🎁','#FFB627'],
+              ['৳1K','#9DE134'],['৳200','#FFB627'],['100🎰','#9DE134'],['৳5K','#FFB627'],
+              ['৳50','#9DE134'],['৳100','#FFB627'],['৳500','#9DE134'],['💎','#FFB627'],
               ['৳1K','#9DE134'],['৳200','#FFB627'],['JACKPOT','#FFB627'],['৳5K','#9DE134'],
-            ].map(([prize,color],i)=>`
-              <div class="flex-shrink-0 w-[52px] h-[44px] mx-px rounded grid place-items-center text-[10px] font-black text-ink-0" style="background: ${color}; box-shadow: inset 0 1px 0 rgba(255,255,255,.3), 0 1px 0 rgba(0,0,0,.3)">
-                ${prize}
-              </div>`).join('')}
+            ].map(([prize,color])=>`<div class="flex-shrink-0 w-[44px] h-[34px] mx-px rounded grid place-items-center text-[10px] font-black text-ink-0" style="background: ${color}; box-shadow: inset 0 1px 0 rgba(255,255,255,.3)">${prize}</div>`).join('')}
           </div>
         </div>
-        <!-- Footer row: prize + spin -->
-        <div class="flex items-center gap-2 mt-1.5">
-          <div class="flex-1 min-w-0">
-            <div class="text-[8px] text-zinc-400 leading-none">Up to</div>
-            <div class="font-display font-black gold-text text-sm leading-tight num-mono">৳ 5,000</div>
-          </div>
-          <button onclick="protoSpinBarrel()" class="px-3 py-1.5 rounded-lg bg-gradient-to-b from-amber-300 to-amber-600 text-ink-0 text-[11px] font-black btn-3d pulse-scale">🎯 SPIN!</button>
-        </div>
+        <button onclick="protoSpinBarrel()" class="w-full mt-2 px-3 py-2.5 rounded-lg bg-gradient-to-b from-amber-300 to-amber-600 text-ink-0 text-sm font-black btn-3d pulse-scale">🎯 SPIN · ৳5,000</button>
       </div>
 
-      <!-- Free coins + streak -->
-      <div class="grid grid-cols-2 gap-2">
-        <button onclick="protoCollectBonus(this)" class="relative rounded-xl overflow-hidden border border-brand/40 h-[68px]" style="background: linear-gradient(135deg, rgba(157,225,52,0.2), #161616 70%)">
-          <div class="absolute top-1 left-1 text-[7px] px-1 py-0.5 rounded bg-brand text-ink-0 font-black">FREE COINS</div>
-          <div class="absolute top-1 right-1 text-[7px] text-brand font-mono num-mono" id="bonus-timer">00:14:22</div>
-          <div class="absolute inset-0 grid place-items-center pt-2">
-            <div class="text-2xl float-y">💰</div>
-          </div>
-          <div class="absolute bottom-1 inset-x-1 flex items-center justify-between">
-            <div class="text-[9px] font-black gold-text">+10K</div>
-            <div class="text-[7px] text-zinc-400">tap</div>
-          </div>
-        </button>
-        <div class="rounded-xl border border-line bg-ink-2 px-1.5 py-1 h-[68px] flex flex-col justify-between">
-          <div class="flex items-center justify-between">
-            <span class="text-[8px] text-amber-400 font-black">🔥 STREAK</span>
-            <span class="font-display font-black text-amber-400 text-[10px] num-mono">6/7</span>
-          </div>
-          <div class="flex gap-0.5">
-            ${[1,1,1,1,1,1,0].map(v=>`<div class="flex-1 h-1 rounded-full ${v?'bg-amber-400':'bg-ink-4'}"></div>`).join('')}
-          </div>
-          <button onclick="setProtoScreen('calendar')" class="w-full text-[8px] text-brand text-center font-bold">View →</button>
+      <!-- Free coins chest — bigger button -->
+      <button onclick="protoCollectBonus(this)" class="relative rounded-xl overflow-hidden border-2 border-brand/40 h-[80px] flex-shrink-0" style="background: linear-gradient(135deg, rgba(157,225,52,0.25), #161616 70%)">
+        <div class="absolute top-1.5 left-1.5 text-[9px] px-1.5 py-0.5 rounded bg-brand text-ink-0 font-black">FREE COINS</div>
+        <div class="absolute top-1.5 right-1.5 text-[9px] text-brand font-mono num-mono" id="bonus-timer">00:14:22</div>
+        <div class="absolute inset-0 grid place-items-center pt-3">
+          <div class="text-3xl float-y">💰</div>
         </div>
-      </div>
-
-      <!-- Tournament -->
-      <button onclick="setProtoScreen('leaderboard')" class="w-full rounded-xl border border-amber-500/40 px-2 py-1.5 text-left relative overflow-hidden shine flex items-center gap-2" style="background: linear-gradient(135deg, rgba(255,182,39,.15), #161616)">
-        <span class="text-2xl">🏆</span>
-        <div class="flex-1 min-w-0">
-          <div class="text-[9px] text-amber-400 font-black">TOURNAMENT · 2D 11H</div>
-          <div class="text-[10px] font-bold leading-tight">Champions Cup</div>
-          <div class="text-[10px] gold-text font-black num-mono">৳ 50,00,000</div>
+        <div class="absolute bottom-1 inset-x-2 flex items-center justify-between">
+          <div class="text-[11px] font-black gold-text">+10,000</div>
+          <div class="text-[10px] text-brand font-bold">TAP →</div>
         </div>
-        <span class="text-amber-400 text-xs">›</span>
       </button>
 
-      <!-- Jackpot -->
-      <button onclick="setProtoScreen('slots')" class="w-full rounded-xl border border-brand/40 px-2 py-1.5 text-left flex items-center gap-2" style="background: linear-gradient(135deg, rgba(157,225,52,.15), #161616)">
-        <span class="text-2xl">💎</span>
+      <!-- Tournament — bigger button -->
+      <button onclick="setProtoScreen('leaderboard')" class="w-full rounded-xl border-2 border-amber-500/40 p-2.5 text-left relative overflow-hidden shine flex items-center gap-2.5 flex-shrink-0" style="background: linear-gradient(135deg, rgba(255,182,39,.18), #161616)">
+        <span class="text-3xl">🏆</span>
         <div class="flex-1 min-w-0">
-          <div class="text-[9px] text-brand font-black">JACKPOT · ↑৳234/sec</div>
-          <div class="font-display font-black text-sm num-mono text-brand neon-text truncate" id="jackpot-val">৳ 1,24,87,302</div>
+          <div class="text-[9px] text-amber-400 font-black">🇧🇩 IPL TOURNAMENT · 2D</div>
+          <div class="text-[11px] font-black leading-tight">Champions Cup</div>
+          <div class="text-[11px] gold-text font-black num-mono">৳ 50,00,000</div>
         </div>
-        <span class="text-brand text-xs">›</span>
       </button>
 
-      <!-- Quick deposit chips -->
-      <div class="rounded-xl border border-line bg-ink-2 px-1.5 py-1.5">
-        <div class="text-[8px] text-zinc-500 font-bold mb-1">QUICK TOP-UP</div>
-        <div class="grid grid-cols-4 gap-1">
-          ${['500','1k','3k','MAX'].map(a=>`<button onclick="protoOpenDeposit()" class="py-1 rounded text-[9px] font-black bg-brand/10 border border-brand/30 text-brand hover:bg-brand hover:text-ink-0">৳${a}</button>`).join('')}
-        </div>
-      </div>
-
-      <!-- Live wins ticker -->
-      <div class="rounded-xl bg-ink-2 border border-line p-2">
-        <div class="flex items-center justify-between mb-1">
+      <!-- Live wins ticker (compact) -->
+      <div class="rounded-xl bg-ink-2 border border-line p-2 flex-1 min-h-0 overflow-hidden flex flex-col">
+        <div class="flex items-center justify-between mb-1 flex-shrink-0">
           <div class="text-[10px] font-black flex items-center gap-1"><span class="w-1.5 h-1.5 rounded-full bg-red-500 live-dot"></span>BIG WINS</div>
           <span class="text-[8px] text-zinc-500">live</span>
         </div>
-        <div class="relative h-[90px] overflow-hidden">
+        <div class="relative flex-1 overflow-hidden min-h-0">
           <div class="ticker-up absolute inset-x-0 space-y-1.5">
             ${[
               ['M****61','Aviator','৳ 124,000','12.4x','🥇'],
@@ -663,50 +676,60 @@ const Home = () => `
               ['A****hi','Aviator','৳ 24,100','4.2x','✈️'],
               ['M****61','Aviator','৳ 124,000','12.4x','🥇'],
             ].map(([u,g,amt,mult,e])=>`
-              <div class="rounded bg-ink-3/60 border border-line p-1">
+              <div class="rounded bg-ink-3/60 border border-line p-1.5">
                 <div class="flex items-center gap-1.5">
-                  <div class="text-sm">${e}</div>
+                  <div class="text-base">${e}</div>
                   <div class="flex-1 min-w-0">
-                    <div class="text-[9px] font-bold truncate">${u}</div>
+                    <div class="text-[10px] font-bold truncate">${u}</div>
                   </div>
                   <span class="text-[8px] px-1 py-0.5 rounded bg-brand/15 text-brand font-bold">${mult}</span>
                 </div>
-                <div class="text-[10px] font-black gold-text num-mono">${amt}</div>
+                <div class="text-[11px] font-black gold-text num-mono">${amt}</div>
               </div>`).join('')}
           </div>
         </div>
       </div>
-
-      <!-- Missions -->
-      <button onclick="setProtoScreen('missions')" class="w-full rounded-xl bg-ink-2 border border-brand/30 p-2 text-left">
-        <div class="flex items-center justify-between mb-1">
-          <div class="text-[10px] font-black text-brand">🎯 MISSIONS</div>
-          <div class="text-[9px] font-bold num-mono">2/3 today</div>
-        </div>
-        <div class="space-y-0.5">
-          <div class="flex items-center gap-1.5"><span class="text-[10px]">✅</span><div class="flex-1 text-[9px] line-through text-zinc-500">Place 3 bets</div><span class="text-[8px] text-brand font-bold">৳20</span></div>
-          <div class="flex items-center gap-1.5"><span class="text-[10px]">✅</span><div class="flex-1 text-[9px] line-through text-zinc-500">Deposit ৳500</div><span class="text-[8px] text-brand font-bold">৳30</span></div>
-          <div class="flex items-center gap-1.5"><span class="w-2.5 h-2.5 rounded-full border border-brand"></span><div class="flex-1 text-[9px] font-bold">Win Baccarat hand</div><span class="text-[8px] text-brand font-bold">৳100</span></div>
-        </div>
-      </button>
-
-      <!-- Invite friends -->
-      <button onclick="setProtoScreen('refer')" class="w-full rounded-xl border border-cyan-400/30 p-2 text-left flex items-center gap-2" style="background: linear-gradient(135deg, rgba(34,211,238,.1), #161616)">
-        <span class="text-xl">👥</span>
-        <div class="flex-1 min-w-0">
-          <div class="text-[10px] font-black text-cyan-400">INVITE FRIENDS</div>
-          <div class="text-[9px]">Earn <span class="gold-text font-black">৳500</span> per friend</div>
-          <div class="text-[8px] text-zinc-500">+0.7% lifetime · 23 invited</div>
-        </div>
-        <span class="text-cyan-400 text-xs">›</span>
-      </button>
     </div>
   </div>
   ${BottomBar()}
 
   <!-- Floating support button -->
-  <button onclick="setProtoScreen('support')" class="absolute bottom-14 right-3 w-9 h-9 rounded-full bg-brand text-ink-0 grid place-items-center shadow-glow btn-3d z-30">💬</button>
+  <button onclick="setProtoScreen('support')" class="absolute bottom-14 right-3 w-11 h-11 rounded-full bg-brand text-ink-0 grid place-items-center text-lg shadow-glow btn-3d z-30">💬</button>
 </div>`;
+};
+
+// Equip an avatar skin (from shop) — updates global state and bounces back to lobby
+function protoEquipSkin(skinId){
+  if (!AvatarSkins[skinId]) return;
+  avatarSkin = skinId;
+  fxBeep(900, 100);
+  setTimeout(()=>{ fxBeep(1200, 150); }, 100);
+  spawnConfetti();
+  // Re-render the shop so EQUIPPED state updates, then navigate home so user sees their new look
+  setProtoScreen('shop');
+  setTimeout(()=>{ setProtoScreen('home'); }, 800);
+}
+
+// Avatar emote — tap avatar to show random Bengali greeting
+function protoAvatarEmote(){
+  const bubble = document.getElementById('avatar-bubble');
+  const bn = document.getElementById('avatar-bubble-bn');
+  const en = document.getElementById('avatar-bubble-en');
+  const ch = document.getElementById('avatar-char');
+  if (!bubble || !bn || !en) return;
+  const greeting = BengaliGreetings[Math.floor(Math.random() * BengaliGreetings.length)];
+  bn.textContent = greeting[0] + ' ' + greeting[1];
+  en.textContent = greeting[2];
+  bubble.style.opacity = '1';
+  if (ch) {
+    ch.style.transform = 'scale(1.1) rotate(-5deg)';
+    ch.style.transition = 'transform .3s cubic-bezier(.5,1.7,.7,.9)';
+    setTimeout(()=>{ ch.style.transform = ''; }, 400);
+  }
+  fxBeep(700, 80);
+  setTimeout(()=>{ fxBeep(1000, 100); }, 100);
+  setTimeout(()=>{ bubble.style.opacity = '0'; }, 2200);
+}
 
 // ===================== 4. LIVE CASINO =====================
 const Live = () => `
@@ -2346,6 +2369,7 @@ function setShopCategory(c) { shopCategory = c; shopItemIdx = 0; setProtoScreen(
 function setShopItem(i) { shopItemIdx = i; setProtoScreen('shop'); }
 
 const ShopCategories = {
+  skins: { e:'👤', n:'Avatar skins', sub:'Outfits · frames · emotes', accent:'brand' },
   coins: { e:'🪙', n:'Coin packs', sub:'Cash + bonus coins', accent:'brand' },
   gems:  { e:'💎', n:'Gems', sub:'Premium currency', accent:'cyan' },
   bundles:{ e:'🎁', n:'Bundles', sub:'Themed value packs', accent:'amber' },
@@ -2356,6 +2380,16 @@ const ShopCategories = {
 };
 
 const ShopData = {
+  skins: [
+    { e:'🤴', n:'Royal Panjabi', p:'Free', v:'Default · equipped', tag:'EQUIPPED', bg:'#3a2a1f', skin:'panjabi', desc:'Default Bangladeshi royal panjabi outfit. Traditional, classic, and free for all players.', benefits:['Free starter skin','Bangladeshi traditional wear','Standard idle pose','Compatible with all emotes'] },
+    { e:'🏏', n:'Tiger Cricket Jersey', p:'৳ 250', v:'Bangladesh team kit', tag:'POPULAR', bg:'#1f3a2a', skin:'cricket', desc:'Wear the Bangladesh Tigers cricket jersey. Auto-equip during IPL/Asia Cup season for extra cricket cashback.', benefits:['Tiger cricket jersey','Cricket-bat idle pose','Roar emote unlocked','+1% cashback on cricket bets','Tournament leaderboard badge'] },
+    { e:'🌙', n:'Eid Premium', p:'৳ 400', v:'Festive holiday set', tag:null, bg:'#1a2a3a', skin:'eid', desc:'Crescent moon kurta + golden trim. Perfect for Eid season festivities.', benefits:['Eid kurta with gold trim','Lantern aura effect','Eid Mubarak emote','Festive chat name color','Auto-equip during Eid week'] },
+    { e:'🧢', n:'Dhaka Streetwear', p:'৳ 600', v:'Urban modern look', tag:'NEW', bg:'#2a1a3a', skin:'streetwear', desc:'Urban Dhaka streetwear — cap, hoodie, sneakers. For players who like their edge modern.', benefits:['Cap + hoodie + sneakers set','Smooth idle dance','Rap emote unlocked','Graffiti chat backdrop','Animated profile frame'] },
+    { e:'🎮', n:'Esports Pro', p:'৳ 800', v:'Gaming championship gear', tag:null, bg:'#3a1f2a', skin:'esports', desc:'Esports champion gear — headset, jersey, gaming glasses. For the serious gamer.', benefits:['Pro esports jersey','Headset + gaming glasses','GG emote unlocked','Score celebration animation','Esports leaderboard frame'] },
+    { e:'🎨', n:'Pohela Boishakh', p:'৳ 1,200', v:'Bengali New Year', tag:'LIMITED', bg:'#3a2f1f', skin:'pohela', desc:'Bengali New Year festive set with traditional patterns. Only available during Boishakh season.', benefits:['Festive panjabi with alpana patterns','Boishakhi mela backdrop','Drum dance emote','Limited-edition Boishakh frame','+200 coins on equip'] },
+    { e:'👑', n:'Royal Sultan', p:'৳ 2,500', v:'Mughal-era royalty', tag:'EPIC', bg:'#3a1f1a', skin:'sultan', desc:'Mughal-era royal robe and turban with jeweled accessories. Premium-tier prestige skin.', benefits:['Sultan robe + turban + jewels','Throne idle pose','Royal command emote','Animated golden frame','Top-of-chat highlight','+5% rebate on all games'] },
+    { e:'🐅', n:'Sundarbans Tiger', p:'৳ 5,000', v:'Mythic tiger spirit', tag:'MYTHIC', bg:'#3a3a1f', skin:'sundarbans', desc:'Channel the spirit of the Royal Bengal Tiger. The rarest skin in the shop — only owned by 0.2% of players.', benefits:['Tiger spirit transformation','Roar emote with screen shake','Tiger-stripe animated frame','Mythic chat badge','Exclusive Sundarbans backdrop','+10% rebate on all games','Auto-VIP Diamond perks'] },
+  ],
   coins: [
     { e:'💵', n:'Starter', p:'৳ 100', v:'+ 5K coins', tag:null, bg:'#3a2a1a', desc:'A small top-up to try out games. Cash you can withdraw + bonus coins for play.', benefits:['৳ 100 cash credited instantly','+ 5,000 bonus coins','3.5% method bonus included','No turnover on cash portion'] },
     { e:'💰', n:'Bronze', p:'৳ 500', v:'+ 30K coins', tag:'5%', bg:'#3a1f1f', desc:'Bronze tier saver — 5% extra bonus on top of standard 3.5% method bonus.', benefits:['৳ 500 cash credited instantly','+ 30,000 bonus coins','+5% Bronze bonus','3.5% method bonus included'] },
@@ -2477,11 +2511,13 @@ const Shop = () => {
         ${items.map((it, i) => {
           const active = i === shopItemIdx;
           const locked = it.locked;
+          // For skins, dynamically tag the currently-equipped skin
+          const displayTag = (shopCategory==='skins' && it.skin === avatarSkin) ? 'EQUIPPED' : (shopCategory==='skins' && it.tag==='EQUIPPED' ? null : it.tag);
           return `<button onclick="setShopItem(${i})" class="card-3d rounded-lg overflow-hidden ${active?accent.ring:locked?'border-line opacity-70':'border-line hover:border-zinc-600'} border bg-ink-2 text-left transition relative">
             <div class="aspect-[3/2] relative overflow-hidden" style="background: linear-gradient(135deg, ${it.bg}, #0a0a0a)">
               ${it.img?`<img src="game-assets/generated/${it.img}.png" class="absolute inset-0 w-full h-full object-cover opacity-50">`:''}
               <div class="absolute inset-0 grid place-items-center text-4xl ${active?'float-y':''}" style="filter: drop-shadow(0 4px 12px rgba(0,0,0,.6))">${it.e}</div>
-              ${it.tag?`<span class="absolute top-1 left-1 text-[7px] px-1 py-0.5 rounded ${it.tag==='POPULAR'||it.tag==='Active'?accent.tagBg:it.tag==='BEST'||it.tag==='Premium'?'bg-amber-400 text-ink-0':it.tag==='VIP'?'bg-purple-500 text-white':it.tag==='Done'?'bg-zinc-700 text-zinc-300':it.tag==='Expired'?'bg-red-500/30 text-red-400':'bg-ink-3 text-zinc-300'} font-black">${it.tag}</span>`:''}
+              ${displayTag?`<span class="absolute top-1 left-1 text-[7px] px-1 py-0.5 rounded ${displayTag==='POPULAR'||displayTag==='Active'||displayTag==='EQUIPPED'?accent.tagBg:displayTag==='BEST'||displayTag==='Premium'||displayTag==='LIMITED'||displayTag==='MYTHIC'?'bg-amber-400 text-ink-0':displayTag==='VIP'||displayTag==='EPIC'?'bg-purple-500 text-white':displayTag==='Done'?'bg-zinc-700 text-zinc-300':displayTag==='Expired'?'bg-red-500/30 text-red-400':displayTag==='NEW'?'bg-cyan-500 text-ink-0':'bg-ink-3 text-zinc-300'} font-black">${displayTag}</span>`:''}
               ${active?`<div class="absolute top-1 right-1 w-3.5 h-3.5 rounded-full ${accent.btnBg} grid place-items-center text-[8px] font-black">●</div>`:''}
               ${locked?'<div class="absolute inset-0 bg-ink-0/65 backdrop-blur-sm grid place-items-center text-xl">🔒</div>':''}
             </div>
@@ -2501,12 +2537,16 @@ const Shop = () => {
     <!-- RIGHT: Detail of selected item (~260 wide) -->
     <div class="w-[280px] flex-shrink-0 flex flex-col overflow-y-auto hide-scroll">
       ${sel?`
-      <!-- Hero preview -->
-      <div class="relative h-28 overflow-hidden flex-shrink-0" style="background: linear-gradient(135deg, ${sel.bg}, #0a0a0a)">
+      <!-- Hero preview (skins get a TALLER avatar preview, others stay compact) -->
+      <div class="relative ${shopCategory==='skins'?'h-40':'h-28'} overflow-hidden flex-shrink-0" style="background: ${sel.bg.startsWith('linear-')||sel.bg.startsWith('rgba')?sel.bg:`linear-gradient(135deg, ${sel.bg}, #0a0a0a)`}">
         ${sel.img?`<img src="game-assets/generated/${sel.img}.png" class="absolute inset-0 w-full h-full object-cover opacity-50">`:''}
+        <div class="absolute inset-0 grid-bg opacity-25"></div>
         <div class="absolute inset-0 bg-gradient-to-t from-ink-0 via-transparent to-transparent"></div>
-        <div class="absolute inset-0 grid place-items-center text-6xl float-y" style="filter: drop-shadow(0 4px 16px rgba(0,0,0,.7))">${sel.e}</div>
-        ${sel.tag?`<div class="absolute top-2 left-2 text-[8px] px-1.5 py-0.5 rounded ${sel.tag==='POPULAR'||sel.tag==='Active'?accent.tagBg:sel.tag==='BEST'||sel.tag==='Premium'?'bg-amber-400 text-ink-0':sel.tag==='VIP'?'bg-purple-500 text-white':sel.tag==='Done'?'bg-zinc-700 text-zinc-300':sel.tag==='Expired'?'bg-red-500/30 text-red-400':'bg-ink-3 text-zinc-300'} font-black">${sel.tag}</div>`:''}
+        <!-- Spotlight for skins preview -->
+        ${shopCategory==='skins'?`<div class="absolute inset-0" style="background: radial-gradient(ellipse at 50% 80%, rgba(157,225,52,.2), transparent 60%)"></div>`:''}
+        <div class="absolute inset-0 grid place-items-center ${shopCategory==='skins'?'text-7xl':'text-6xl'} float-y" style="filter: drop-shadow(0 8px 24px rgba(0,0,0,.7))">${sel.e}</div>
+        ${shopCategory==='skins' && avatarSkin===sel.skin ? `<div class="absolute top-2 right-2 px-2 py-0.5 rounded bg-brand text-ink-0 text-[8px] font-black">✓ EQUIPPED</div>` : (sel.tag?`<div class="absolute top-2 left-2 text-[8px] px-1.5 py-0.5 rounded ${sel.tag==='POPULAR'||sel.tag==='Active'||sel.tag==='EQUIPPED'?accent.tagBg:sel.tag==='BEST'||sel.tag==='Premium'||sel.tag==='LIMITED'||sel.tag==='MYTHIC'?'bg-amber-400 text-ink-0':sel.tag==='VIP'||sel.tag==='EPIC'?'bg-purple-500 text-white':sel.tag==='Done'?'bg-zinc-700 text-zinc-300':sel.tag==='Expired'?'bg-red-500/30 text-red-400':sel.tag==='NEW'?'bg-cyan-500 text-ink-0':'bg-ink-3 text-zinc-300'} font-black">${sel.tag}</div>`:'')}
+        ${shopCategory==='skins'?`<div class="absolute bottom-2 inset-x-2 text-center"><div class="text-[8px] text-zinc-400">PREVIEW</div></div>`:''}
         ${isVipLocked?`<div class="absolute inset-0 bg-ink-0/75 backdrop-blur grid place-items-center"><div class="text-center"><div class="text-3xl mb-1">🔒</div><div class="text-[10px] font-bold">Unlock at ${sel.tier} tier</div></div></div>`:''}
       </div>
       <div class="p-3 flex flex-col flex-1 min-h-0">
@@ -2525,6 +2565,17 @@ const Shop = () => {
           ${shopCategory==='my'?`
             <button class="w-full py-2 rounded-lg bg-ink-2 border border-line text-xs font-bold mb-1.5">📄 Download invoice</button>
             <button class="w-full py-2 rounded-lg ${accent.btnBg} font-black text-xs btn-3d">${sel.tag==='Active'?'Manage':sel.tag==='Done'?'Buy again':'View receipt'}</button>
+          `:shopCategory==='skins'?`
+            <div class="flex items-baseline justify-between mb-2">
+              <div class="text-[9px] text-zinc-500">${sel.p==='Free'?'Cost':'Price'}</div>
+              <div class="font-display font-black text-xl ${accent.txt} num-mono">${sel.p}</div>
+            </div>
+            ${avatarSkin===sel.skin?`
+              <button disabled class="w-full py-3 rounded-lg bg-brand/30 text-brand font-black text-sm btn-3d border-2 border-brand">✓ EQUIPPED</button>
+            `:`
+              <button onclick="protoEquipSkin('${sel.skin}')" class="w-full py-3 rounded-lg ${accent.btnBg} font-black text-sm btn-3d glow-pulse">${sel.p==='Free'?'EQUIP':'BUY & EQUIP · '+sel.p}</button>
+              <button onclick="setProtoScreen('home')" class="w-full mt-1.5 py-2 rounded-lg bg-ink-2 border border-line text-[11px] font-bold">↩ Preview in Lobby</button>
+            `}
           `:`
             <div class="flex items-baseline justify-between mb-2">
               <div class="text-[9px] text-zinc-500">Total</div>
