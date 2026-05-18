@@ -137,7 +137,6 @@ tailwind.config = {
   window.checkGate = function(e){
     if (e) e.preventDefault();
     const v = document.getElementById('gate-input').value;
-    // Obfuscated literal so it's not a plain-text "Aaaa1111" in source
     const target = String.fromCharCode(65,97,97,97,49,49,49,49);
     if (v === target) { unlock(); }
     else {
@@ -297,7 +296,7 @@ tailwind.config = {
 // Left side rail — 5 categories (matches existing app pattern)
 const SideRail = (active='home', onclick=true) => {
   const items = [
-    {k:'home',    l:'Hot Game',    i:'M3 11.5 12 4l9 7.5V20a2 2 0 0 1-2 2h-3v-7h-8v7H5a2 2 0 0 1-2-2v-8.5Z'},
+    {k:'home',    l:'Lobby',       i:'M3 11.5 12 4l9 7.5V20a2 2 0 0 1-2 2h-3v-7h-8v7H5a2 2 0 0 1-2-2v-8.5Z'},
     {k:'live',    l:'Live Casino', i:'M2 5h20v12H2zM10 19h4v2h-4zM4 7v8h16V7z'},
     {k:'slots',   l:'Slots',       i:'M5 4h14v16H5zM8 8h8v3H8zM8 13h8v3H8z'},
     {k:'fishing', l:'Fishing',     i:'M2 12c5-7 11-7 16 0-5 7-11 7-16 0Zm14 0a1 1 0 1 0 0-2 1 1 0 0 0 0 2Z'},
