@@ -567,7 +567,7 @@ Screens.lobby = () => `
   </div>
 
   <!-- RIGHT: LIVE WINS + MISSIONS + FRIENDS + PROMO -->
-  <div class="stack-col">
+  <div class="stack-col lobby-right-stack">
     <!-- Live wins ticker -->
     <div class="glass lobby-right-card">
       <div class="card-h"><div class="icon-box">🏆</div><div class="label brand">LIVE BIG WINS</div><div class="right" style="font-size:9px;color:#9DE134;">● LIVE</div></div>

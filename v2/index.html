@@ -2,7 +2,8 @@
 <html lang="en">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#050507">
 <title>RajaBaji V2 — 3D Wireframe</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -464,6 +465,169 @@ button { font-family: inherit; }
 .lr-promo .p-amount { font-family: 'Orbitron'; font-weight: 900; font-size: 20px; background: linear-gradient(180deg, #FFE787, #FFB627); -webkit-background-clip: text; background-clip: text; color: transparent; }
 .lr-promo .p-sub { font-size: 9px; color: #71717A; margin-top: 4px; }
 .lr-promo .p-timer { font-family: 'Orbitron'; font-weight: 700; font-size: 10px; color: #FFB627; margin-top: 6px; }
+
+/* ============================== RESPONSIVE · MOBILE LANDSCAPE ============================== */
+/* Activates on tablet landscape, mobile landscape, and any narrow window.
+   Targets: viewport < 1100px wide OR < 500px tall. */
+@media (max-width: 1100px), (max-height: 500px) {
+  /* TOP BAR — compact */
+  .topbar { padding: 6px 10px; gap: 8px; top: 10px; left: 10px; right: 10px; }
+  .topbar .user-info { display: none; }
+  .topbar .tb-back { padding: 5px 10px; font-size: 11px; }
+  .tb-title { display: none; }
+  .icon-btn { width: 30px; height: 30px; font-size: 14px; }
+  .avatar-chip { width: 30px; height: 30px; font-size: 11px; }
+  .avatar-chip::after { width: 13px; height: 13px; font-size: 7px; bottom: -3px; right: -3px; }
+  .bal-chip { padding: 5px 9px; gap: 4px; }
+  .bal-chip .icon { font-size: 12px; }
+  .bal-chip .num { font-size: 11px; }
+  .bal-chip .plus { width: 14px; height: 14px; font-size: 10px; }
+
+  /* SCREEN CONTENT — tighter inset */
+  .screen-root { inset: 60px 10px 80px 10px; }
+
+  /* LOBBY LAYOUT — tighter columns */
+  .layout-lobby { grid-template-columns: 170px 1fr 190px; gap: 10px; }
+  .stack-col { gap: 8px; }
+  .glass { padding: 10px; }
+  .glass amber, .tourney-card, .lobby-right-card { padding: 10px; }
+
+  /* AVATAR — smaller */
+  .character { font-size: 110px !important; }
+  .character-wrap { width: 180px !important; height: 200px !important; }
+  .energy-ring { width: 220px !important; height: 220px !important; bottom: 60px !important; }
+  .energy-ring-2 { width: 280px !important; height: 280px !important; bottom: 50px !important; }
+  .spotlight { width: 260px !important; }
+  .tier-emblem { padding: 4px 10px; font-size: 9px; }
+  .tier-emblem .tier-name { font-size: 9px; }
+  .name-plate .name { font-size: 18px !important; }
+  .name-plate .skin { font-size: 9px; }
+
+  /* PROVIDER CARDS — smaller */
+  .provider-card { width: 120px; padding: 10px 8px; gap: 4px; }
+  .provider-card .pc-emoji { font-size: 28px; }
+  .provider-card .pc-name { font-size: 10px; max-width: 110px; }
+  .provider-card .pc-count { font-size: 9px; }
+
+  /* GAME CARDS — smaller */
+  .game-card-big { width: 190px; }
+  .game-card-big .gc-name { font-size: 14px; }
+  .game-card-big .gc-meta { font-size: 9px; }
+  .game-card-big .gc-stats { font-size: 8px; }
+  .game-card-big .gc-info { padding: 10px; }
+  .game-card-big .gc-play { padding: 8px; font-size: 11px; }
+  .carousel-arrow { width: 40px; height: 40px; font-size: 18px; }
+  .game-carousel { padding: 8px 50px; gap: 12px; }
+
+  /* QUICK PLAY (lobby) */
+  .quick-play-row { gap: 6px; }
+  .qp-tile .qp-name { font-size: 8px; }
+
+  /* CATEGORY HEADER */
+  .cat-header .cat-title { font-size: 18px; letter-spacing: 2px; }
+  .screen-title { font-size: 18px; letter-spacing: 2px; }
+
+  /* DOME — smaller */
+  .dome-nav { width: 420px; height: 95px; margin: -32px 8px -8px; }
+  .dome-bg { height: 95px; border-radius: 210px 210px 0 0 / 95px 95px 0 0; }
+  .dome-cat { width: 54px; height: 54px; bottom: 10px; }
+  .dome-cat .cat-emoji { font-size: 22px; }
+  .dome-cat .cat-label { font-size: 8px; }
+  .dome-cat[data-pos="0"]  { transform: translate(-50%, -30px) scale(1.25) rotateY(0deg); width: 60px; height: 60px; }
+  .dome-cat[data-pos="-1"] { transform: translate(calc(-50% - 82px), -8px) scale(0.9) rotateY(25deg); }
+  .dome-cat[data-pos="1"]  { transform: translate(calc(-50% + 82px), -8px) scale(0.9) rotateY(-25deg); }
+  .dome-cat[data-pos="-2"] { transform: translate(calc(-50% - 150px), 12px) scale(0.62) rotateY(42deg); }
+  .dome-cat[data-pos="2"]  { transform: translate(calc(-50% + 150px), 12px) scale(0.62) rotateY(-42deg); }
+  .dome-arrow-d { width: 32px; height: 32px; font-size: 18px; top: 30px; }
+  .dome-confirm { font-size: 8px; padding: 2px 10px; }
+
+  /* ACTION DOCK — shorter */
+  .action-dock { padding: 8px 12px; min-height: 58px; left: 10px; right: 10px; bottom: 10px; }
+  .dock-btn { padding: 4px 10px; min-width: 48px; }
+  .dock-btn .icon { font-size: 14px; }
+  .dock-btn .lbl { font-size: 8px; }
+
+  /* HOT WINS / MISSIONS / FRIENDS / PROMO cards (right rail) */
+  .lr-wins-list { max-height: 130px; }
+  .lr-win { padding: 4px 6px; gap: 6px; }
+  .lr-win .em { font-size: 14px; }
+  .lr-win .u { font-size: 9px; }
+  .lr-win .g { font-size: 8px; }
+  .lr-win .a { font-size: 10px; }
+  .lr-mission { padding: 6px; gap: 8px; margin-top: 4px; }
+  .lr-mission .m-icon { width: 22px; height: 22px; font-size: 11px; }
+  .lr-mission .m-title { font-size: 9px; }
+  .lr-mission .m-progress { font-size: 8px; }
+  .lr-mission .m-reward { font-size: 10px; }
+  .lr-friends { gap: 4px; }
+  .lr-friend .fr-em { font-size: 16px; }
+  .lr-promo { padding: 10px; }
+  .lr-promo .p-title { font-size: 12px; }
+  .lr-promo .p-amount { font-size: 18px; }
+}
+
+/* ============================== RESPONSIVE · PHONE LANDSCAPE (very narrow) ============================== */
+@media (max-width: 720px), (max-height: 420px) {
+  /* DOCK — hide button labels, icons only */
+  .dock-btn .lbl { display: none; }
+  .dock-btn { padding: 6px 10px; min-width: 40px; }
+  .dock-btn .icon { font-size: 16px; }
+
+  /* TOP BAR — hide secondary icons, keep balance + essential */
+  .topbar { gap: 6px; padding: 5px 8px; }
+  .topbar .icon-btn:nth-of-type(2) { /* search */ display: none; }
+  .topbar .bal-chip .plus { display: none; }
+
+  /* LOBBY — drop the right rail entirely on tiny screens */
+  .layout-lobby { grid-template-columns: 140px 1fr; gap: 8px; }
+  .stack-col.lobby-right-stack { display: none; }
+
+  /* DOME — even smaller */
+  .dome-nav { width: 340px; height: 82px; margin: -26px 6px -6px; }
+  .dome-bg { height: 82px; border-radius: 170px 170px 0 0 / 82px 82px 0 0; }
+  .dome-cat { width: 44px; height: 44px; bottom: 8px; }
+  .dome-cat .cat-emoji { font-size: 18px; }
+  .dome-cat[data-pos="0"]  { transform: translate(-50%, -26px) scale(1.2) rotateY(0deg); width: 50px; height: 50px; }
+  .dome-cat[data-pos="-1"] { transform: translate(calc(-50% - 65px), -6px) scale(0.85) rotateY(25deg); }
+  .dome-cat[data-pos="1"]  { transform: translate(calc(-50% + 65px), -6px) scale(0.85) rotateY(-25deg); }
+  .dome-cat[data-pos="-2"] { transform: translate(calc(-50% - 118px), 10px) scale(0.58) rotateY(42deg); }
+  .dome-cat[data-pos="2"]  { transform: translate(calc(-50% + 118px), 10px) scale(0.58) rotateY(-42deg); }
+  .dome-arrow-d { width: 28px; height: 28px; font-size: 16px; top: 26px; }
+
+  /* GAME CARDS — minimum size for touch targets */
+  .game-card-big { width: 160px; }
+  .quick-play-row { grid-template-columns: repeat(4, 1fr); }
+
+  /* PROVIDER CARDS — minimum */
+  .provider-card { width: 100px; padding: 8px 6px; }
+  .provider-card .pc-emoji { font-size: 24px; }
+  .provider-card .pc-name { font-size: 9px; max-width: 90px; }
+
+  /* SLASHES — fewer for performance on small screens */
+  .slash { opacity: 0.4; }
+}
+
+/* ============================== RESPONSIVE · LANDSCAPE HEIGHT ONLY ============================== */
+/* When screen is very short (phone in landscape) we drop the right rail */
+@media (max-height: 380px) {
+  .layout-lobby { grid-template-columns: 130px 1fr; }
+  .stack-col.lobby-right-stack { display: none; }
+  .character { font-size: 90px !important; }
+  .character-wrap { width: 150px !important; height: 170px !important; }
+  .energy-ring { width: 180px !important; height: 180px !important; }
+  .energy-ring-2 { width: 220px !important; height: 220px !important; }
+}
+
+/* ============================== TOUCH AFFORDANCES ============================== */
+@media (hover: none) and (pointer: coarse) {
+  /* On touch devices, lift hover effects (they require taps to trigger) */
+  .game-card-big:hover { transform: none; }
+  .game-card-big .gc-play { opacity: 0.85; transform: translateY(0); pointer-events: auto; }
+  .provider-card:hover { transform: none; }
+  /* Slightly larger touch targets */
+  .dock-btn { min-height: 38px; }
+  .carousel-arrow { width: 44px; height: 44px; }
+}
 
 /* ============================== LOBBY ============================== */
 .layout-lobby { display: grid; grid-template-columns: 220px 1fr 220px; gap: 16px; height: 100%; transition: transform .3s ease-out; }
