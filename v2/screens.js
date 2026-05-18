@@ -112,6 +112,12 @@ const DockSlots = {};
 function setScreen(name){
   if (!Screens[name]) return;
   currentScreen = name;
+  // Sync the dome's centered item to the screen we're navigating to (if it's a category).
+  // This only fires on navigation — the dock re-render below won't override the user's slide.
+  if (typeof CategoryWheel !== 'undefined') {
+    const catIdx = CategoryWheel.findIndex(c => c.target === name);
+    if (catIdx !== -1) domeIndex = catIdx;
+  }
   document.getElementById('screen-root').innerHTML = Screens[name]();
   document.getElementById('topbar-root').innerHTML = TopBar(name);
   document.getElementById('dock-root').innerHTML = ActionDock(name);
@@ -193,7 +199,8 @@ function ActionDock(active){
   };
   const hi = map[active] || '';
   const utilBtn = (key, icon, lbl, target) => `<button class="dock-btn ${hi===key?'active':''}" onclick="setScreen('${target}')"><span class="icon">${icon}</span><span class="lbl">${lbl}</span></button>`;
-  syncDomeToScreen(active);
+  // NOTE: domeIndex is synced inside setScreen() once when navigating to a category.
+  // We DO NOT sync here — that would overwrite the user's slide and break left/right rotation.
   const N = CategoryWheel.length;
   const centeredCat = CategoryWheel[domeIndex];
   const confirmLbl = active === 'lobby'
@@ -510,6 +517,16 @@ setInterval(() => {
 }, 200);
 
 // ============================== LOBBY ==============================
+// Quick-play hot games — small tiles under the avatar
+const QuickPlayGames = [
+  ['Aviator',        'Spribe',     'aviator'],
+  ['Crazy Time',     'Evolution',  'crazy_time'],
+  ['Super Ace',      'JILI',       'super_ace'],
+  ['Sweet Bonanza',  'Pragmatic',  'sweet_bonanza'],
+  ['Mega Wheel',     'Pragmatic',  'mega_wheel'],
+  ['Plinko',         'Spribe',     'plinko'],
+];
+
 Screens.lobby = () => `
 ${SplineScenes.lobbyBg ? `<div style="position:absolute;inset:0;z-index:2;pointer-events:none;opacity:.6;">${SplineSlot('lobbyBg')}</div>` : ''}
 <div class="layout-lobby">
@@ -550,32 +567,110 @@ ${SplineScenes.lobbyBg ? `<div style="position:absolute;inset:0;z-index:2;pointe
     </div>
   </div>
 
-  <!-- CENTER: AVATAR (Spline 3D scene with CSS fallback) -->
-  <div class="avatar-stage">
-    <div class="spotlight"></div>
-    <div class="energy-ring-2"></div>
-    <div class="energy-ring"></div>
-    <div class="character-wrap" id="character-wrap" onclick="emote()">
-      <div class="tier-emblem" style="z-index:8;"><span class="icon">🥈</span><span class="tier-name">SILVER II</span></div>
-      ${SplineSlot('avatar', {
-        style: 'position:absolute;inset:0;',
-        showStatus: true,
-        fallback: `<div class="orbit" id="orbit"></div><div class="character" id="character" style="position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);">🤴</div>`
-      })}
-      <div class="name-plate" style="z-index:8;"><div class="name">RD JAY</div><div class="skin">ROYAL PANJABI</div></div>
-      <div class="bubble" id="bubble" style="z-index:8;"><div class="bn" id="bubble-bn">🏏 চলো খেলি!</div><div class="en" id="bubble-en">Let's play!</div></div>
+  <!-- CENTER: AVATAR + QUICK PLAY GAMES -->
+  <div class="stack-col" style="min-height:0;">
+    <!-- Avatar (top) -->
+    <div class="avatar-stage" style="flex:1;min-height:0;">
+      <div class="spotlight"></div>
+      <div class="energy-ring-2"></div>
+      <div class="energy-ring"></div>
+      <div class="character-wrap" id="character-wrap" onclick="emote()" style="width:200px;height:240px;">
+        <div class="tier-emblem" style="z-index:8;"><span class="icon">🥈</span><span class="tier-name">SILVER II</span></div>
+        ${SplineSlot('avatar', {
+          style: 'position:absolute;inset:0;',
+          showStatus: true,
+          fallback: `<div class="orbit" id="orbit"></div><div class="character" id="character" style="position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);font-size:150px;">🤴</div>`
+        })}
+        <div class="name-plate" style="z-index:8;"><div class="name" style="font-size:20px;">RD JAY</div><div class="skin">ROYAL PANJABI</div></div>
+        <div class="bubble" id="bubble" style="z-index:8;"><div class="bn" id="bubble-bn">🏏 চলো খেলি!</div><div class="en" id="bubble-en">Let's play!</div></div>
+      </div>
+    </div>
+
+    <!-- HOT GAMES QUICK-PLAY ROW -->
+    <div style="flex-shrink:0;">
+      <div style="display:flex;align-items:center;justify-content:space-between;padding:0 4px 8px;">
+        <div style="display:flex;align-items:center;gap:8px;">
+          <span style="font-family:'Orbitron';font-weight:900;font-size:13px;color:#9DE134;letter-spacing:2px;">🔥 HOT GAMES</span>
+          <span style="font-size:10px;color:#71717A;">tap to play instantly</span>
+        </div>
+        <button onclick="setScreen('slots')" style="font-size:10px;font-weight:700;color:#9DE134;background:none;border:none;cursor:pointer;font-family:inherit;">All games →</button>
+      </div>
+      <div class="quick-play-row">
+        ${QuickPlayGames.map(([n,prov,img]) => `
+          <button class="qp-tile" onclick="launchGame('${n}','${prov}')">
+            <img src="${GAME_IMG(img)}" alt="${n}">
+            <span class="qp-live"></span>
+            <div class="qp-name">${n.toUpperCase()}</div>
+          </button>
+        `).join('')}
+      </div>
     </div>
   </div>
 
-  <!-- RIGHT: GAMES STACK -->
-  <div>
-    <div class="games-stack" id="games-stack">
-      <div class="games-header"><span class="h-title">🔥 HOT</span><span class="h-count">১৬,৮৪২ online</span></div>
-      <div class="game-tile-3d gs-1" onclick="setScreen('crash')"><img src="${GAME_IMG('aviator')}" alt="Aviator"><span class="tag-i hot">HOT</span><span class="player-count">২,৮৪৭</span><div class="info"><div class="name">AVIATOR</div><div class="meta">Spribe · 12.4x peak</div></div></div>
-      <div class="game-tile-3d gs-2" onclick="setScreen('live')"><img src="${GAME_IMG('crazy_time')}" alt="Crazy Time"><span class="tag-i live">LIVE</span><span class="player-count">১,৭৮২</span><div class="info"><div class="name">CRAZY TIME</div><div class="meta">Evolution · 347x</div></div></div>
-      <div class="game-tile-3d gs-3" onclick="setScreen('slots')"><img src="${GAME_IMG('super_ace')}" alt="Super Ace"><span class="tag-i jackpot">💎</span><span class="player-count">২,১০৩</span><div class="info"><div class="name">SUPER ACE</div><div class="meta">JILI · Jackpot</div></div></div>
-      <div class="game-tile-3d gs-4" onclick="setScreen('slots')"><img src="${GAME_IMG('sweet_bonanza')}" alt="Sweet Bonanza"><span class="tag-i hot">HOT</span><span class="player-count">১,৬১২</span><div class="info"><div class="name">SWEET BONANZA</div><div class="meta">Pragmatic</div></div></div>
-      <div class="game-tile-3d gs-5" onclick="setScreen('crash')"><img src="${GAME_IMG('plinko')}" alt="Plinko"><span class="tag-i new">NEW</span><span class="player-count">৯৪৩</span><div class="info"><div class="name">PLINKO</div><div class="meta">Spribe</div></div></div>
+  <!-- RIGHT: LIVE WINS + MISSIONS + FRIENDS + PROMO -->
+  <div class="stack-col">
+    <!-- Live wins ticker -->
+    <div class="glass lobby-right-card">
+      <div class="card-h"><div class="icon-box">🏆</div><div class="label brand">LIVE BIG WINS</div><div class="right" style="font-size:9px;color:#9DE134;">● LIVE</div></div>
+      <div class="lr-wins-list" style="margin-top:10px;">
+        ${[
+          ['🥇','M****61','Aviator','৳ 124,000'],
+          ['🎰','S****ad','Sweet Bonanza','৳ 89,500'],
+          ['🎡','R****na','Crazy Time','৳ 56,800'],
+          ['🎰','F****ul','Super Ace','৳ 38,200'],
+          ['✈️','A****hi','Aviator','৳ 24,100'],
+        ].map(([em,u,g,a])=>`<div class="lr-win"><span class="em">${em}</span><div><div class="u">${u}</div><div class="g">${g}</div></div><div class="a">${a}</div></div>`).join('')}
+      </div>
+    </div>
+
+    <!-- Today's missions widget -->
+    <div class="glass lobby-right-card">
+      <div class="card-h"><div class="icon-box">🎯</div><div class="label brand">TODAY'S MISSIONS</div><div class="right">2/3</div></div>
+      <div style="margin-top:6px;">
+        <div class="lr-mission done">
+          <div class="m-icon">✓</div>
+          <div class="m-info"><div class="m-title">Place 3 bets in any slot</div><div class="m-progress">3/3</div></div>
+          <div class="m-reward">৳20</div>
+        </div>
+        <div class="lr-mission done">
+          <div class="m-icon">✓</div>
+          <div class="m-info"><div class="m-title">Deposit ৳ 500 or more</div><div class="m-progress">৳500/৳500</div></div>
+          <div class="m-reward">৳30</div>
+        </div>
+        <div class="lr-mission">
+          <div class="m-icon">🃏</div>
+          <div class="m-info"><div class="m-title">Win a Baccarat hand</div><div class="m-progress">0/1 · in progress</div></div>
+          <div class="m-reward">৳100</div>
+        </div>
+      </div>
+      <button onclick="setScreen('missions')" class="cta-ghost" style="width:100%;margin-top:8px;font-size:10px;">View all missions →</button>
+    </div>
+
+    <!-- Friends online -->
+    <div class="glass lobby-right-card">
+      <div class="card-h"><div class="icon-box">👥</div><div class="label brand">FRIENDS ONLINE</div><div class="right">8</div></div>
+      <div class="lr-friends">
+        ${[
+          ['🤴','online','RD'],
+          ['🏏','online','SH'],
+          ['🎮','away','FL'],
+          ['👑','online','MR'],
+          ['🌙','online','EL'],
+          ['🐅','online','TG'],
+          ['🎨','away','PB'],
+          ['🃏','online','JR'],
+        ].map(([em,st,_])=>`<div class="lr-friend ${st==='away'?'away':''}"><span class="fr-em">${em}</span><span class="fr-dot"></span></div>`).join('')}
+      </div>
+      <button onclick="setScreen('refer')" class="cta-ghost" style="width:100%;margin-top:8px;font-size:10px;">Invite more friends →</button>
+    </div>
+
+    <!-- Promo banner -->
+    <div class="lr-promo" onclick="setScreen('promo')">
+      <span class="p-tag">FLASH · 6H LEFT</span>
+      <div class="p-title">POHELA BOISHAKH</div>
+      <div class="p-amount">৳ 600 BONUS</div>
+      <div class="p-sub">Triple deposit · auto-applied</div>
+      <div class="p-timer">⏱ Ends in 05h 42m</div>
     </div>
   </div>
 </div>`;
