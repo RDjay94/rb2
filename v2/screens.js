@@ -7,17 +7,75 @@ function setScreen(name){
   if (!Screens[name]) return;
   currentScreen = name;
   // Sync the dome's centered item to the screen we're navigating to (if it's a category).
-  // This only fires on navigation — the dock re-render below won't override the user's slide.
   if (typeof CategoryWheel !== 'undefined') {
     const catIdx = CategoryWheel.findIndex(c => c.target === name);
     if (catIdx !== -1) domeIndex = catIdx;
   }
-  document.getElementById('screen-root').innerHTML = Screens[name]();
+  const root = document.getElementById('screen-root');
+  root.innerHTML = Screens[name]();
+  // Trigger slide-in animation by toggling the class
+  root.classList.remove('screen-enter');
+  void root.offsetWidth; // force reflow so the animation restarts on identical class
+  root.classList.add('screen-enter');
+
   document.getElementById('topbar-root').innerHTML = TopBar(name);
   document.getElementById('dock-root').innerHTML = ActionDock(name);
-  // Re-init per-screen behaviors
   if (postRender[name]) postRender[name]();
 }
+
+// ============================== DOME DRAG / SWIPE / WHEEL ==============================
+// Attach once at script load — works for every dome render thereafter via event delegation.
+(function initDomeInteractions(){
+  let dragX = null;
+  let lastRotate = 0;
+  const DRAG_THRESHOLD = 60;    // px before we trigger a rotation
+  const ROTATE_COOLDOWN = 220;  // ms between rotations during continuous drag
+
+  function tryRotate(deltaX) {
+    const now = Date.now();
+    if (now - lastRotate < ROTATE_COOLDOWN) return false;
+    if (Math.abs(deltaX) < DRAG_THRESHOLD) return false;
+    // Drag right (positive delta) → bring previous category to center
+    // Drag left  (negative delta) → bring next category to center
+    domeRotate(deltaX > 0 ? -1 : 1);
+    lastRotate = now;
+    return true;
+  }
+
+  // Mouse drag
+  document.addEventListener('mousedown', (e) => {
+    if (e.target.closest('.dome-nav')) dragX = e.clientX;
+  });
+  document.addEventListener('mousemove', (e) => {
+    if (dragX === null) return;
+    const delta = e.clientX - dragX;
+    if (tryRotate(delta)) dragX = e.clientX;
+  });
+  document.addEventListener('mouseup', () => { dragX = null; });
+
+  // Touch swipe
+  document.addEventListener('touchstart', (e) => {
+    if (e.target.closest('.dome-nav')) dragX = e.touches[0].clientX;
+  }, { passive: true });
+  document.addEventListener('touchmove', (e) => {
+    if (dragX === null) return;
+    const delta = e.touches[0].clientX - dragX;
+    if (tryRotate(delta)) dragX = e.touches[0].clientX;
+  }, { passive: true });
+  document.addEventListener('touchend', () => { dragX = null; });
+
+  // Wheel scroll (trackpad swipe or mouse wheel over the dome)
+  document.addEventListener('wheel', (e) => {
+    if (!e.target.closest('.dome-nav')) return;
+    const d = Math.abs(e.deltaX) > Math.abs(e.deltaY) ? e.deltaX : e.deltaY;
+    if (Math.abs(d) < 5) return;
+    e.preventDefault();
+    const now = Date.now();
+    if (now - lastRotate < 200) return;
+    domeRotate(d > 0 ? 1 : -1);
+    lastRotate = now;
+  }, { passive: false });
+})();
 
 const postRender = {};
 
