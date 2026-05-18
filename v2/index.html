@@ -396,13 +396,13 @@ button { font-family: inherit; }
 
 /* ============================== LAYOUT REGIONS ============================== */
 .screen-root { position: absolute; inset: 80px 16px 100px 16px; z-index: 10; }
-/* Slide-in animation when switching screens */
+/* Slide-in animation when switching screens (slower, more deliberate) */
 @keyframes screen-slide-in {
-  0%   { transform: translateX(50px) scale(0.985); opacity: 0; }
-  60%  { opacity: 1; }
-  100% { transform: translateX(0) scale(1); opacity: 1; }
+  0%   { transform: translateX(80px) scale(0.97); opacity: 0; filter: blur(4px); }
+  30%  { opacity: 1; filter: blur(0); }
+  100% { transform: translateX(0) scale(1); opacity: 1; filter: blur(0); }
 }
-.screen-enter { animation: screen-slide-in 0.42s cubic-bezier(.3, 1.15, .5, 1); }
+.screen-enter { animation: screen-slide-in 1s cubic-bezier(.22, 1, .36, 1); }
 
 /* Dome drag cursor affordance */
 .dome-nav { cursor: grab; user-select: none; touch-action: pan-y; }

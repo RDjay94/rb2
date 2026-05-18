@@ -5,6 +5,8 @@ const DockSlots = {};
 
 function setScreen(name){
   if (!Screens[name]) return;
+  // Cancel any pending auto-nav from the dome since we're navigating explicitly now.
+  if (typeof domeNavTimer !== 'undefined') clearTimeout(domeNavTimer);
   currentScreen = name;
   // Sync the dome's centered item to the screen we're navigating to (if it's a category).
   if (typeof CategoryWheel !== 'undefined') {
@@ -116,21 +118,37 @@ const CategoryWheel = [
 
 // Half-sphere dome state — index of category at the apex (center top)
 let domeIndex = 0;
+let domeNavTimer = null;
+const DOME_AUTO_NAV_DELAY = 450; // ms after the last rotation before auto-navigating
+
+// Auto-navigate to whichever category is currently at the dome's apex.
+// Debounced so rapid drags/wheel scrolls don't trigger multiple screen changes.
+function scheduleDomeNav(){
+  clearTimeout(domeNavTimer);
+  domeNavTimer = setTimeout(() => {
+    const target = CategoryWheel[domeIndex] && CategoryWheel[domeIndex].target;
+    if (target && currentScreen !== target) setScreen(target);
+  }, DOME_AUTO_NAV_DELAY);
+}
+
 function domeRotate(dir){
   const N = CategoryWheel.length;
   domeIndex = (domeIndex + dir + N) % N;
   document.getElementById('dock-root').innerHTML = ActionDock(currentScreen);
   beep(400, 30);
+  scheduleDomeNav();
 }
 function domeSelectOrNav(idx){
-  // If clicking the already-centered item, navigate to it.
-  // Otherwise, rotate it to the center first.
+  // Tapping the centered item navigates immediately (no debounce delay).
+  // Tapping a side item brings it to the apex AND schedules auto-nav.
   if (idx === domeIndex) {
+    clearTimeout(domeNavTimer);
     setScreen(CategoryWheel[idx].target);
   } else {
     domeIndex = idx;
     document.getElementById('dock-root').innerHTML = ActionDock(currentScreen);
     beep(500, 40);
+    scheduleDomeNav();
   }
 }
 // Keep the dome's centered item in sync with whichever category screen is active.
