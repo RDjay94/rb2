@@ -145,38 +145,59 @@ function TopBar(screen){
 }
 
 // ============================== ACTION DOCK ==============================
+// Category wheel — the round control in the center of the dock.
+// 5 segments arranged around the wheel (top, top-right, bottom-right, bottom-left, top-left).
+// Center button returns to the Lobby.
+const CategoryWheel = [
+  { key:'slots',   icon:'🎰', label:'SLOTS',   target:'slots',     pos:'s-top' },
+  { key:'live',    icon:'🎲', label:'LIVE',    target:'live',      pos:'s-tr'  },
+  { key:'cricket', icon:'🏏', label:'CRICKET', target:'cricket',   pos:'s-br'  },
+  { key:'crash',   icon:'✈',  label:'CRASH',   target:'crash',     pos:'s-bl'  },
+  { key:'slotroom',icon:'🃏', label:'SLOT ROOM',target:'slotroom', pos:'s-tl'  },
+];
+
 function ActionDock(active){
-  // Map active screen to dock highlight
   const map = {
-    lobby:'play', slots:'slots', slotroom:'slots',
-    live:'live',
-    cricket:'cricket',
-    crash:'crash',
-    wallet:'wallet', deposit:'wallet', withdraw:'wallet',
-    shop:'shop',
+    lobby:'play', slots:'slots', slotroom:'slotroom',
+    live:'live', cricket:'cricket', crash:'crash',
+    wallet:'wallet', deposit:'wallet', withdraw:'wallet', shop:'shop',
     profile:'profile', settings:'profile', notif:'profile',
     missions:'missions', calendar:'missions',
     leaderboard:'tourney', vip:'tourney',
     refer:'refer', promo:'promo', support:'support'
   };
   const hi = map[active] || '';
-  const btn = (key, icon, lbl, target, primary) => `<button class="dock-btn ${primary?'primary':''} ${hi===key?'active':''}" onclick="setScreen('${target}')"><span class="icon">${icon}</span><span class="lbl">${lbl}</span></button>`;
+  const utilBtn = (key, icon, lbl, target) => `<button class="dock-btn ${hi===key?'active':''}" onclick="setScreen('${target}')"><span class="icon">${icon}</span><span class="lbl">${lbl}</span></button>`;
+  // Find currently active category for the wheel center label
+  const activeCat = CategoryWheel.find(c => c.key === hi);
+  const centerLbl = active === 'lobby' ? 'LOBBY' : (activeCat ? activeCat.label : 'BACK');
   return `
   <div class="action-dock">
+    <!-- Left utility buttons -->
     <div class="dock-section">
-      ${btn('play','▶','PLAY','lobby', active==='lobby')}
-      ${btn('slots','🎰','SLOTS','slots')}
-      ${btn('live','🎲','LIVE','live')}
-      ${btn('cricket','🏏','CRICKET','cricket')}
-      ${btn('crash','✈','CRASH','crash')}
+      ${utilBtn('wallet','💼','WALLET','wallet')}
+      ${utilBtn('shop','🛒','SHOP','shop')}
+      ${utilBtn('missions','🎯','MISSIONS','missions')}
     </div>
-    <div class="wins-ticker"><div class="strip" id="wins-strip-${active}">${winsTickerHTML()}</div></div>
+    <!-- Center round category wheel -->
+    <div class="cat-wheel-wrap" title="Tap a segment to navigate · center to return to Lobby">
+      <div class="cat-current-lbl">${centerLbl}</div>
+      <div class="cat-wheel-disc"></div>
+      ${CategoryWheel.map(c => `<button class="cat-seg ${c.pos} ${hi===c.key?'active':''}" onclick="setScreen('${c.target}')" title="${c.label}"><span class="seg-icon">${c.icon}</span></button>`).join('')}
+      <button class="cat-center" onclick="setScreen('lobby')" title="Return to Lobby"><span class="ico">${active==='lobby'?'⌂':'⌂'}</span><span class="lbl">${centerLbl}</span></button>
+    </div>
+    <!-- Right utility buttons -->
     <div class="dock-section">
-      ${btn('wallet','💼','WALLET','wallet')}
-      ${btn('shop','🛒','SHOP','shop')}
-      ${btn('missions','🎯','MISSIONS','missions')}
-      ${btn('tourney','🏆','TROPHY','leaderboard')}
-      ${btn('profile','👤','PROFILE','profile')}
+      ${utilBtn('tourney','🏆','TROPHY','leaderboard')}
+      ${utilBtn('refer','👥','REFER','refer')}
+      ${utilBtn('profile','👤','PROFILE','profile')}
+    </div>
+  </div>
+  <!-- Wins ticker as a separate strip above the dock -->
+  <div style="position:absolute;left:16px;right:16px;bottom:90px;z-index:19;pointer-events:none;">
+    <div style="background:rgba(15,15,18,.55);backdrop-filter:blur(20px) saturate(150%);-webkit-backdrop-filter:blur(20px) saturate(150%);border:1px solid rgba(255,255,255,.08);border-radius:14px;padding:6px 16px;display:flex;align-items:center;gap:10px;">
+      <span style="font-size:9px;color:#9DE134;font-weight:800;letter-spacing:1px;white-space:nowrap;flex-shrink:0;">🏆 BIG WINS</span>
+      <div class="wins-ticker" style="flex:1;max-width:none;height:32px;"><div class="strip" id="wins-strip-${active}">${winsTickerHTML()}</div></div>
     </div>
   </div>`;
 }
@@ -590,6 +611,17 @@ Screens.slotroom = () => `
 </div>`;
 
 // ============================== CRASH / AVIATOR ==============================
+let crashProvider = 'aviator';
+const CrashProviders = [
+  { k:'aviator',    n:'Aviator',         e:'✈️', provider:'Spribe',     img:'aviator',     desc:'The original crash game · ✈️ flying multiplier' },
+  { k:'aviatrix',   n:'Aviatrix',        e:'🛩️', provider:'RajaBaji',   img:'aviatrix',    desc:'NFT-style stealth jet crash · custom planes' },
+  { k:'plinko',     n:'Plinko',          e:'🟢', provider:'Spribe',     img:'plinko',      desc:'Drop the ball · choose risk · 1000x multipliers' },
+  { k:'chicken',    n:'Chicken Road 2',  e:'🐔', provider:'InOut',      img:'chicken_road',desc:'Cross the road, more lanes = bigger payout' },
+  { k:'jetx',       n:'JetX',            e:'🚀', provider:'SmartSoft',  img:'aviator',     desc:'Race the jet · 200x+ peak multipliers' },
+  { k:'crash',      n:'Crash Royale',    e:'💥', provider:'BC Games',   img:'aviator',     desc:'Crypto-style crash with auto-cashout' },
+  { k:'minimines',  n:'Mini Mines',      e:'💣', provider:'Spribe',     img:'plinko',      desc:'Dodge mines, collect gems, cash out anytime' },
+];
+function setCrashProvider(p){ crashProvider = p; setScreen('crash'); }
 setInterval(() => {
   const el = document.getElementById('crash-mult');
   if (!el) return;
@@ -599,11 +631,33 @@ setInterval(() => {
   el.innerHTML = next.toFixed(2) + '<span style="font-size:.6em;">x</span>';
 }, 120);
 
-Screens.crash = () => `
-<div class="screen-grid cols-2" style="grid-template-columns: 1fr 280px;">
+Screens.crash = () => {
+  const game = CrashProviders.find(p => p.k === crashProvider) || CrashProviders[0];
+  return `
+<div class="stack-col" style="height:100%;gap:10px;">
+  <!-- Crash provider selector -->
+  <div class="glass" style="padding:10px 12px;display:flex;align-items:center;gap:12px;flex-shrink:0;">
+    <div class="card-h" style="margin:0;flex-shrink:0;"><div class="label">CRASH GAME</div></div>
+    <div style="display:flex;gap:6px;overflow-x:auto;flex:1;" class="hide-scroll">
+      ${CrashProviders.map(p => {
+        const act = p.k === crashProvider;
+        return `<button onclick="setCrashProvider('${p.k}')" style="flex-shrink:0;display:flex;align-items:center;gap:8px;padding:6px 12px;border-radius:10px;cursor:pointer;font-family:inherit;border:1px solid ${act?'#9DE134':'rgba(255,255,255,.08)'};${act?'background:rgba(157,225,52,.15);color:white;box-shadow:0 0 12px rgba(157,225,52,.25);':'background:rgba(255,255,255,.04);color:#A1A1AA;'}transition:all .2s;">
+          <span style="font-size:16px;">${p.e}</span>
+          <div style="text-align:left;">
+            <div style="font-size:11px;font-weight:800;">${p.n}</div>
+            <div style="font-size:9px;opacity:.7;">${p.provider}</div>
+          </div>
+        </button>`;
+      }).join('')}
+    </div>
+    <div style="font-size:10px;color:#9DE134;font-weight:800;flex-shrink:0;display:flex;align-items:center;gap:4px;"><span style="width:6px;height:6px;border-radius:50%;background:#9DE134;animation:live-pulse 1.4s infinite;"></span>${game.provider.toUpperCase()}</div>
+  </div>
+
+  <!-- Game canvas + side panel -->
+  <div class="screen-grid cols-2" style="grid-template-columns: 1fr 280px;flex:1;min-height:0;">
   <!-- Game canvas -->
   <div class="glass" style="padding:0; overflow:hidden; position:relative;">
-    <img src="${GAME_IMG('aviator')}" style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover;opacity:.18">
+    <img src="${GAME_IMG(game.img)}" style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover;opacity:.18">
     <div style="position:absolute;inset:0;background:linear-gradient(180deg,rgba(10,26,46,.7),rgba(5,5,7,.95));"></div>
 
     <!-- Stars -->
@@ -619,8 +673,9 @@ Screens.crash = () => `
     <!-- Header -->
     <div style="position:absolute;top:16px;left:16px;right:16px;display:flex;align-items:center;justify-content:space-between;">
       <div>
-        <div class="screen-title" style="font-size:22px;">AVIATOR</div>
-        <div class="screen-sub" style="display:flex;align-items:center;gap:6px;"><span style="width:6px;height:6px;border-radius:50%;background:#ef4444;animation:live-pulse 1.4s infinite;"></span>২,৮৪৭ betting now</div>
+        <div class="screen-title" style="font-size:22px;">${game.n.toUpperCase()}</div>
+        <div class="screen-sub" style="display:flex;align-items:center;gap:6px;"><span style="width:6px;height:6px;border-radius:50%;background:#ef4444;animation:live-pulse 1.4s infinite;"></span>${game.provider} · ২,৮৪৭ betting now</div>
+        <div style="font-size:9px;color:#71717A;margin-top:2px;max-width:300px;">${game.desc}</div>
       </div>
       <div style="display:flex;gap:4px;">
         ${[1.24,2.41,8.92,1.05,3.67,15.4,1.42,2.18].map(m=>`<div style="padding:4px 10px;border-radius:999px;font-family:'Orbitron';font-weight:900;font-size:11px;${m>=5?'background:#A855F7;color:white':m>=2?'background:#22D3EE;color:#0a0a0a':'background:rgba(236,72,153,.3);color:#EC4899'}">${m}x</div>`).join('')}
@@ -692,6 +747,7 @@ Screens.crash = () => `
       </div>`).join('')}
     </div>
   </div>
+  </div>
 </div>
 
 <style>
@@ -700,118 +756,200 @@ Screens.crash = () => `
 @keyframes reel-spin { from { transform: translateY(0); } to { transform: translateY(-80%); } }
 @keyframes big-win-pop { 0% { transform: translate(-50%,-50%) scale(.3); opacity: 0; } 60% { transform: translate(-50%,-50%) scale(1.15); opacity: 1; } 100% { transform: translate(-50%,-50%) scale(1); opacity: 1; } }
 </style>`;
+};
 
 // ============================== CRICKET EXCHANGE ==============================
-Screens.cricket = () => `
-<div class="screen-grid" style="grid-template-columns: 280px 1fr 260px;">
-  <!-- Matches list -->
-  <div class="glass" style="padding:12px;display:flex;flex-direction:column;">
-    <div class="tab-pills" style="margin-bottom:8px;">
-      <button class="active">LIVE 4</button>
-      <button>Today</button>
-      <button>My bets</button>
+let sportsProvider = 'btisports';
+const SportsProviders = [
+  { k:'btisports', n:'BTI Sports',    e:'🅱️', sub:'Asia & EU markets' },
+  { k:'sabasport', n:'Saba Sports',   e:'⚡',  sub:'Asia handicap' },
+  { k:'imsports',  n:'IM Sports',     e:'🇧🇩', sub:'BD cricket focus' },
+  { k:'sbo',       n:'SBO Bet',       e:'🎯', sub:'Live exchange' },
+  { k:'pinnacle',  n:'Pinnacle',      e:'📐', sub:'Sharp odds' },
+  { k:'cmd368',    n:'CMD368',        e:'🃎', sub:'Asian books' },
+  { k:'pragmaticsports', n:'Pragmatic Sports', e:'🏆', sub:'Virtual & live' },
+];
+function setSportsProvider(p){ sportsProvider = p; setScreen('cricket'); }
+
+Screens.cricket = () => {
+  const provider = SportsProviders.find(p => p.k === sportsProvider) || SportsProviders[0];
+  return `
+<div class="stack-col" style="height:100%;gap:10px;">
+  <!-- Provider selector strip -->
+  <div class="glass" style="padding:10px 12px;display:flex;align-items:center;gap:12px;flex-shrink:0;">
+    <div class="card-h" style="margin:0;flex-shrink:0;"><div class="label">PROVIDER</div></div>
+    <div style="display:flex;gap:6px;overflow-x:auto;flex:1;" class="hide-scroll">
+      ${SportsProviders.map(p => {
+        const act = p.k === sportsProvider;
+        return `<button onclick="setSportsProvider('${p.k}')" style="flex-shrink:0;display:flex;align-items:center;gap:8px;padding:6px 12px;border-radius:10px;cursor:pointer;font-family:inherit;border:1px solid ${act?'#9DE134':'rgba(255,255,255,.08)'};${act?'background:rgba(157,225,52,.15);color:white':'background:rgba(255,255,255,.04);color:#A1A1AA'};${act?'box-shadow:0 0 12px rgba(157,225,52,.25);':''}transition:all .2s;">
+          <span style="font-size:14px;">${p.e}</span>
+          <div style="text-align:left;">
+            <div style="font-size:11px;font-weight:800;">${p.n}</div>
+            <div style="font-size:9px;opacity:.7;">${p.sub}</div>
+          </div>
+        </button>`;
+      }).join('')}
     </div>
-    <div class="scroll-y hide-scroll" style="flex:1;display:flex;flex-direction:column;gap:6px;">
-      ${[
-        ['IPL · Match 47','MI','CSK','186/4 · 19.2','204/7 · 20','live','active'],
-        ['Asia Cup','BAN','SL','142/3 · 16.4','158/8 · 20','live',''],
-        ['Test Day 2','ENG','AUS','89/2 · 23.0','—','live',''],
-        ['Tonight 8:30','IND','PAK','—','—','soon',''],
-        ['Tomorrow','SA','NZ','—','—','soon',''],
-      ].map(([evt,t1,t2,s1,s2,st,a])=>`<button style="text-align:left;padding:10px;border-radius:12px;${a?'background:rgba(157,225,52,.1);border:1px solid rgba(157,225,52,.4)':'background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.06)'};cursor:pointer;transition:all .2s;">
-        <div style="display:flex;align-items:center;justify-content:space-between;font-size:9px;">
-          <span style="color:#71717A;">${evt}</span>
-          ${st==='live'?'<span class="pill red" style="padding:2px 8px;font-size:8px;">LIVE</span>':'<span style="color:#71717A;">⏱</span>'}
-        </div>
-        <div style="margin-top:6px;font-size:11px;">
-          <div style="font-weight:700;">${t1} <span style="color:#71717A;font-weight:400;font-size:10px;" class="num-mono">${s1}</span></div>
-          <div style="font-weight:700;margin-top:2px;">${t2} <span style="color:#71717A;font-weight:400;font-size:10px;" class="num-mono">${s2}</span></div>
-        </div>
-      </button>`).join('')}
-    </div>
+    <div style="font-size:10px;color:#9DE134;font-weight:800;flex-shrink:0;display:flex;align-items:center;gap:4px;"><span style="width:6px;height:6px;border-radius:50%;background:#9DE134;animation:live-pulse 1.4s infinite;"></span>${provider.n.toUpperCase()}</div>
   </div>
 
-  <!-- Selected match -->
-  <div class="stack-col">
-    <div class="glass" style="padding:14px;">
-      <div style="display:flex;align-items:center;justify-content:space-between;font-size:10px;">
-        <span class="pill red" style="padding:3px 10px;">LIVE</span>
-        <span style="color:#A1A1AA;">IPL · Match 47 · Wankhede</span>
-        <span style="color:#9DE134;font-weight:700;">MI need 19 in 4</span>
+  <!-- Main 3-pane: matches list (left) · selected match (center) · stats + betslip (right) -->
+  <div class="screen-grid" style="grid-template-columns: 260px 1fr 280px;flex:1;min-height:0;">
+    <!-- LEFT: Match list -->
+    <div class="glass" style="padding:12px;display:flex;flex-direction:column;">
+      <div class="tab-pills" style="margin-bottom:8px;">
+        <button class="active">LIVE 4</button>
+        <button>Today</button>
+        <button>My bets</button>
       </div>
-      <div style="display:flex;align-items:center;justify-content:space-between;margin-top:14px;">
-        <div style="text-align:center;flex:1;">
-          <div style="font-size:32px;">🇮🇳</div>
-          <div style="font-size:10px;font-weight:800;margin-top:4px;">MUMBAI INDIANS</div>
-          <div style="font-family:'Orbitron';font-weight:900;font-size:28px;margin-top:4px;" class="num-mono">186/4</div>
-          <div style="font-size:10px;color:#71717A;">19.2 ov · CRR 9.6</div>
+      <div class="scroll-y hide-scroll" style="flex:1;display:flex;flex-direction:column;gap:6px;">
+        ${[
+          ['IPL · Match 47','MI','CSK','186/4 · 19.2','204/7 · 20','live','active'],
+          ['Asia Cup','BAN','SL','142/3 · 16.4','158/8 · 20','live',''],
+          ['Test Day 2','ENG','AUS','89/2 · 23.0','—','live',''],
+          ['Tonight 8:30','IND','PAK','—','—','soon',''],
+          ['Tomorrow','SA','NZ','—','—','soon',''],
+        ].map(([evt,t1,t2,s1,s2,st,a])=>`<button style="text-align:left;padding:10px;border-radius:12px;${a?'background:rgba(157,225,52,.1);border:1px solid rgba(157,225,52,.4)':'background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.06)'};cursor:pointer;font-family:inherit;color:white;">
+          <div style="display:flex;align-items:center;justify-content:space-between;font-size:9px;">
+            <span style="color:#71717A;">${evt}</span>
+            ${st==='live'?'<span class="pill red" style="padding:2px 8px;font-size:8px;">LIVE</span>':'<span style="color:#71717A;">⏱</span>'}
+          </div>
+          <div style="margin-top:6px;font-size:11px;">
+            <div style="font-weight:700;">${t1} <span style="color:#71717A;font-weight:400;font-size:10px;" class="num-mono">${s1}</span></div>
+            <div style="font-weight:700;margin-top:2px;">${t2} <span style="color:#71717A;font-weight:400;font-size:10px;" class="num-mono">${s2}</span></div>
+          </div>
+        </button>`).join('')}
+      </div>
+    </div>
+
+    <!-- CENTER: Selected match -->
+    <div class="stack-col">
+      <div class="glass" style="padding:14px;">
+        <div style="display:flex;align-items:center;justify-content:space-between;font-size:10px;">
+          <span class="pill red" style="padding:3px 10px;">LIVE</span>
+          <span style="color:#A1A1AA;">IPL · Match 47 · Wankhede</span>
+          <span style="color:#9DE134;font-weight:700;">MI need 19 in 4</span>
         </div>
-        <div style="text-align:center;padding:0 16px;font-family:'Orbitron';font-weight:700;color:#71717A;font-size:18px;">VS</div>
-        <div style="text-align:center;flex:1;">
-          <div style="font-size:32px;">🇮🇳</div>
-          <div style="font-size:10px;font-weight:800;margin-top:4px;">CHENNAI SUPER KINGS</div>
-          <div style="font-family:'Orbitron';font-weight:900;font-size:28px;margin-top:4px;" class="num-mono">204/7</div>
-          <div style="font-size:10px;color:#71717A;">20.0 ov · RRR 11.2</div>
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-top:14px;">
+          <div style="text-align:center;flex:1;">
+            <div style="font-size:32px;">🇮🇳</div>
+            <div style="font-size:10px;font-weight:800;margin-top:4px;">MUMBAI INDIANS</div>
+            <div style="font-family:'Orbitron';font-weight:900;font-size:28px;margin-top:4px;" class="num-mono">186/4</div>
+            <div style="font-size:10px;color:#71717A;">19.2 ov · CRR 9.6</div>
+          </div>
+          <div style="text-align:center;padding:0 16px;font-family:'Orbitron';font-weight:700;color:#71717A;font-size:18px;">VS</div>
+          <div style="text-align:center;flex:1;">
+            <div style="font-size:32px;">🇮🇳</div>
+            <div style="font-size:10px;font-weight:800;margin-top:4px;">CHENNAI SUPER KINGS</div>
+            <div style="font-family:'Orbitron';font-weight:900;font-size:28px;margin-top:4px;" class="num-mono">204/7</div>
+            <div style="font-size:10px;color:#71717A;">20.0 ov · RRR 11.2</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Markets -->
+      <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:10px;">
+        ${[
+          ['MATCH ODDS','MI',3.4,3.6],
+          ['BOOKMAKER','MI',2.8,2.9],
+          ['NEXT OVER RUNS','Over 8.5',1.9,2.0],
+        ].map(([t,team,b,l])=>`<div class="glass" style="padding:10px;">
+          <div style="font-size:9px;color:#71717A;font-weight:800;letter-spacing:1px;">${t}</div>
+          <div style="font-size:10px;font-weight:800;margin-top:4px;">${team}</div>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-top:8px;">
+            <button style="padding:8px;border-radius:8px;background:rgba(34,211,238,.15);border:1px solid rgba(34,211,238,.4);text-align:left;cursor:pointer;font-family:inherit;color:white;">
+              <div style="font-size:8px;color:#22D3EE;font-weight:800;">BACK</div>
+              <div style="font-family:'Orbitron';font-weight:900;font-size:16px;" class="num-mono">${b}</div>
+            </button>
+            <button style="padding:8px;border-radius:8px;background:rgba(236,72,153,.15);border:1px solid rgba(236,72,153,.4);text-align:left;cursor:pointer;font-family:inherit;color:white;">
+              <div style="font-size:8px;color:#EC4899;font-weight:800;">LAY</div>
+              <div style="font-family:'Orbitron';font-weight:900;font-size:16px;" class="num-mono">${l}</div>
+            </button>
+          </div>
+        </div>`).join('')}
+      </div>
+
+      <!-- Extra markets -->
+      <div class="glass" style="padding:10px;flex:1;min-height:0;display:flex;flex-direction:column;">
+        <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px;">
+          <div class="tab-pills">
+            <button class="active">All markets</button>
+            <button>Bookmaker</button>
+            <button>Fancy</button>
+            <button>Sessions</button>
+          </div>
+        </div>
+        <div class="scroll-y hide-scroll" style="flex:1;display:grid;grid-template-columns:repeat(2,1fr);gap:6px;">
+          ${[
+            ['Total 6s in MI innings','Over 8.5','Under 8.5',1.85,1.95],
+            ['Dhoni total runs','Over 14.5','Under 14.5',2.1,1.7],
+            ['Highest 1st innings over','Yes','No',1.75,2.05],
+            ['Bumrah wickets','Over 1.5','Under 1.5',2.4,1.55],
+            ['Tied match','Yes','No',12,1.05],
+            ['Super over','Yes','No',9,1.08],
+          ].map(([t,b,l,bo,lo])=>`<div style="padding:8px;border-radius:8px;background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.04);">
+            <div style="font-size:10px;font-weight:700;margin-bottom:6px;">${t}</div>
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:4px;">
+              <button style="padding:5px;border-radius:6px;background:rgba(34,211,238,.12);border:1px solid rgba(34,211,238,.3);cursor:pointer;font-family:inherit;color:white;text-align:left;">
+                <div style="font-size:8px;color:#22D3EE;">${b}</div>
+                <div style="font-family:'Orbitron';font-weight:800;font-size:11px;" class="num-mono">${bo}</div>
+              </button>
+              <button style="padding:5px;border-radius:6px;background:rgba(236,72,153,.12);border:1px solid rgba(236,72,153,.3);cursor:pointer;font-family:inherit;color:white;text-align:left;">
+                <div style="font-size:8px;color:#EC4899;">${l}</div>
+                <div style="font-family:'Orbitron';font-weight:800;font-size:11px;" class="num-mono">${lo}</div>
+              </button>
+            </div>
+          </div>`).join('')}
         </div>
       </div>
     </div>
 
-    <!-- Markets -->
-    <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:10px;">
-      ${[
-        ['MATCH ODDS','MI',3.4,3.6],
-        ['BOOKMAKER','MI',2.8,2.9],
-        ['NEXT OVER RUNS','Over 8.5',1.9,2.0],
-      ].map(([t,team,b,l])=>`<div class="glass" style="padding:10px;">
-        <div style="font-size:9px;color:#71717A;font-weight:800;letter-spacing:1px;">${t}</div>
-        <div style="font-size:10px;font-weight:800;margin-top:4px;">${team}</div>
-        <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-top:8px;">
-          <button style="padding:8px;border-radius:8px;background:rgba(34,211,238,.15);border:1px solid rgba(34,211,238,.4);text-align:left;cursor:pointer;">
-            <div style="font-size:8px;color:#22D3EE;font-weight:800;">BACK</div>
-            <div style="font-family:'Orbitron';font-weight:900;font-size:16px;" class="num-mono">${b}</div>
-          </button>
-          <button style="padding:8px;border-radius:8px;background:rgba(236,72,153,.15);border:1px solid rgba(236,72,153,.4);text-align:left;cursor:pointer;">
-            <div style="font-size:8px;color:#EC4899;font-weight:800;">LAY</div>
-            <div style="font-family:'Orbitron';font-weight:900;font-size:16px;" class="num-mono">${l}</div>
-          </button>
+    <!-- RIGHT: STATS + COMMENTARY + BETSLIP (consolidated) -->
+    <div class="stack-col">
+      <!-- Match stats -->
+      <div class="glass" style="padding:12px;">
+        <div class="card-h"><div class="label">MATCH STATS</div></div>
+        <div style="display:grid;grid-template-columns:repeat(2,1fr);gap:6px;margin-top:8px;font-size:10px;">
+          ${[
+            ['Toss','CSK won'],['Venue','Wankhede'],['Weather','Clear'],['Pitch','Batting'],
+            ['CSK · 1st inn','204/7'],['MI · Target','205'],['MI · CRR','9.6'],['MI · RRR','11.2'],
+          ].map(([k,v])=>`<div style="padding:6px 8px;border-radius:6px;background:rgba(255,255,255,.04);"><div style="font-size:8px;color:#71717A;">${k}</div><div style="font-family:'Orbitron';font-weight:700;color:white;" class="num-mono">${v}</div></div>`).join('')}
         </div>
-      </div>`).join('')}
-    </div>
-
-    <!-- Commentary -->
-    <div class="glass" style="padding:12px;">
-      <div class="card-h"><div class="label brand">📺 LIVE COMMENTARY</div><div class="right">● LIVE</div></div>
-      <div style="margin-top:8px;display:grid;grid-template-columns:1fr 1fr;gap:6px 16px;font-size:10px;">
-        <div style="display:flex;gap:8px;"><span style="color:#9DE134;font-weight:800;width:30px;" class="num-mono">19.2</span><span style="color:#A1A1AA;">Bumrah to Dhoni · WIDE!</span></div>
-        <div style="display:flex;gap:8px;"><span style="color:#9DE134;font-weight:800;width:30px;" class="num-mono">19.1</span><span style="color:#A1A1AA;">Bumrah to Jadeja · 2 runs</span></div>
-        <div style="display:flex;gap:8px;"><span style="color:#71717A;width:30px;" class="num-mono">19.0</span><span style="color:#71717A;">Over change · 19 needed</span></div>
-        <div style="display:flex;gap:8px;"><span style="color:#71717A;width:30px;" class="num-mono">18.6</span><span style="color:#71717A;">Jadeja · SIX! 🏏</span></div>
+      </div>
+      <!-- Live commentary -->
+      <div class="glass" style="padding:12px;flex:1;min-height:0;display:flex;flex-direction:column;">
+        <div class="card-h"><div class="label brand">📺 COMMENTARY</div><div class="right">● LIVE</div></div>
+        <div class="scroll-y hide-scroll" style="flex:1;margin-top:8px;display:flex;flex-direction:column;gap:5px;font-size:10px;">
+          <div style="display:flex;gap:6px;padding:5px;border-radius:6px;background:rgba(157,225,52,.05);"><span style="color:#9DE134;font-weight:800;width:30px;flex-shrink:0;" class="num-mono">19.2</span><span style="color:#fff;">Bumrah to Dhoni · <strong>WIDE!</strong></span></div>
+          <div style="display:flex;gap:6px;padding:5px;border-radius:6px;background:rgba(157,225,52,.05);"><span style="color:#9DE134;font-weight:800;width:30px;flex-shrink:0;" class="num-mono">19.1</span><span style="color:#A1A1AA;">Bumrah to Jadeja · 2 runs through covers</span></div>
+          <div style="display:flex;gap:6px;padding:5px;"><span style="color:#71717A;width:30px;flex-shrink:0;" class="num-mono">19.0</span><span style="color:#71717A;">Over change · 19 needed off 6</span></div>
+          <div style="display:flex;gap:6px;padding:5px;"><span style="color:#71717A;width:30px;flex-shrink:0;" class="num-mono">18.6</span><span style="color:#71717A;">Jadeja · SIX! over long-on 🏏</span></div>
+          <div style="display:flex;gap:6px;padding:5px;"><span style="color:#71717A;width:30px;flex-shrink:0;" class="num-mono">18.5</span><span style="color:#71717A;">FOUR! through point</span></div>
+          <div style="display:flex;gap:6px;padding:5px;"><span style="color:#71717A;width:30px;flex-shrink:0;" class="num-mono">18.4</span><span style="color:#71717A;">Single, rotated</span></div>
+        </div>
+      </div>
+      <!-- Betslip -->
+      <div class="glass cyan" style="padding:12px;">
+        <div class="card-h"><div class="label cyan-c">BETSLIP</div><div class="right" style="color:#22D3EE;">1</div></div>
+        <div style="margin-top:8px;padding:8px;border-radius:8px;background:rgba(34,211,238,.08);border:1px solid rgba(34,211,238,.3);">
+          <div style="display:flex;justify-content:space-between;font-size:9px;">
+            <span style="color:#22D3EE;font-weight:800;">BACK · MI · 3.4</span>
+            <button class="cta-ghost" style="padding:2px 6px;">×</button>
+          </div>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-top:6px;">
+            <div><div style="font-size:8px;color:#71717A;">Stake</div><div style="padding:5px 8px;border-radius:5px;background:rgba(255,255,255,.04);font-family:'Orbitron';font-weight:900;font-size:12px;" class="num-mono">৳ 500</div></div>
+            <div><div style="font-size:8px;color:#71717A;">Profit</div><div style="padding:5px 8px;border-radius:5px;background:rgba(157,225,52,.1);color:#9DE134;font-family:'Orbitron';font-weight:900;font-size:12px;" class="num-mono">৳ 1,200</div></div>
+          </div>
+        </div>
+        <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:3px;margin-top:6px;">
+          ${['100','500','1k','5k'].map(a=>`<button class="cta-ghost" style="padding:5px;font-size:10px;">৳${a}</button>`).join('')}
+        </div>
+        <button class="cta-neon cyan full" style="margin-top:8px;padding:10px;font-size:12px;" onclick="confetti();bumpBalance('cash', 1200);beep(1000, 200);">PLACE BET ৳ 500</button>
       </div>
     </div>
-  </div>
-
-  <!-- Betslip -->
-  <div class="glass cyan" style="padding:12px;display:flex;flex-direction:column;">
-    <div class="card-h"><div class="label cyan-c">BETSLIP</div><div class="right" style="color:#22D3EE;">1</div></div>
-    <div style="margin-top:10px;padding:10px;border-radius:10px;background:rgba(34,211,238,.08);border:1px solid rgba(34,211,238,.3);">
-      <div style="display:flex;align-items:center;justify-content:space-between;font-size:9px;">
-        <span style="color:#22D3EE;font-weight:800;">BACK · MI</span>
-        <button class="cta-ghost" style="padding:2px 6px;">×</button>
-      </div>
-      <div style="font-size:10px;color:#D4D4D8;margin-top:4px;">Match Odds · IPL 47</div>
-      <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-top:8px;">
-        <div><div style="font-size:8px;color:#71717A;">Odds</div><div style="padding:6px 10px;border-radius:6px;background:rgba(255,255,255,.04);font-family:'Orbitron';font-weight:900;font-size:13px;" class="num-mono">3.4</div></div>
-        <div><div style="font-size:8px;color:#71717A;">Stake</div><div style="padding:6px 10px;border-radius:6px;background:rgba(255,255,255,.04);font-family:'Orbitron';font-weight:900;font-size:13px;" class="num-mono">৳ 500</div></div>
-      </div>
-      <div style="display:flex;justify-content:space-between;margin-top:8px;font-size:9px;color:#71717A;"><span>Profit</span><span style="color:#9DE134;font-weight:800;" class="num-mono">৳ 1,200</span></div>
-    </div>
-    <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:4px;margin-top:8px;">
-      ${['100','500','1k','5k'].map(a=>`<button class="cta-ghost" style="padding:6px;font-size:10px;">৳${a}</button>`).join('')}
-    </div>
-    <button class="cta-neon cyan full" style="margin-top:8px;" onclick="confetti();bumpBalance('cash', 1200);beep(1000, 200);">PLACE BET ৳ 500</button>
-    <div style="margin-top:8px;font-size:9px;color:#71717A;">Min ৳20 · Max ৳50K · Cash out available after 1st ball</div>
   </div>
 </div>`;
+};
 
 // ============================== LIVE CASINO ==============================
 Screens.live = () => `
