@@ -53,8 +53,7 @@ tailwind.config = {
   .spin-slow { animation: spin-slow 18s linear infinite; }
   @keyframes spin-wheel { from { transform: rotate(0) } to { transform: rotate(2880deg) } }
   .spin-wheel { animation: spin-wheel 4s cubic-bezier(.17,.67,.32,1.02) forwards; }
-  @keyframes barrel-spin { 0% { transform: translateX(-50%) } 100% { transform: translateX(calc(-50% - 670px)) } }
-  .barrel-spin { animation: barrel-spin 3.5s cubic-bezier(.17,.67,.32,1.02) forwards; }
+  /* barrel-spin is now JS-driven for reliability — see protoSpinBarrel() */
   @keyframes reel-spin { from { transform: translateY(0) } to { transform: translateY(-80%) } }
   .reel-spin { animation: reel-spin .12s linear infinite; }
   @keyframes float-up { 0% { transform: translateY(0); opacity: 1 } 100% { transform: translateY(-60px); opacity: 0 } }
@@ -110,6 +109,9 @@ tailwind.config = {
   #gate .err { color: #ef4444; font-size: 11px; margin-top: 8px; text-align: center; min-height: 16px; }
   #gate .footer { text-align: center; font-size: 10px; color: #52525B; margin-top: 18px; }
 </style>
+</head>
+<body class="min-h-screen">
+
 </head>
 <body class="min-h-screen">
 
@@ -2816,27 +2818,52 @@ function protoSpinWheel(){
   w.classList.add('spin-wheel');
   setTimeout(()=>{ fxBeep(900,200); spawnConfetti(); protoBumpCoin('cash', 500); }, 4100);
 }
-// Spin the horizontal prize barrel — slides left then settles on a prize
+// Spin the horizontal prize barrel — JS-driven animation
+let barrelSpinning = false;
 function protoSpinBarrel(){
   const w = document.getElementById('wheel');
   if (!w) return;
-  // Tick-tick-tick sound during spin
-  fxBeep(400,80);
-  let tickCount = 0;
-  const tickTimer = setInterval(()=>{
-    tickCount++;
-    fxBeep(800 - tickCount*40, 30);
-    if (tickCount > 18) clearInterval(tickTimer);
-  }, 180);
-  w.classList.remove('barrel-spin');
+  if (barrelSpinning) return;
+  barrelSpinning = true;
+  fxBeep(400, 80);
+  // Reset position then animate
+  const tileWidth = 54; // each prize tile ~54px wide
+  const fullCycle = 16 * tileWidth; // 16 prizes in the strip
+  const startOffset = 0;
+  // Pick a random landing prize (offset in tiles, between 8-15 for a satisfying spin)
+  const landingTile = 8 + Math.floor(Math.random() * 8);
+  const endOffset = -(landingTile * tileWidth + Math.random() * 10);
+  const duration = 3500;
+  const t0 = performance.now();
+  // Easing — quartic ease-out for the "fast then slow" feel
+  function easeOut(t){ return 1 - Math.pow(1 - t, 4); }
+  // Tick sounds during spin (slow down toward end)
+  let lastTickX = 0;
+  function tick(now){
+    const elapsed = now - t0;
+    const p = Math.min(elapsed / duration, 1);
+    const eased = easeOut(p);
+    const x = startOffset + (endOffset - startOffset) * eased;
+    w.style.transform = `translateX(calc(-50% + ${x}px))`;
+    // Tick when crossing a tile boundary
+    const tilesPassed = Math.floor(Math.abs(x) / tileWidth);
+    if (tilesPassed !== lastTickX) {
+      lastTickX = tilesPassed;
+      fxBeep(600 + (1 - p) * 400, 25);
+    }
+    if (p < 1) {
+      requestAnimationFrame(tick);
+    } else {
+      barrelSpinning = false;
+      fxBeep(1100, 250);
+      spawnConfetti();
+      protoBumpCoin('cash', 500);
+    }
+  }
+  // Reset transform first, then start the animation
+  w.style.transform = 'translateX(-50%)';
   void w.offsetWidth;
-  w.classList.add('barrel-spin');
-  setTimeout(()=>{
-    clearInterval(tickTimer);
-    fxBeep(1100,250);
-    spawnConfetti();
-    protoBumpCoin('cash', 500);
-  }, 3600);
+  requestAnimationFrame(tick);
 }
 
 // Spin slot reels
