@@ -149,16 +149,16 @@ function TopBar(screen){
 // 5 segments arranged around the wheel (top, top-right, bottom-right, bottom-left, top-left).
 // Center button returns to the Lobby.
 const CategoryWheel = [
-  { key:'slots',   icon:'🎰', label:'SLOTS',   target:'slots',     pos:'s-top' },
-  { key:'live',    icon:'🎲', label:'LIVE',    target:'live',      pos:'s-tr'  },
-  { key:'cricket', icon:'🏏', label:'CRICKET', target:'cricket',   pos:'s-br'  },
-  { key:'crash',   icon:'✈',  label:'CRASH',   target:'crash',     pos:'s-bl'  },
-  { key:'slotroom',icon:'🃏', label:'SLOT ROOM',target:'slotroom', pos:'s-tl'  },
+  { key:'slots',   icon:'🎰', label:'SLOTS',   target:'slots',   pos:'s-top' },
+  { key:'live',    icon:'🎲', label:'LIVE',    target:'live',    pos:'s-tr'  },
+  { key:'cricket', icon:'🏏', label:'CRICKET', target:'cricket', pos:'s-br'  },
+  { key:'crash',   icon:'✈',  label:'CRASH',   target:'crash',   pos:'s-bl'  },
+  { key:'fishing', icon:'🎣', label:'FISHING', target:'fishing', pos:'s-tl'  },
 ];
 
 function ActionDock(active){
   const map = {
-    lobby:'play', slots:'slots', slotroom:'slotroom',
+    lobby:'play', slots:'slots', fishing:'fishing',
     live:'live', cricket:'cricket', crash:'crash',
     wallet:'wallet', deposit:'wallet', withdraw:'wallet', shop:'shop',
     profile:'profile', settings:'profile', notif:'profile',
@@ -295,6 +295,55 @@ function bumpBalance(kind, addAmount){
   document.body.appendChild(flash);
   flash.animate([{ transform: 'translate(-50%, 0)', opacity: 1 }, { transform: 'translate(-50%, -40px)', opacity: 0 }], { duration: 1200, easing: 'ease-out' });
   setTimeout(() => flash.remove(), 1300);
+}
+
+// ============================== GAME CAROUSEL HELPERS ==============================
+function scrollCarousel(id, dir){
+  const el = document.getElementById(id);
+  if (!el) return;
+  el.scrollBy({ left: dir * 280, behavior: 'smooth' });
+  beep(500, 30);
+}
+
+function launchGame(name, provider){
+  beep(600, 80);
+  setTimeout(() => beep(900, 100), 100);
+  setTimeout(() => beep(1200, 150), 200);
+  confetti();
+  const toast = document.createElement('div');
+  toast.className = 'launch-toast';
+  toast.innerHTML = `
+    <div class="lt-icon">🎮</div>
+    <div class="lt-title">LAUNCHING</div>
+    <div class="lt-title" style="font-size:24px;margin-top:4px;color:white;-webkit-text-fill-color:white;background:none;">${name}</div>
+    <div class="lt-sub">${provider} · loading game session…</div>
+  `;
+  document.body.appendChild(toast);
+  setTimeout(() => toast.remove(), 2000);
+}
+
+// Generic provider strip — used at the top of every category page
+function ProviderStrip(providers, currentKey, onSelectName){
+  return `<div class="provider-strip-wrap">
+    <div class="provider-strip" id="${onSelectName}-strip">
+      ${providers.map(p => `<button class="provider-card ${p.k === currentKey ? 'active' : ''}" onclick="${onSelectName}('${p.k}')">
+        <div class="pc-emoji">${p.e}</div>
+        <div class="pc-name">${p.n}</div>
+        <div class="pc-count">${p.count || p.sub || ''}</div>
+      </button>`).join('')}
+    </div>
+  </div>`;
+}
+
+// Generic game card carousel
+function GameCarousel(id, games, mapper){
+  return `<div class="carousel-wrap">
+    <button class="carousel-arrow left" onclick="scrollCarousel('${id}', -1)">‹</button>
+    <div class="game-carousel" id="${id}">
+      ${games.map(mapper).join('')}
+    </div>
+    <button class="carousel-arrow right" onclick="scrollCarousel('${id}', 1)">›</button>
+  </div>`;
 }
 
 // ============================== BENGALI GREETINGS ==============================
@@ -486,7 +535,7 @@ ${SplineScenes.lobbyBg ? `<div style="position:absolute;inset:0;z-index:2;pointe
       <div class="games-header"><span class="h-title">🔥 HOT</span><span class="h-count">১৬,৮৪২ online</span></div>
       <div class="game-tile-3d gs-1" onclick="setScreen('crash')"><img src="${GAME_IMG('aviator')}" alt="Aviator"><span class="tag-i hot">HOT</span><span class="player-count">২,৮৪৭</span><div class="info"><div class="name">AVIATOR</div><div class="meta">Spribe · 12.4x peak</div></div></div>
       <div class="game-tile-3d gs-2" onclick="setScreen('live')"><img src="${GAME_IMG('crazy_time')}" alt="Crazy Time"><span class="tag-i live">LIVE</span><span class="player-count">১,৭৮২</span><div class="info"><div class="name">CRAZY TIME</div><div class="meta">Evolution · 347x</div></div></div>
-      <div class="game-tile-3d gs-3" onclick="setScreen('slotroom')"><img src="${GAME_IMG('super_ace')}" alt="Super Ace"><span class="tag-i jackpot">💎</span><span class="player-count">২,১০৩</span><div class="info"><div class="name">SUPER ACE</div><div class="meta">JILI · Jackpot</div></div></div>
+      <div class="game-tile-3d gs-3" onclick="setScreen('slots')"><img src="${GAME_IMG('super_ace')}" alt="Super Ace"><span class="tag-i jackpot">💎</span><span class="player-count">২,১০৩</span><div class="info"><div class="name">SUPER ACE</div><div class="meta">JILI · Jackpot</div></div></div>
       <div class="game-tile-3d gs-4" onclick="setScreen('slots')"><img src="${GAME_IMG('sweet_bonanza')}" alt="Sweet Bonanza"><span class="tag-i hot">HOT</span><span class="player-count">১,৬১২</span><div class="info"><div class="name">SWEET BONANZA</div><div class="meta">Pragmatic</div></div></div>
       <div class="game-tile-3d gs-5" onclick="setScreen('crash')"><img src="${GAME_IMG('plinko')}" alt="Plinko"><span class="tag-i new">NEW</span><span class="player-count">৯৪৩</span><div class="info"><div class="name">PLINKO</div><div class="meta">Spribe</div></div></div>
     </div>
@@ -495,702 +544,345 @@ ${SplineScenes.lobbyBg ? `<div style="position:absolute;inset:0;z-index:2;pointe
 
 postRender.lobby = () => { buildBarrel('barrel'); spawnOrbit(); };
 
-// ============================== SLOT ROOM ==============================
-let slotSpinning = false;
-function spinSlotReels(){
-  if (slotSpinning) return;
-  slotSpinning = true;
-  beep(300, 60);
-  const reels = [0,1,2,3,4].map(i => document.getElementById('reel-'+i));
-  reels.forEach(r => r && r.classList.add('reel-spin'));
-  setTimeout(() => {
-    reels.forEach(r => r && r.classList.remove('reel-spin'));
-    slotSpinning = false;
-    beep(800, 150);
-    if (Math.random() > 0.5) { confetti(); bumpBalance('coins', 12000); flashBigWin('SUPER ACE WIN', '৳ 2,400'); }
-  }, 1400 + Math.random() * 600);
-}
-function flashBigWin(title, amt){
-  const stage = document.getElementById('stage');
-  const div = document.createElement('div');
-  div.style.cssText = `position:absolute;top:30%;left:50%;transform:translate(-50%,-50%);padding:20px 40px;border-radius:24px;background:linear-gradient(180deg,#FFE787,#FFB627);color:#0a0a0a;font-family:'Orbitron';font-weight:900;font-size:24px;text-align:center;z-index:500;box-shadow:0 0 80px rgba(255,182,39,.8);animation:big-win-pop .6s cubic-bezier(.5,1.7,.5,1) forwards;`;
-  div.innerHTML = `🎉 ${title}<br><span style="font-size:32px;">${amt}</span>`;
-  stage.appendChild(div);
-  setTimeout(() => div.animate([{opacity:1},{opacity:0}], {duration:400}).onfinish = () => div.remove(), 2200);
-}
 
-Screens.slotroom = () => `
-<div class="screen-grid cols-2" style="grid-template-columns: 1fr 280px;">
-  <div class="glass" style="position:relative; padding:0; overflow:hidden;">
-    <img src="${GAME_IMG('super_ace')}" style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover;opacity:.15">
-    <div style="position:absolute;inset:0;background:linear-gradient(180deg,rgba(5,5,7,.4),rgba(5,5,7,.85));"></div>
-    <div style="position:relative; padding:16px; display:flex; flex-direction:column; height:100%;">
-      <div style="display:flex; align-items:center; justify-content:space-between;">
-        <div>
-          <div class="screen-title" style="font-size:20px;">SUPER ACE</div>
-          <div class="screen-sub">JILI · RTP 96.0% · ২,১০৩ playing</div>
-        </div>
-        <div class="flex-row">
-          <button class="cta-ghost">ℹ INFO</button>
-          <button class="cta-ghost">⚙</button>
-          <button class="cta-ghost">⛶</button>
-        </div>
-      </div>
-
-      <!-- Reels frame in the middle -->
-      <div style="flex:1; display:grid; place-items:center;">
-        <div style="display:grid; grid-template-columns:repeat(5,1fr); gap:6px; padding:12px; border-radius:18px; background:rgba(0,0,0,.5); border:3px solid #FFB627; box-shadow:0 0 60px rgba(255,182,39,.4), inset 0 0 24px rgba(0,0,0,.6);">
-          ${['🃏','💎','👑','🎰','💰'].map((center,col)=>{
-            const above = ['🍒','🍋','🔔','⭐','🎯'][col];
-            const below = ['🍇','🍀','💵','💎','7️⃣'][col];
-            return `<div style="width:64px;height:152px;border-radius:8px;background:linear-gradient(180deg,#FFE787,#FFB627);overflow:hidden;position:relative;box-shadow:inset 0 2px 8px rgba(0,0,0,.3);">
-              <div id="reel-${col}" style="position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:space-around;font-size:38px;">
-                <div>${above}</div><div>${center}</div><div>${below}</div><div>${above}</div><div>${center}</div>
-              </div>
-              <div style="position:absolute;top:50%;transform:translateY(-50%);inset-inline:0;height:50px;border-block:2px solid rgba(255,182,39,.6);pointer-events:none;"></div>
-            </div>`;
-          }).join('')}
-        </div>
-      </div>
-
-      <!-- Multiplier indicators on right side -->
-      <div style="position:absolute; top:50%; right:16px; transform:translateY(-50%); display:flex; flex-direction:column; gap:6px;">
-        ${['1x','2x','5x','10x','100x'].map((m,i)=>`<div style="width:48px;height:28px;border-radius:6px;display:grid;place-items:center;font-family:'Orbitron';font-weight:900;font-size:11px;${i===2?'background:#FFB627;color:#0a0a0a;animation:glow-breathe 1.2s infinite':'background:rgba(255,255,255,.04);color:#71717A;border:1px solid rgba(255,255,255,.08)'}">${m}</div>`).join('')}
-      </div>
-
-      <!-- Bottom control bar -->
-      <div class="glass" style="padding:10px; display:flex; align-items:center; gap:10px;">
-        <div style="padding:6px 10px; border-radius:8px; background:rgba(255,255,255,.04); border:1px solid rgba(255,255,255,.06);">
-          <div style="font-size:8px;color:#71717A;">BALANCE</div>
-          <div style="font-family:'Orbitron';font-weight:800;color:#9DE134;font-size:13px;">৳ 4,562</div>
-        </div>
-        <div style="padding:6px 10px; border-radius:8px; background:rgba(255,255,255,.04); border:1px solid rgba(255,255,255,.06);">
-          <div style="font-size:8px;color:#71717A;">BET</div>
-          <div style="display:flex;align-items:center;gap:6px;">
-            <button class="cta-ghost" style="padding:2px 8px;">−</button>
-            <span style="font-family:'Orbitron';font-weight:800;font-size:13px;width:48px;text-align:center;" class="num-mono">৳50</span>
-            <button class="cta-ghost" style="padding:2px 8px;">+</button>
-          </div>
-        </div>
-        <button class="cta-ghost">AUTO</button>
-        <button class="cta-ghost">MAX BET</button>
-        <div style="flex:1;"></div>
-        <button class="cta-neon" style="padding:14px 32px;font-size:14px;" onclick="spinSlotReels()">🎰 SPIN</button>
-        <div style="flex:1;"></div>
-        <button class="cta-neon amber" style="padding:8px 14px;font-size:11px;">BUY BONUS · ৳5K</button>
-        <div style="padding:6px 10px; border-radius:8px; background:rgba(157,225,52,.1); border:1px solid rgba(157,225,52,.3);">
-          <div style="font-size:8px;color:#9DE134;">WIN</div>
-          <div style="font-family:'Orbitron';font-weight:900;color:#FFB627;font-size:13px;">৳ 2,400</div>
-        </div>
-      </div>
-    </div>
-  </div>
-
-  <!-- Side panel: recent + paytable + chat -->
-  <div class="stack-col">
-    <div class="glass" style="padding:12px;">
-      <div class="card-h"><div class="label">RECENT SPINS</div></div>
-      <div style="display:flex;gap:4px;margin-top:8px;">
-        ${[2.4,0,0,5.8,12,0,0,1,2,0].map(m=>`<div style="flex:1;height:26px;border-radius:5px;display:grid;place-items:center;font-size:9px;font-weight:900;${m>=5?'background:#9DE134;color:#0a0a0a':m>0?'background:rgba(157,225,52,.2);color:#9DE134':'background:rgba(255,255,255,.04);color:#52525B'}">${m>0?m+'x':'·'}</div>`).join('')}
-      </div>
-    </div>
-    <div class="glass" style="padding:12px;">
-      <div class="card-h"><div class="label">SYMBOL PAYS</div></div>
-      <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:6px;margin-top:8px;text-align:center;">
-        ${[['👑','500x'],['💎','200x'],['🃏','100x'],['💰','50x'],['🎰','25x'],['7️⃣','15x']].map(([s,p])=>`<div style="padding:6px;border-radius:8px;background:rgba(255,255,255,.04);"><div style="font-size:24px">${s}</div><div style="font-family:'Orbitron';font-weight:900;font-size:11px;color:#FFB627;">${p}</div></div>`).join('')}
-      </div>
-    </div>
-    <div class="glass" style="padding:12px;flex:1;display:flex;flex-direction:column;min-height:0;">
-      <div class="card-h"><div class="label">LIVE CHAT</div></div>
-      <div class="scroll-y hide-scroll" style="flex:1;margin-top:8px;display:flex;flex-direction:column;gap:6px;">
-        ${[['M****61','GG!','#9DE134'],['S****ad','i won 5x 🔥','#FFB627'],['system','M****61 won ৳12,400 🎉','#ef4444'],['R****na','lucky tonight','#A1A1AA']].map(([u,m,c])=>`<div style="padding:6px 8px;border-radius:6px;background:rgba(255,255,255,.04);font-size:10px;"><span style="font-weight:800;color:${c};">${u}:</span> <span style="color:#D4D4D8;">${m}</span></div>`).join('')}
-      </div>
-      <input style="margin-top:8px;padding:8px;border-radius:8px;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.1);color:#fff;font-size:10px;outline:none;" placeholder="Say something...">
-    </div>
-  </div>
-</div>`;
-
-// ============================== CRASH / AVIATOR ==============================
-let crashProvider = 'aviator';
+// ============================== CRASH GAMES ==============================
+let crashProvider = 'spribe';
 const CrashProviders = [
-  { k:'aviator',    n:'Aviator',         e:'✈️', provider:'Spribe',     img:'aviator',     desc:'The original crash game · ✈️ flying multiplier' },
-  { k:'aviatrix',   n:'Aviatrix',        e:'🛩️', provider:'RajaBaji',   img:'aviatrix',    desc:'NFT-style stealth jet crash · custom planes' },
-  { k:'plinko',     n:'Plinko',          e:'🟢', provider:'Spribe',     img:'plinko',      desc:'Drop the ball · choose risk · 1000x multipliers' },
-  { k:'chicken',    n:'Chicken Road 2',  e:'🐔', provider:'InOut',      img:'chicken_road',desc:'Cross the road, more lanes = bigger payout' },
-  { k:'jetx',       n:'JetX',            e:'🚀', provider:'SmartSoft',  img:'aviator',     desc:'Race the jet · 200x+ peak multipliers' },
-  { k:'crash',      n:'Crash Royale',    e:'💥', provider:'BC Games',   img:'aviator',     desc:'Crypto-style crash with auto-cashout' },
-  { k:'minimines',  n:'Mini Mines',      e:'💣', provider:'Spribe',     img:'plinko',      desc:'Dodge mines, collect gems, cash out anytime' },
+  { k:'spribe',     n:'Spribe',         e:'✈️', count:'4 games' },
+  { k:'rajabaji',   n:'RajaBaji',       e:'🛩️', count:'1 game' },
+  { k:'inout',      n:'InOut Games',    e:'🐔', count:'1 game' },
+  { k:'smartsoft',  n:'SmartSoft',      e:'🚀', count:'1 game' },
+  { k:'bcgames',    n:'BC Games',       e:'💥', count:'1 game' },
+  { k:'turbo',      n:'Turbo Games',    e:'💎', count:'2 games' },
 ];
 function setCrashProvider(p){ crashProvider = p; setScreen('crash'); }
-setInterval(() => {
-  const el = document.getElementById('crash-mult');
-  if (!el) return;
-  const cur = parseFloat(el.dataset.v || '1') || 1;
-  const next = Math.random() > .92 ? 1.0 : (cur + 0.01 + Math.random()*0.03);
-  el.dataset.v = next.toFixed(2);
-  el.innerHTML = next.toFixed(2) + '<span style="font-size:.6em;">x</span>';
-}, 120);
+
+const AllCrashGames = [
+  ['Aviator','Spribe','spribe','aviator','2,847','HOT','✈️ Original crash · 100x peak'],
+  ['Plinko','Spribe','spribe','plinko','943','NEW','🟢 Ball drop · 1000x multipliers'],
+  ['Mini Mines','Spribe','spribe','plinko','512','HOT','💣 Dodge mines · collect gems'],
+  ['Dice','Spribe','spribe','plinko','389',null,'🎲 Pick odds · 98% RTP'],
+  ['Aviatrix','RajaBaji','rajabaji','aviator','1,234','HOT','🛩️ NFT planes · custom skins'],
+  ['Chicken Road 2','InOut','inout','chicken_road','823','HOT','🐔 Cross lanes · 1000x'],
+  ['JetX','SmartSoft','smartsoft','aviator','645',null,'🚀 Race the jet · 200x peaks'],
+  ['Crash Royale','BC Games','bcgames','aviator','423',null,'💥 Auto-cashout · crypto style'],
+  ['Crash X','Turbo Games','turbo','aviator','312',null,'⚡ Lightning rounds · 5s'],
+  ['Cash or Crash','Turbo Games','turbo','aviator','289','NEW','💸 Cash out anytime'],
+];
+
+function crashCardHTML(g){
+  const [n,prov,_pk,img,playing,tag,sub] = g;
+  return `<div class="game-card-big" onclick="launchGame('${n}','${prov}')">
+    <img src="${GAME_IMG(img)}" alt="${n}">
+    <div class="gc-tags">
+      ${tag?`<span class="gc-tag ${tag.toLowerCase()}">${tag}</span>`:'<span></span>'}
+      <span class="gc-count">👥 ${playing}</span>
+    </div>
+    <div class="gc-info">
+      <div class="gc-name">${n.toUpperCase()}</div>
+      <div class="gc-meta">${prov}</div>
+      <div class="gc-stats"><span>${sub}</span></div>
+    </div>
+    <div class="gc-play">▶ PLAY NOW</div>
+  </div>`;
+}
 
 Screens.crash = () => {
-  const game = CrashProviders.find(p => p.k === crashProvider) || CrashProviders[0];
+  const provider = CrashProviders.find(p => p.k === crashProvider) || CrashProviders[0];
+  const games = AllCrashGames.filter(g => g[2] === crashProvider);
   return `
-<div class="stack-col" style="height:100%;gap:10px;">
-  <!-- Crash provider selector -->
-  <div class="glass" style="padding:10px 12px;display:flex;align-items:center;gap:12px;flex-shrink:0;">
-    <div class="card-h" style="margin:0;flex-shrink:0;"><div class="label">CRASH GAME</div></div>
-    <div style="display:flex;gap:6px;overflow-x:auto;flex:1;" class="hide-scroll">
-      ${CrashProviders.map(p => {
-        const act = p.k === crashProvider;
-        return `<button onclick="setCrashProvider('${p.k}')" style="flex-shrink:0;display:flex;align-items:center;gap:8px;padding:6px 12px;border-radius:10px;cursor:pointer;font-family:inherit;border:1px solid ${act?'#9DE134':'rgba(255,255,255,.08)'};${act?'background:rgba(157,225,52,.15);color:white;box-shadow:0 0 12px rgba(157,225,52,.25);':'background:rgba(255,255,255,.04);color:#A1A1AA;'}transition:all .2s;">
-          <span style="font-size:16px;">${p.e}</span>
-          <div style="text-align:left;">
-            <div style="font-size:11px;font-weight:800;">${p.n}</div>
-            <div style="font-size:9px;opacity:.7;">${p.provider}</div>
-          </div>
-        </button>`;
-      }).join('')}
+<div class="stack-col" style="height:100%;gap:14px;">
+  <div class="cat-header">
+    <div>
+      <div class="cat-title">✈️ CRASH GAMES</div>
+      <div class="cat-sub">Choose a provider, slide to find your crash game</div>
     </div>
-    <div style="font-size:10px;color:#9DE134;font-weight:800;flex-shrink:0;display:flex;align-items:center;gap:4px;"><span style="width:6px;height:6px;border-radius:50%;background:#9DE134;animation:live-pulse 1.4s infinite;"></span>${game.provider.toUpperCase()}</div>
+    <div class="cat-meta">${games.length} games · ${provider.n}</div>
   </div>
-
-  <!-- Game canvas + side panel -->
-  <div class="screen-grid cols-2" style="grid-template-columns: 1fr 280px;flex:1;min-height:0;">
-  <!-- Game canvas -->
-  <div class="glass" style="padding:0; overflow:hidden; position:relative;">
-    <img src="${GAME_IMG(game.img)}" style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover;opacity:.18">
-    <div style="position:absolute;inset:0;background:linear-gradient(180deg,rgba(10,26,46,.7),rgba(5,5,7,.95));"></div>
-
-    <!-- Stars -->
-    ${[...Array(40)].map(()=>`<div style="position:absolute;width:2px;height:2px;background:#fff;border-radius:50%;opacity:.6;left:${Math.random()*100}%;top:${Math.random()*60}%"></div>`).join('')}
-
-    <!-- Flight path -->
-    <svg style="position:absolute;inset:0;width:100%;height:100%;" viewBox="0 0 600 360" preserveAspectRatio="none">
-      <defs><linearGradient id="path-grad" x1="0" y1="100%" x2="100%" y2="0"><stop offset="0" stop-color="#9DE134" stop-opacity="0"/><stop offset="1" stop-color="#9DE134" stop-opacity=".4"/></linearGradient></defs>
-      <path d="M 0 340 Q 200 320, 400 200 T 600 60" fill="none" stroke="#9DE134" stroke-width="3" opacity=".9" style="filter:drop-shadow(0 0 12px #9DE134);"/>
-      <path d="M 0 340 Q 200 320, 400 200 T 600 60 L 600 360 L 0 360 Z" fill="url(#path-grad)"/>
-    </svg>
-
-    <!-- Header -->
-    <div style="position:absolute;top:16px;left:16px;right:16px;display:flex;align-items:center;justify-content:space-between;">
-      <div>
-        <div class="screen-title" style="font-size:22px;">${game.n.toUpperCase()}</div>
-        <div class="screen-sub" style="display:flex;align-items:center;gap:6px;"><span style="width:6px;height:6px;border-radius:50%;background:#ef4444;animation:live-pulse 1.4s infinite;"></span>${game.provider} · ২,৮৪৭ betting now</div>
-        <div style="font-size:9px;color:#71717A;margin-top:2px;max-width:300px;">${game.desc}</div>
-      </div>
-      <div style="display:flex;gap:4px;">
-        ${[1.24,2.41,8.92,1.05,3.67,15.4,1.42,2.18].map(m=>`<div style="padding:4px 10px;border-radius:999px;font-family:'Orbitron';font-weight:900;font-size:11px;${m>=5?'background:#A855F7;color:white':m>=2?'background:#22D3EE;color:#0a0a0a':'background:rgba(236,72,153,.3);color:#EC4899'}">${m}x</div>`).join('')}
-      </div>
-    </div>
-
-    <!-- Multiplier giant text -->
-    <div style="position:absolute;inset:0;display:grid;place-items:center;">
-      <div style="text-align:center;">
-        <div id="crash-mult" data-v="2.41" style="font-family:'Orbitron';font-weight:900;font-size:120px;background:linear-gradient(180deg,#FFE787,#FFB627);-webkit-background-clip:text;background-clip:text;color:transparent;text-shadow:0 0 60px rgba(255,182,39,.6);line-height:1;">2.41<span style="font-size:.6em;">x</span></div>
-        <div style="font-size:11px;color:#9DE134;letter-spacing:4px;font-weight:700;margin-top:8px;">FLYING HIGH 🚀</div>
-      </div>
-    </div>
-
-    <!-- Plane -->
-    <div style="position:absolute;bottom:80px;left:80px;font-size:52px;filter:drop-shadow(0 0 24px rgba(157,225,52,.5));animation:plane-fly 4s ease-out infinite alternate;">✈️</div>
-
-    <!-- Bet panels -->
-    <div style="position:absolute;bottom:16px;left:16px;right:16px;display:grid;grid-template-columns:1fr 1fr;gap:10px;">
-      <div class="glass" style="padding:12px;border-color:#9DE134;">
-        <div style="position:absolute;top:-10px;left:14px;padding:2px 10px;border-radius:6px;background:#9DE134;color:#0a0a0a;font-size:9px;font-weight:900;letter-spacing:1px;">BET 1</div>
-        <div style="display:flex;align-items:center;gap:10px;">
-          <div style="display:flex;align-items:center;gap:4px;padding:6px 10px;border-radius:8px;background:rgba(255,255,255,.04);">
-            <button class="cta-ghost" style="padding:2px 6px;">−</button>
-            <span style="font-family:'Orbitron';font-weight:800;font-size:13px;width:48px;text-align:center;" class="num-mono">৳ 100</span>
-            <button class="cta-ghost" style="padding:2px 6px;">+</button>
-          </div>
-          <button class="cta-neon amber" style="flex:1;text-align:center;padding:10px;">CASHOUT<br><span style="font-family:'Orbitron';font-size:14px;" class="num-mono">৳ 241</span></button>
-        </div>
-      </div>
-      <div class="glass" style="padding:12px;">
-        <div style="position:absolute;top:-10px;left:14px;padding:2px 10px;border-radius:6px;background:#52525B;color:white;font-size:9px;font-weight:900;letter-spacing:1px;">BET 2</div>
-        <div style="display:flex;align-items:center;gap:10px;">
-          <div style="display:flex;align-items:center;gap:4px;padding:6px 10px;border-radius:8px;background:rgba(255,255,255,.04);">
-            <button class="cta-ghost" style="padding:2px 6px;">−</button>
-            <span style="font-family:'Orbitron';font-weight:800;font-size:13px;width:48px;text-align:center;" class="num-mono">৳ 50</span>
-            <button class="cta-ghost" style="padding:2px 6px;">+</button>
-          </div>
-          <label style="display:flex;align-items:center;gap:4px;font-size:9px;color:#A1A1AA;"><input type="checkbox" style="accent-color:#9DE134"> Auto <span style="color:#9DE134;font-weight:800;">2.0x</span></label>
-          <button class="cta-neon" style="flex:1;text-align:center;padding:10px;">BET ৳ 50</button>
-        </div>
-      </div>
-    </div>
-  </div>
-
-  <!-- Side: active bets -->
-  <div class="glass" style="padding:12px;display:flex;flex-direction:column;">
-    <div class="card-h"><div class="label">ACTIVE BETS · ২,৮৪৭</div></div>
-    <div class="flex-row" style="gap:4px;margin-top:8px;">
-      <button class="pill brand" style="padding:4px 10px;font-size:10px;">All</button>
-      <button class="pill ghost" style="padding:4px 10px;font-size:10px;">High</button>
-      <button class="pill ghost" style="padding:4px 10px;font-size:10px;">My</button>
-    </div>
-    <div class="scroll-y hide-scroll" style="flex:1;margin-top:8px;display:flex;flex-direction:column;gap:4px;">
-      ${[
-        ['M****61','৳ 5,000','2.41x','৳ 12,050','live'],
-        ['S****ad','৳ 1,000','—','—','flying'],
-        ['You','৳ 100','—','—','me'],
-        ['R****na','৳ 800','1.8x','৳ 1,440','cashed'],
-        ['F****ul','৳ 2,500','—','—','flying'],
-        ['A****hi','৳ 500','3.2x','৳ 1,600','cashed'],
-        ['K****bd','৳ 300','—','—','flying'],
-        ['T****is','৳ 1,500','5.4x','৳ 8,100','cashed'],
-        ['J****la','৳ 200','—','—','flying'],
-      ].map(([u,b,mult,win,st])=>`<div style="padding:6px 8px;border-radius:8px;${st==='me'?'background:rgba(157,225,52,.1);border:1px solid rgba(157,225,52,.4)':'background:rgba(255,255,255,.04)'};${st==='cashed'?'opacity:.6':''};display:flex;align-items:center;gap:6px;font-size:10px;">
-        <div style="width:22px;height:22px;border-radius:50%;display:grid;place-items:center;font-size:9px;font-weight:900;${st==='me'?'background:#9DE134;color:#0a0a0a':'background:rgba(255,255,255,.06);color:#A1A1AA'}">${u[0]}</div>
-        <div style="flex:1;min-width:0;"><div style="font-weight:700;${st==='me'?'color:#9DE134;':''}">${u}</div><div style="color:#71717A;" class="num-mono">${b}</div></div>
-        <div style="text-align:right;"><div style="font-family:'Orbitron';font-weight:900;color:${st==='cashed'?'#71717A':'#FFB627'};" class="num-mono">${mult}</div><div style="color:${st==='cashed'?'#9DE134':'#71717A'};" class="num-mono">${win}</div></div>
-      </div>`).join('')}
-    </div>
-  </div>
-  </div>
-</div>
-
-<style>
-@keyframes plane-fly { 0% { transform: translate(0,0) rotate(-15deg); } 100% { transform: translate(140px,-100px) rotate(-35deg); } }
-.reel-spin { animation: reel-spin .12s linear infinite; }
-@keyframes reel-spin { from { transform: translateY(0); } to { transform: translateY(-80%); } }
-@keyframes big-win-pop { 0% { transform: translate(-50%,-50%) scale(.3); opacity: 0; } 60% { transform: translate(-50%,-50%) scale(1.15); opacity: 1; } 100% { transform: translate(-50%,-50%) scale(1); opacity: 1; } }
-</style>`;
+  ${ProviderStrip(CrashProviders, crashProvider, 'setCrashProvider')}
+  ${GameCarousel('crash-car-' + crashProvider, games, crashCardHTML)}
+</div>`;
 };
 
-// ============================== CRICKET EXCHANGE ==============================
+// ============================== CRICKET / SPORTS ==============================
 let sportsProvider = 'btisports';
 const SportsProviders = [
-  { k:'btisports', n:'BTI Sports',    e:'🅱️', sub:'Asia & EU markets' },
-  { k:'sabasport', n:'Saba Sports',   e:'⚡',  sub:'Asia handicap' },
-  { k:'imsports',  n:'IM Sports',     e:'🇧🇩', sub:'BD cricket focus' },
-  { k:'sbo',       n:'SBO Bet',       e:'🎯', sub:'Live exchange' },
-  { k:'pinnacle',  n:'Pinnacle',      e:'📐', sub:'Sharp odds' },
-  { k:'cmd368',    n:'CMD368',        e:'🃎', sub:'Asian books' },
-  { k:'pragmaticsports', n:'Pragmatic Sports', e:'🏆', sub:'Virtual & live' },
+  { k:'btisports', n:'BTI Sports',     e:'🅱️', count:'3 matches' },
+  { k:'sabasport', n:'Saba Sports',    e:'⚡',  count:'2 matches' },
+  { k:'imsports',  n:'IM Sports',      e:'🇧🇩', count:'3 matches' },
+  { k:'sbo',       n:'SBO Bet',        e:'🎯', count:'1 match' },
+  { k:'pinnacle',  n:'Pinnacle',       e:'📐', count:'1 match' },
+  { k:'cmd368',    n:'CMD368',         e:'🃎', count:'9 matches' },
+  { k:'pragmaticsports', n:'Pragmatic Sports', e:'🏆', count:'4 matches' },
 ];
 function setSportsProvider(p){ sportsProvider = p; setScreen('cricket'); }
 
+const AllCricketMatches = [
+  ['MI vs CSK','IPL 2026 · Match 47','Wankhede','LIVE','19.2 ov · MI 186/4','btisports','crazy_time','MI need 19 in 4', 3.4, 3.6],
+  ['BAN vs SL','Asia Cup · Group A','Mirpur','LIVE','16.4 ov · BAN 142/3','btisports','super_ace','SL won toss', 2.1, 2.3],
+  ['ENG vs AUS','Ashes · Test Day 2','Lords','LIVE','Day 2 · ENG 89/2','btisports','super_ace','Steady start', 1.85, 2.0],
+  ['IND vs PAK','T20 Series · Game 3','Dubai','SOON','Starts 8:30 PM','sabasport','crazy_time','Big rivalry · high stakes', 1.9, 1.95],
+  ['SA vs NZ','ODI Series · Game 2','Cape Town','SOON','Starts tomorrow','sabasport','aviator','SA at home', 1.75, 2.15],
+  ['LSG vs RCB','IPL 2026 · Match 48','Bengaluru','SOON','Tomorrow 7:30 PM','imsports','sweet_bonanza','Kohli vs Rahul', 2.0, 1.85],
+  ['BAN vs IND','Asia Cup · Final','Colombo','SOON','Sunday 8:00 PM','imsports','money_coming','Trophy match', 2.4, 1.6],
+  ['PAK vs SL','T20 Tri-Series','Karachi','LIVE','12.3 ov · PAK 88/2','imsports','aviator','Babar 50*', 2.5, 1.55],
+  ['AUS vs NZ','Trans-Tasman ODI','Sydney','LIVE','35 ov · AUS 195/4','sbo','crazy_time','Smith hundred coming', 1.4, 3.0],
+  ['WI vs SA','T20I · Game 1','Bridgetown','SOON','Tonight 11 PM','pinnacle','plinko','First clash this year', 2.7, 1.45],
+];
+
+function cricketCardHTML(m){
+  const [match,event,venue,status,score,_pk,img,_note,b,l] = m;
+  return `<div class="game-card-big" onclick="launchGame('${match}','${event}')">
+    <img src="${GAME_IMG(img)}" alt="${match}">
+    <div class="gc-tags">
+      <span class="gc-tag ${status.toLowerCase() === 'live' ? 'live' : 'new'}">${status}</span>
+      <span class="gc-count">🏏 ${event.split('·')[0].trim()}</span>
+    </div>
+    <div class="gc-info">
+      <div class="gc-name">${match}</div>
+      <div class="gc-meta">${venue} · ${score}</div>
+      <div class="gc-stats" style="margin-top:10px;gap:6px;">
+        <span style="background:rgba(34,211,238,.15);color:#22D3EE;font-weight:800;flex:1;text-align:center;">BACK ${b}</span>
+        <span style="background:rgba(236,72,153,.15);color:#EC4899;font-weight:800;flex:1;text-align:center;">LAY ${l}</span>
+      </div>
+    </div>
+    <div class="gc-play">📊 OPEN MARKETS</div>
+  </div>`;
+}
+
 Screens.cricket = () => {
   const provider = SportsProviders.find(p => p.k === sportsProvider) || SportsProviders[0];
+  const matches = AllCricketMatches.filter(m => m[5] === sportsProvider);
   return `
-<div class="stack-col" style="height:100%;gap:10px;">
-  <!-- Provider selector strip -->
-  <div class="glass" style="padding:10px 12px;display:flex;align-items:center;gap:12px;flex-shrink:0;">
-    <div class="card-h" style="margin:0;flex-shrink:0;"><div class="label">PROVIDER</div></div>
-    <div style="display:flex;gap:6px;overflow-x:auto;flex:1;" class="hide-scroll">
-      ${SportsProviders.map(p => {
-        const act = p.k === sportsProvider;
-        return `<button onclick="setSportsProvider('${p.k}')" style="flex-shrink:0;display:flex;align-items:center;gap:8px;padding:6px 12px;border-radius:10px;cursor:pointer;font-family:inherit;border:1px solid ${act?'#9DE134':'rgba(255,255,255,.08)'};${act?'background:rgba(157,225,52,.15);color:white':'background:rgba(255,255,255,.04);color:#A1A1AA'};${act?'box-shadow:0 0 12px rgba(157,225,52,.25);':''}transition:all .2s;">
-          <span style="font-size:14px;">${p.e}</span>
-          <div style="text-align:left;">
-            <div style="font-size:11px;font-weight:800;">${p.n}</div>
-            <div style="font-size:9px;opacity:.7;">${p.sub}</div>
-          </div>
-        </button>`;
-      }).join('')}
+<div class="stack-col" style="height:100%;gap:14px;">
+  <div class="cat-header">
+    <div>
+      <div class="cat-title">🏏 CRICKET</div>
+      <div class="cat-sub">Choose a sportsbook, slide to find your match</div>
     </div>
-    <div style="font-size:10px;color:#9DE134;font-weight:800;flex-shrink:0;display:flex;align-items:center;gap:4px;"><span style="width:6px;height:6px;border-radius:50%;background:#9DE134;animation:live-pulse 1.4s infinite;"></span>${provider.n.toUpperCase()}</div>
+    <div class="cat-meta">${matches.length} matches · ${provider.n}</div>
   </div>
-
-  <!-- Main 3-pane: matches list (left) · selected match (center) · stats + betslip (right) -->
-  <div class="screen-grid" style="grid-template-columns: 260px 1fr 280px;flex:1;min-height:0;">
-    <!-- LEFT: Match list -->
-    <div class="glass" style="padding:12px;display:flex;flex-direction:column;">
-      <div class="tab-pills" style="margin-bottom:8px;">
-        <button class="active">LIVE 4</button>
-        <button>Today</button>
-        <button>My bets</button>
-      </div>
-      <div class="scroll-y hide-scroll" style="flex:1;display:flex;flex-direction:column;gap:6px;">
-        ${[
-          ['IPL · Match 47','MI','CSK','186/4 · 19.2','204/7 · 20','live','active'],
-          ['Asia Cup','BAN','SL','142/3 · 16.4','158/8 · 20','live',''],
-          ['Test Day 2','ENG','AUS','89/2 · 23.0','—','live',''],
-          ['Tonight 8:30','IND','PAK','—','—','soon',''],
-          ['Tomorrow','SA','NZ','—','—','soon',''],
-        ].map(([evt,t1,t2,s1,s2,st,a])=>`<button style="text-align:left;padding:10px;border-radius:12px;${a?'background:rgba(157,225,52,.1);border:1px solid rgba(157,225,52,.4)':'background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.06)'};cursor:pointer;font-family:inherit;color:white;">
-          <div style="display:flex;align-items:center;justify-content:space-between;font-size:9px;">
-            <span style="color:#71717A;">${evt}</span>
-            ${st==='live'?'<span class="pill red" style="padding:2px 8px;font-size:8px;">LIVE</span>':'<span style="color:#71717A;">⏱</span>'}
-          </div>
-          <div style="margin-top:6px;font-size:11px;">
-            <div style="font-weight:700;">${t1} <span style="color:#71717A;font-weight:400;font-size:10px;" class="num-mono">${s1}</span></div>
-            <div style="font-weight:700;margin-top:2px;">${t2} <span style="color:#71717A;font-weight:400;font-size:10px;" class="num-mono">${s2}</span></div>
-          </div>
-        </button>`).join('')}
-      </div>
-    </div>
-
-    <!-- CENTER: Selected match -->
-    <div class="stack-col">
-      <div class="glass" style="padding:14px;">
-        <div style="display:flex;align-items:center;justify-content:space-between;font-size:10px;">
-          <span class="pill red" style="padding:3px 10px;">LIVE</span>
-          <span style="color:#A1A1AA;">IPL · Match 47 · Wankhede</span>
-          <span style="color:#9DE134;font-weight:700;">MI need 19 in 4</span>
-        </div>
-        <div style="display:flex;align-items:center;justify-content:space-between;margin-top:14px;">
-          <div style="text-align:center;flex:1;">
-            <div style="font-size:32px;">🇮🇳</div>
-            <div style="font-size:10px;font-weight:800;margin-top:4px;">MUMBAI INDIANS</div>
-            <div style="font-family:'Orbitron';font-weight:900;font-size:28px;margin-top:4px;" class="num-mono">186/4</div>
-            <div style="font-size:10px;color:#71717A;">19.2 ov · CRR 9.6</div>
-          </div>
-          <div style="text-align:center;padding:0 16px;font-family:'Orbitron';font-weight:700;color:#71717A;font-size:18px;">VS</div>
-          <div style="text-align:center;flex:1;">
-            <div style="font-size:32px;">🇮🇳</div>
-            <div style="font-size:10px;font-weight:800;margin-top:4px;">CHENNAI SUPER KINGS</div>
-            <div style="font-family:'Orbitron';font-weight:900;font-size:28px;margin-top:4px;" class="num-mono">204/7</div>
-            <div style="font-size:10px;color:#71717A;">20.0 ov · RRR 11.2</div>
-          </div>
-        </div>
-      </div>
-
-      <!-- Markets -->
-      <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:10px;">
-        ${[
-          ['MATCH ODDS','MI',3.4,3.6],
-          ['BOOKMAKER','MI',2.8,2.9],
-          ['NEXT OVER RUNS','Over 8.5',1.9,2.0],
-        ].map(([t,team,b,l])=>`<div class="glass" style="padding:10px;">
-          <div style="font-size:9px;color:#71717A;font-weight:800;letter-spacing:1px;">${t}</div>
-          <div style="font-size:10px;font-weight:800;margin-top:4px;">${team}</div>
-          <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-top:8px;">
-            <button style="padding:8px;border-radius:8px;background:rgba(34,211,238,.15);border:1px solid rgba(34,211,238,.4);text-align:left;cursor:pointer;font-family:inherit;color:white;">
-              <div style="font-size:8px;color:#22D3EE;font-weight:800;">BACK</div>
-              <div style="font-family:'Orbitron';font-weight:900;font-size:16px;" class="num-mono">${b}</div>
-            </button>
-            <button style="padding:8px;border-radius:8px;background:rgba(236,72,153,.15);border:1px solid rgba(236,72,153,.4);text-align:left;cursor:pointer;font-family:inherit;color:white;">
-              <div style="font-size:8px;color:#EC4899;font-weight:800;">LAY</div>
-              <div style="font-family:'Orbitron';font-weight:900;font-size:16px;" class="num-mono">${l}</div>
-            </button>
-          </div>
-        </div>`).join('')}
-      </div>
-
-      <!-- Extra markets -->
-      <div class="glass" style="padding:10px;flex:1;min-height:0;display:flex;flex-direction:column;">
-        <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px;">
-          <div class="tab-pills">
-            <button class="active">All markets</button>
-            <button>Bookmaker</button>
-            <button>Fancy</button>
-            <button>Sessions</button>
-          </div>
-        </div>
-        <div class="scroll-y hide-scroll" style="flex:1;display:grid;grid-template-columns:repeat(2,1fr);gap:6px;">
-          ${[
-            ['Total 6s in MI innings','Over 8.5','Under 8.5',1.85,1.95],
-            ['Dhoni total runs','Over 14.5','Under 14.5',2.1,1.7],
-            ['Highest 1st innings over','Yes','No',1.75,2.05],
-            ['Bumrah wickets','Over 1.5','Under 1.5',2.4,1.55],
-            ['Tied match','Yes','No',12,1.05],
-            ['Super over','Yes','No',9,1.08],
-          ].map(([t,b,l,bo,lo])=>`<div style="padding:8px;border-radius:8px;background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.04);">
-            <div style="font-size:10px;font-weight:700;margin-bottom:6px;">${t}</div>
-            <div style="display:grid;grid-template-columns:1fr 1fr;gap:4px;">
-              <button style="padding:5px;border-radius:6px;background:rgba(34,211,238,.12);border:1px solid rgba(34,211,238,.3);cursor:pointer;font-family:inherit;color:white;text-align:left;">
-                <div style="font-size:8px;color:#22D3EE;">${b}</div>
-                <div style="font-family:'Orbitron';font-weight:800;font-size:11px;" class="num-mono">${bo}</div>
-              </button>
-              <button style="padding:5px;border-radius:6px;background:rgba(236,72,153,.12);border:1px solid rgba(236,72,153,.3);cursor:pointer;font-family:inherit;color:white;text-align:left;">
-                <div style="font-size:8px;color:#EC4899;">${l}</div>
-                <div style="font-family:'Orbitron';font-weight:800;font-size:11px;" class="num-mono">${lo}</div>
-              </button>
-            </div>
-          </div>`).join('')}
-        </div>
-      </div>
-    </div>
-
-    <!-- RIGHT: STATS + COMMENTARY + BETSLIP (consolidated) -->
-    <div class="stack-col">
-      <!-- Match stats -->
-      <div class="glass" style="padding:12px;">
-        <div class="card-h"><div class="label">MATCH STATS</div></div>
-        <div style="display:grid;grid-template-columns:repeat(2,1fr);gap:6px;margin-top:8px;font-size:10px;">
-          ${[
-            ['Toss','CSK won'],['Venue','Wankhede'],['Weather','Clear'],['Pitch','Batting'],
-            ['CSK · 1st inn','204/7'],['MI · Target','205'],['MI · CRR','9.6'],['MI · RRR','11.2'],
-          ].map(([k,v])=>`<div style="padding:6px 8px;border-radius:6px;background:rgba(255,255,255,.04);"><div style="font-size:8px;color:#71717A;">${k}</div><div style="font-family:'Orbitron';font-weight:700;color:white;" class="num-mono">${v}</div></div>`).join('')}
-        </div>
-      </div>
-      <!-- Live commentary -->
-      <div class="glass" style="padding:12px;flex:1;min-height:0;display:flex;flex-direction:column;">
-        <div class="card-h"><div class="label brand">📺 COMMENTARY</div><div class="right">● LIVE</div></div>
-        <div class="scroll-y hide-scroll" style="flex:1;margin-top:8px;display:flex;flex-direction:column;gap:5px;font-size:10px;">
-          <div style="display:flex;gap:6px;padding:5px;border-radius:6px;background:rgba(157,225,52,.05);"><span style="color:#9DE134;font-weight:800;width:30px;flex-shrink:0;" class="num-mono">19.2</span><span style="color:#fff;">Bumrah to Dhoni · <strong>WIDE!</strong></span></div>
-          <div style="display:flex;gap:6px;padding:5px;border-radius:6px;background:rgba(157,225,52,.05);"><span style="color:#9DE134;font-weight:800;width:30px;flex-shrink:0;" class="num-mono">19.1</span><span style="color:#A1A1AA;">Bumrah to Jadeja · 2 runs through covers</span></div>
-          <div style="display:flex;gap:6px;padding:5px;"><span style="color:#71717A;width:30px;flex-shrink:0;" class="num-mono">19.0</span><span style="color:#71717A;">Over change · 19 needed off 6</span></div>
-          <div style="display:flex;gap:6px;padding:5px;"><span style="color:#71717A;width:30px;flex-shrink:0;" class="num-mono">18.6</span><span style="color:#71717A;">Jadeja · SIX! over long-on 🏏</span></div>
-          <div style="display:flex;gap:6px;padding:5px;"><span style="color:#71717A;width:30px;flex-shrink:0;" class="num-mono">18.5</span><span style="color:#71717A;">FOUR! through point</span></div>
-          <div style="display:flex;gap:6px;padding:5px;"><span style="color:#71717A;width:30px;flex-shrink:0;" class="num-mono">18.4</span><span style="color:#71717A;">Single, rotated</span></div>
-        </div>
-      </div>
-      <!-- Betslip -->
-      <div class="glass cyan" style="padding:12px;">
-        <div class="card-h"><div class="label cyan-c">BETSLIP</div><div class="right" style="color:#22D3EE;">1</div></div>
-        <div style="margin-top:8px;padding:8px;border-radius:8px;background:rgba(34,211,238,.08);border:1px solid rgba(34,211,238,.3);">
-          <div style="display:flex;justify-content:space-between;font-size:9px;">
-            <span style="color:#22D3EE;font-weight:800;">BACK · MI · 3.4</span>
-            <button class="cta-ghost" style="padding:2px 6px;">×</button>
-          </div>
-          <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-top:6px;">
-            <div><div style="font-size:8px;color:#71717A;">Stake</div><div style="padding:5px 8px;border-radius:5px;background:rgba(255,255,255,.04);font-family:'Orbitron';font-weight:900;font-size:12px;" class="num-mono">৳ 500</div></div>
-            <div><div style="font-size:8px;color:#71717A;">Profit</div><div style="padding:5px 8px;border-radius:5px;background:rgba(157,225,52,.1);color:#9DE134;font-family:'Orbitron';font-weight:900;font-size:12px;" class="num-mono">৳ 1,200</div></div>
-          </div>
-        </div>
-        <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:3px;margin-top:6px;">
-          ${['100','500','1k','5k'].map(a=>`<button class="cta-ghost" style="padding:5px;font-size:10px;">৳${a}</button>`).join('')}
-        </div>
-        <button class="cta-neon cyan full" style="margin-top:8px;padding:10px;font-size:12px;" onclick="confetti();bumpBalance('cash', 1200);beep(1000, 200);">PLACE BET ৳ 500</button>
-      </div>
-    </div>
-  </div>
+  ${ProviderStrip(SportsProviders, sportsProvider, 'setSportsProvider')}
+  ${matches.length > 0 ? GameCarousel('cricket-car-' + sportsProvider, matches, cricketCardHTML) : '<div style="flex:1;display:grid;place-items:center;color:#71717A;font-size:13px;">No matches from this sportsbook today · check back soon</div>'}
 </div>`;
 };
 
+// ============================== FISHING ==============================
+let fishingProvider = 'jili';
+const FishingProviders = [
+  { k:'jili',       n:'JILI Fishing',  e:'🐟', count:'4 games' },
+  { k:'cq9',        n:'CQ9 Fishing',   e:'🐡', count:'3 games' },
+  { k:'spadefish',  n:'Spadegaming',   e:'🐠', count:'2 games' },
+  { k:'fachai',     n:'FaChai',        e:'🦈', count:'2 games' },
+  { k:'kagaming',   n:'KA Gaming',     e:'🦑', count:'1 game' },
+];
+function setFishingProvider(p){ fishingProvider = p; setScreen('fishing'); }
+
+const AllFishingGames = [
+  ['Royal Fishing','JILI','jili','big_bass','1,234','HOT','👑 Multiplayer · multi-cannon'],
+  ['Happy Fishing','JILI','jili','big_bass','892','LIVE','😊 Casual · 2-player tables'],
+  ['Boom Legend','JILI','jili','aviator','745','HOT','💣 Boss fights · jackpot fish'],
+  ['Dinosaur Tycoon','JILI','jili','aviator','512','NEW','🦖 Hunt dinos for jackpots'],
+  ['Fishing God','CQ9','cq9','big_bass','589','HOT','🌊 Deep sea · 100x fish'],
+  ['Fishing War','CQ9','cq9','aviator','345',null,'⚔️ PvP fishing battles'],
+  ['Cai Shen Fishing','CQ9','cq9','money_coming','423',null,'💰 Fortune-themed fish'],
+  ['Zombie Party','Spadegaming','spadefish','aviator','278',null,'🧟 Zombie sea hunt'],
+  ['Fish Hunter','Spadegaming','spadefish','big_bass','189',null,'🎯 Classic arcade fish'],
+  ['All Star Fishing','FaChai','fachai','big_bass','423','HOT','⭐ All-star roster'],
+  ['Dragon Fortune','FaChai','fachai','money_coming','312',null,'🐉 Dragon-themed fish'],
+  ['Wild Fishing','KA Gaming','kagaming','big_bass','156',null,'🌿 Forest river hunt'],
+];
+
+function fishingCardHTML(g){
+  const [n,prov,_pk,img,playing,tag,sub] = g;
+  return `<div class="game-card-big" onclick="launchGame('${n}','${prov}')">
+    <img src="${GAME_IMG(img)}" alt="${n}">
+    <div class="gc-tags">
+      ${tag?`<span class="gc-tag ${tag.toLowerCase()}">${tag}</span>`:'<span></span>'}
+      <span class="gc-count">👥 ${playing}</span>
+    </div>
+    <div class="gc-info">
+      <div class="gc-name">${n.toUpperCase()}</div>
+      <div class="gc-meta">${prov}</div>
+      <div class="gc-stats"><span>${sub}</span></div>
+    </div>
+    <div class="gc-play">▶ CAST LINE</div>
+  </div>`;
+}
+
+Screens.fishing = () => {
+  const provider = FishingProviders.find(p => p.k === fishingProvider) || FishingProviders[0];
+  const games = AllFishingGames.filter(g => g[2] === fishingProvider);
+  return `
+<div class="stack-col" style="height:100%;gap:14px;">
+  <div class="cat-header">
+    <div>
+      <div class="cat-title">🎣 FISHING</div>
+      <div class="cat-sub">Choose a provider, slide to find your fishing game</div>
+    </div>
+    <div class="cat-meta">${games.length} games · ${provider.n}</div>
+  </div>
+  ${ProviderStrip(FishingProviders, fishingProvider, 'setFishingProvider')}
+  ${GameCarousel('fishing-car-' + fishingProvider, games, fishingCardHTML)}
+</div>`;
+};
 
 // ============================== LIVE CASINO ==============================
-let liveProvider = 'all';
+let liveProvider = 'evolution';
 const LiveProviders = [
-  { k:'all',       n:'All Live',       e:'🎲', sub:'48 tables · all providers' },
-  { k:'evolution', n:'Evolution',      e:'🎡', sub:'Crazy Time · Lightning · Funky' },
-  { k:'pragmatic', n:'Pragmatic Live', e:'🍭', sub:'Mega Wheel · CandyLand' },
-  { k:'ezugi',     n:'Ezugi',          e:'🃏', sub:'Teen Patti · Andar Bahar' },
-  { k:'aesexy',    n:'AE Sexy',        e:'💃', sub:'Live dealers · Asian focus' },
-  { k:'biggaming', n:'Big Gaming',     e:'🐅', sub:'Bull Bull · Roulette · Sic Bo' },
-  { k:'wmcasino',  n:'WM Casino',      e:'🎴', sub:'Dragon Tiger · Baccarat' },
-  { k:'sagaming',  n:'SA Gaming',      e:'♠️', sub:'Asian live dealers' },
-  { k:'beton',     n:'BetOn Games',    e:'🎯', sub:'Virtual horse · greyhound' },
+  { k:'evolution', n:'Evolution',      e:'🎡', count:'9 tables' },
+  { k:'pragmatic', n:'Pragmatic Live', e:'🍭', count:'5 tables' },
+  { k:'ezugi',     n:'Ezugi',          e:'🃏', count:'3 tables' },
+  { k:'aesexy',    n:'AE Sexy',        e:'💃', count:'2 tables' },
+  { k:'biggaming', n:'Big Gaming',     e:'🐅', count:'2 tables' },
+  { k:'wmcasino',  n:'WM Casino',      e:'🎴', count:'1 table' },
+  { k:'sagaming',  n:'SA Gaming',      e:'♠️', count:'1 table' },
+  { k:'beton',     n:'BetOn Games',    e:'🎯', count:'1 table' },
 ];
 function setLiveProvider(p){ liveProvider = p; setScreen('live'); }
 
 const AllLiveGames = [
-  ['Crazy Time','Evolution','evolution','crazy_time',2849,1],
-  ['Lightning Roulette','Evolution','evolution','lightning_roulette',1124,0],
-  ['Funky Time','Evolution','evolution','funky_time',946,0],
-  ['Live Blackjack','Evolution','evolution','super_ace',1289,0],
-  ['Auto Roulette','Evolution','evolution','lightning_roulette',945,0],
-  ['Baccarat A','Evolution','evolution','super_ace',678,0],
-  ['Speed Bacc','Evolution','evolution','lightning_roulette',432,0],
-  ['Big Baller','Evolution','evolution','crazy_time',834,0],
-  ['Dragon Tiger','Evolution','evolution','super_ace',421,0],
-  ['Mega Wheel','Pragmatic','pragmatic','mega_wheel',678,0],
-  ['Candy Land','Pragmatic','pragmatic','sweet_bonanza',512,0],
-  ['Sweet Bonanza Live','Pragmatic','pragmatic','sweet_bonanza',623,0],
-  ['Mega Roulette','Pragmatic','pragmatic','lightning_roulette',445,0],
-  ['Speed Baccarat','Pragmatic','pragmatic','super_ace',389,0],
-  ['Teen Patti','Ezugi','ezugi','super_ace',756,0],
-  ['Andar Bahar','Ezugi','ezugi','super_ace',589,0],
-  ['Auto Roulette','Ezugi','ezugi','lightning_roulette',312,0],
-  ['Sexy Baccarat','AE Sexy','aesexy','super_ace',1156,0],
-  ['Sexy Roulette','AE Sexy','aesexy','lightning_roulette',678,0],
-  ['Bull Bull','Big Gaming','biggaming','super_ace',445,0],
-  ['Sic Bo','Big Gaming','biggaming','crazy_time',289,0],
-  ['Dragon Tiger','WM Casino','wmcasino','super_ace',512,0],
-  ['SA Baccarat','SA Gaming','sagaming','super_ace',423,0],
-  ['Virtual Horse','BetOn','beton','aviator',189,0],
+  ['Crazy Time','Evolution','evolution','crazy_time','2,849','LIVE','Wheel · 5 bonus rounds'],
+  ['Lightning Roulette','Evolution','evolution','lightning_roulette','1,124','LIVE','500x lightning numbers'],
+  ['Funky Time','Evolution','evolution','funky_time','946','LIVE','70s disco game show'],
+  ['Live Blackjack','Evolution','evolution','super_ace','1,289','LIVE','Multi-hand · multiplayer'],
+  ['Auto Roulette','Evolution','evolution','lightning_roulette','945','LIVE','No dealer · 24/7'],
+  ['Baccarat A','Evolution','evolution','super_ace','678','LIVE','Squeeze & speed modes'],
+  ['Speed Bacc','Evolution','evolution','lightning_roulette','432','LIVE','27s per round'],
+  ['Monopoly Big Baller','Evolution','evolution','crazy_time','834','HOT','Monopoly-themed bingo'],
+  ['Dragon Tiger','Evolution','evolution','super_ace','421','LIVE','Highest card wins'],
+  ['Mega Wheel','Pragmatic','pragmatic','mega_wheel','678','LIVE','54-segment wheel'],
+  ['Candy Land','Pragmatic','pragmatic','sweet_bonanza','512','LIVE','Sweet bonus games'],
+  ['Sweet Bonanza Live','Pragmatic','pragmatic','sweet_bonanza','623','HOT','Live + bonus rounds'],
+  ['Mega Roulette','Pragmatic','pragmatic','lightning_roulette','445','LIVE','500x mega multipliers'],
+  ['Speed Baccarat','Pragmatic','pragmatic','super_ace','389','LIVE','Fast 25s round'],
+  ['Teen Patti','Ezugi','ezugi','super_ace','756','HOT','BD favorite · 3 card poker'],
+  ['Andar Bahar','Ezugi','ezugi','super_ace','589','LIVE','Classic Indian card game'],
+  ['Auto Roulette','Ezugi','ezugi','lightning_roulette','312','LIVE','No dealer · 24/7'],
+  ['Sexy Baccarat','AE Sexy','aesexy','super_ace','1,156','HOT','Live · Asian dealers'],
+  ['Sexy Roulette','AE Sexy','aesexy','lightning_roulette','678','LIVE','Asian live focus'],
+  ['Bull Bull','Big Gaming','biggaming','super_ace','445','LIVE','Card combinations'],
+  ['Sic Bo','Big Gaming','biggaming','crazy_time','289','LIVE','3-dice Asian classic'],
+  ['Dragon Tiger','WM Casino','wmcasino','super_ace','512','LIVE','Asian dealer · fast'],
+  ['SA Baccarat','SA Gaming','sagaming','super_ace','423','LIVE','Asian baccarat tables'],
+  ['Virtual Horse','BetOn','beton','aviator','189','NEW','Virtual horse racing'],
 ];
+
+function liveCardHTML(g){
+  const [n,prov,_pk,img,playing,tag,sub] = g;
+  return `<div class="game-card-big" onclick="launchGame('${n}','${prov}')">
+    <img src="${GAME_IMG(img)}" alt="${n}">
+    <div class="gc-tags">
+      ${tag?`<span class="gc-tag ${tag.toLowerCase()}">${tag}</span>`:'<span></span>'}
+      <span class="gc-count">👥 ${playing}</span>
+    </div>
+    <div class="gc-info">
+      <div class="gc-name">${n.toUpperCase()}</div>
+      <div class="gc-meta">${prov}</div>
+      <div class="gc-stats">
+        <span>${sub}</span>
+      </div>
+    </div>
+    <div class="gc-play">▶ JOIN TABLE</div>
+  </div>`;
+}
 
 Screens.live = () => {
   const provider = LiveProviders.find(p => p.k === liveProvider) || LiveProviders[0];
-  const games = liveProvider === 'all' ? AllLiveGames : AllLiveGames.filter(g => g[2] === liveProvider);
-  const featured = games.find(g => g[5] === 1) || games[0];
+  const games = AllLiveGames.filter(g => g[2] === liveProvider);
   return `
-<div class="stack-col" style="height:100%;gap:10px;">
-  <!-- Live casino provider selector -->
-  <div class="glass" style="padding:10px 12px;display:flex;align-items:center;gap:12px;flex-shrink:0;">
-    <div class="card-h" style="margin:0;flex-shrink:0;"><div class="label">PROVIDER</div></div>
-    <div style="display:flex;gap:6px;overflow-x:auto;flex:1;" class="hide-scroll">
-      ${LiveProviders.map(p => {
-        const act = p.k === liveProvider;
-        return `<button onclick="setLiveProvider('${p.k}')" style="flex-shrink:0;display:flex;align-items:center;gap:8px;padding:6px 12px;border-radius:10px;cursor:pointer;font-family:inherit;border:1px solid ${act?'#9DE134':'rgba(255,255,255,.08)'};${act?'background:rgba(157,225,52,.15);color:white;box-shadow:0 0 12px rgba(157,225,52,.25);':'background:rgba(255,255,255,.04);color:#A1A1AA;'}transition:all .2s;">
-          <span style="font-size:16px;">${p.e}</span>
-          <div style="text-align:left;">
-            <div style="font-size:11px;font-weight:800;">${p.n}</div>
-            <div style="font-size:9px;opacity:.7;">${p.sub}</div>
-          </div>
-        </button>`;
-      }).join('')}
+<div class="stack-col" style="height:100%;gap:14px;">
+  <div class="cat-header">
+    <div>
+      <div class="cat-title">🎲 LIVE CASINO</div>
+      <div class="cat-sub">Choose a provider, slide to find your table</div>
     </div>
-    <div style="font-size:10px;color:#9DE134;font-weight:800;flex-shrink:0;display:flex;align-items:center;gap:4px;"><span style="width:6px;height:6px;border-radius:50%;background:#9DE134;animation:live-pulse 1.4s infinite;"></span>${games.length} TABLES</div>
+    <div class="cat-meta">${games.length} live · ${provider.n}</div>
   </div>
-
-  <!-- Filter rail + content -->
-  <div class="screen-grid cols-side" style="flex:1;min-height:0;">
-    <div class="glass" style="padding:12px;display:flex;flex-direction:column;gap:10px;">
-      <div>
-        <div class="card-h"><div class="label">TYPE</div></div>
-        <div style="display:flex;flex-direction:column;gap:4px;margin-top:6px;">
-          ${[['All',games.length,'active'],['🎲 Roulette','12',''],['🃏 Blackjack','9',''],['🎴 Baccarat','7',''],['🎡 Game shows','8',''],['🐉 Dragon Tiger','4',''],['🎰 Crash','3',''],['⚡ Quick','5','']].map(([n,c,a])=>`<button style="display:flex;align-items:center;justify-content:space-between;padding:6px 10px;border-radius:8px;cursor:pointer;font-size:11px;font-family:inherit;border:none;${a?'background:#9DE134;color:#0a0a0a;font-weight:800':'background:transparent;color:#D4D4D8'}"><span>${n}</span><span style="font-size:9px;opacity:.7;" class="num-mono">${c}</span></button>`).join('')}
-        </div>
-      </div>
-      <div style="border-top:1px solid rgba(255,255,255,.06);padding-top:10px;">
-        <div class="card-h"><div class="label">BET LIMITS</div></div>
-        <div style="display:flex;flex-direction:column;gap:4px;margin-top:6px;">
-          ${['৳ 20 – ৳ 500','৳ 500 – ৳ 5K','৳ 5K – ৳ 50K','VIP · ৳ 50K+'].map(n=>`<button style="text-align:left;padding:6px 10px;border-radius:8px;cursor:pointer;font-size:11px;font-family:inherit;border:none;background:transparent;color:#D4D4D8;">${n}</button>`).join('')}
-        </div>
-      </div>
-      <div style="border-top:1px solid rgba(255,255,255,.06);padding-top:10px;">
-        <div style="font-size:9px;color:#9DE134;font-weight:800;letter-spacing:1px;">${provider.n.toUpperCase()}</div>
-        <div style="font-size:9px;color:#71717A;margin-top:2px;line-height:1.4;">${provider.sub}</div>
-      </div>
-    </div>
-
-    <div class="stack-col">
-      ${featured ? `<div class="glass" style="padding:0;overflow:hidden;height:140px;display:grid;grid-template-columns:1.5fr 1fr;">
-        <div style="position:relative;">
-          <img src="${GAME_IMG(featured[3])}" style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover;">
-          <div style="position:absolute;inset:0;background:linear-gradient(90deg,rgba(5,5,7,.4),transparent 60%);"></div>
-          <span class="pill red" style="position:absolute;top:10px;left:10px;display:flex;align-items:center;gap:6px;"><span style="width:6px;height:6px;border-radius:50%;background:white;animation:live-pulse 1.4s infinite;"></span>LIVE NOW</span>
-          <span style="position:absolute;bottom:10px;left:10px;padding:4px 10px;border-radius:6px;background:rgba(0,0,0,.7);font-size:10px;font-weight:700;" class="num-mono">${featured[4].toLocaleString()} playing</span>
-        </div>
-        <div style="padding:14px;display:flex;flex-direction:column;justify-content:space-between;">
-          <div>
-            <div style="font-family:'Orbitron';font-weight:900;font-size:16px;text-transform:uppercase;">${featured[0]}</div>
-            <div style="font-size:10px;color:#71717A;">${featured[1]} · Min ৳20 · Max ৳1L</div>
-            <div style="display:flex;align-items:center;gap:6px;margin-top:8px;">
-              <span style="font-size:9px;color:#71717A;">Last:</span>
-              <div style="display:flex;gap:3px;">
-                ${[2,5,10,1,2,'CT',5].map(v=>`<span style="width:18px;height:18px;border-radius:50%;background:rgba(255,255,255,.06);display:grid;place-items:center;font-size:9px;font-weight:800;">${v}</span>`).join('')}
-              </div>
-            </div>
-          </div>
-          <button class="cta-neon" onclick="setScreen('slotroom')">JOIN ▶</button>
-        </div>
-      </div>` : ''}
-      <div class="scroll-y hide-scroll" style="flex:1;display:grid;grid-template-columns:repeat(5,1fr);gap:8px;align-content:start;">
-        ${games.filter(g => g !== featured).map(([n,p,_pkey,img,pl])=>`<button class="glass hover" style="padding:0;overflow:hidden;cursor:pointer;border:none;" onclick="setScreen('slotroom')">
-          <div style="position:relative;aspect-ratio:5/3;">
-            <img src="${GAME_IMG(img)}" style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover;">
-            <div style="position:absolute;inset:0;background:linear-gradient(180deg,transparent 50%,rgba(5,5,7,.85));"></div>
-            <span class="pill red" style="position:absolute;top:6px;left:6px;padding:2px 6px;font-size:8px;display:flex;align-items:center;gap:3px;"><span style="width:4px;height:4px;border-radius:50%;background:white;animation:live-pulse 1.4s infinite;"></span>LIVE</span>
-            <span style="position:absolute;top:6px;right:6px;padding:2px 6px;border-radius:4px;background:rgba(0,0,0,.7);font-size:9px;font-weight:700;" class="num-mono">${pl}</span>
-          </div>
-          <div style="padding:6px 8px;text-align:left;">
-            <div style="font-size:11px;font-weight:800;color:white;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${n}</div>
-            <div style="font-size:9px;color:#71717A;">${p}</div>
-          </div>
-        </button>`).join('')}
-        ${games.length === 0 ? '<div style="grid-column:1/-1;padding:40px;text-align:center;color:#71717A;font-size:12px;">No tables from this provider yet · check back soon</div>' : ''}
-      </div>
-    </div>
-  </div>
+  ${ProviderStrip(LiveProviders, liveProvider, 'setLiveProvider')}
+  ${GameCarousel('live-car-' + liveProvider, games, liveCardHTML)}
 </div>`;
 };
 
 // ============================== SLOTS LOBBY ==============================
-let slotsProvider = 'all';
+let slotsProvider = 'pragmatic';
 const SlotsProviders = [
-  { k:'all',         n:'All Slots',      e:'🎰', sub:'312 games · all providers' },
-  { k:'pragmatic',   n:'Pragmatic Play', e:'⚡', sub:'Sweet Bonanza · Olympus · Big Bass' },
-  { k:'jili',        n:'JILI Games',     e:'🃏', sub:'Super Ace · Money Coming · Boom' },
-  { k:'pgsoft',      n:'PG Soft',        e:'🐯', sub:'Mahjong · Aztec · Lucky Neko' },
-  { k:'spribe',      n:'Spribe',         e:'✈️', sub:'Aviator · Plinko · Mini Mines' },
-  { k:'habanero',    n:'Habanero',       e:'🌶️', sub:'Asian-themed slots' },
-  { k:'spadegaming', n:'Spadegaming',    e:'♠️', sub:'Wow Prosperity · Fa Cai Shen' },
-  { k:'cq9',         n:'CQ9 Gaming',     e:'🐉', sub:'Fortune Lions · Dancing Lion' },
-  { k:'redtiger',    n:'Red Tiger',      e:'🐅', sub:'Daily Jackpots · UK favorites' },
+  { k:'pragmatic',   n:'Pragmatic Play', e:'⚡', count:'6 games' },
+  { k:'jili',        n:'JILI Games',     e:'🃏', count:'6 games' },
+  { k:'pgsoft',      n:'PG Soft',        e:'🐯', count:'5 games' },
+  { k:'spribe',      n:'Spribe',         e:'✈️', count:'4 games' },
+  { k:'habanero',    n:'Habanero',       e:'🌶️', count:'2 games' },
+  { k:'spadegaming', n:'Spadegaming',    e:'♠️', count:'2 games' },
+  { k:'cq9',         n:'CQ9 Gaming',     e:'🐉', count:'2 games' },
+  { k:'redtiger',    n:'Red Tiger',      e:'🐅', count:'1 game' },
 ];
 function setSlotsProvider(p){ slotsProvider = p; setScreen('slots'); }
 
 const AllSlotGames = [
-  ['Sweet Bonanza','Pragmatic','pragmatic','sweet_bonanza','96.5'],
-  ['Gates of Olympus','Pragmatic','pragmatic','lightning_roulette','96.5'],
-  ['Wild West Gold','Pragmatic','pragmatic','chicken_road','96.5'],
-  ['Big Bass Bonanza','Pragmatic','pragmatic','big_bass','96.7'],
-  ['The Dog House','Pragmatic','pragmatic','chicken_road','96.5'],
-  ['Sugar Rush','Pragmatic','pragmatic','sweet_bonanza','96.5'],
-  ['Super Ace','JILI','jili','super_ace','96.0'],
-  ['Money Coming','JILI','jili','money_coming','97.0'],
-  ['Boom Legend','JILI','jili','aviator','96.5'],
-  ['Golden Empire','JILI','jili','money_coming','96.7'],
-  ['Fortune Gems','JILI','jili','super_ace','96.0'],
-  ['Crazy 777','JILI','jili','money_coming','96.2'],
-  ['Mahjong Ways','PG Soft','pgsoft','super_ace','96.9'],
-  ['Treasures of Aztec','PG Soft','pgsoft','money_coming','96.7'],
-  ['Lucky Neko','PG Soft','pgsoft','chicken_road','96.7'],
-  ['Fortune Tiger','PG Soft','pgsoft','super_ace','96.8'],
-  ['Fortune Ox','PG Soft','pgsoft','money_coming','96.7'],
-  ['Aviator','Spribe','spribe','aviator','97.0'],
-  ['Plinko','Spribe','spribe','plinko','97.0'],
-  ['Mini Mines','Spribe','spribe','plinko','97.0'],
-  ['Dice','Spribe','spribe','plinko','98.0'],
-  ['Hot Hot Fruit','Habanero','habanero','sweet_bonanza','96.7'],
-  ['Wealth Inn','Habanero','habanero','money_coming','96.7'],
-  ['Wow Prosperity','Spadegaming','spadegaming','money_coming','96.5'],
-  ['Fa Cai Shen','Spadegaming','spadegaming','super_ace','96.6'],
-  ['Fortune Lions','CQ9','cq9','aviator','96.0'],
-  ['Dancing Lion','CQ9','cq9','crazy_time','96.5'],
-  ['Daily Jackpot','Red Tiger','redtiger','lightning_roulette','95.7'],
+  ['Sweet Bonanza','Pragmatic','pragmatic','sweet_bonanza','96.5','2,847','HOT'],
+  ['Gates of Olympus','Pragmatic','pragmatic','lightning_roulette','96.5','1,892','HOT'],
+  ['Wild West Gold','Pragmatic','pragmatic','chicken_road','96.5','956',null],
+  ['Big Bass Bonanza','Pragmatic','pragmatic','big_bass','96.7','1,234',null],
+  ['The Dog House','Pragmatic','pragmatic','chicken_road','96.5','812',null],
+  ['Sugar Rush','Pragmatic','pragmatic','sweet_bonanza','96.5','645','NEW'],
+  ['Super Ace','JILI','jili','super_ace','96.0','2,103','JACKPOT'],
+  ['Money Coming','JILI','jili','money_coming','97.0','1,892','HOT'],
+  ['Boom Legend','JILI','jili','aviator','96.5','745',null],
+  ['Golden Empire','JILI','jili','money_coming','96.7','612',null],
+  ['Fortune Gems','JILI','jili','super_ace','96.0','489','NEW'],
+  ['Crazy 777','JILI','jili','money_coming','96.2','356',null],
+  ['Mahjong Ways','PG Soft','pgsoft','super_ace','96.9','1,456','HOT'],
+  ['Treasures of Aztec','PG Soft','pgsoft','money_coming','96.7','823',null],
+  ['Lucky Neko','PG Soft','pgsoft','chicken_road','96.7','712',null],
+  ['Fortune Tiger','PG Soft','pgsoft','super_ace','96.8','1,089','HOT'],
+  ['Fortune Ox','PG Soft','pgsoft','money_coming','96.7','645',null],
+  ['Aviator','Spribe','spribe','aviator','97.0','2,847','HOT'],
+  ['Plinko','Spribe','spribe','plinko','97.0','943','NEW'],
+  ['Mini Mines','Spribe','spribe','plinko','97.0','512',null],
+  ['Dice','Spribe','spribe','plinko','98.0','389',null],
+  ['Hot Hot Fruit','Habanero','habanero','sweet_bonanza','96.7','267',null],
+  ['Wealth Inn','Habanero','habanero','money_coming','96.7','189',null],
+  ['Wow Prosperity','Spadegaming','spadegaming','money_coming','96.5','423',null],
+  ['Fa Cai Shen','Spadegaming','spadegaming','super_ace','96.6','356',null],
+  ['Fortune Lions','CQ9','cq9','aviator','96.0','512',null],
+  ['Dancing Lion','CQ9','cq9','crazy_time','96.5','278',null],
+  ['Daily Jackpot','Red Tiger','redtiger','lightning_roulette','95.7','445','JACKPOT'],
 ];
+
+function slotCardHTML(g){
+  const [n,prov,_pk,img,rtp,playing,tag] = g;
+  return `<div class="game-card-big" onclick="launchGame('${n}','${prov}')">
+    <img src="${GAME_IMG(img)}" alt="${n}">
+    <div class="gc-tags">
+      ${tag?`<span class="gc-tag ${tag.toLowerCase()}">${tag}</span>`:'<span></span>'}
+      <span class="gc-count">👥 ${playing}</span>
+    </div>
+    <div class="gc-info">
+      <div class="gc-name">${n.toUpperCase()}</div>
+      <div class="gc-meta">${prov}</div>
+      <div class="gc-stats">
+        <span>RTP ${rtp}%</span>
+        <span>৳20 min</span>
+      </div>
+    </div>
+    <div class="gc-play">▶ PLAY NOW</div>
+  </div>`;
+}
 
 Screens.slots = () => {
   const provider = SlotsProviders.find(p => p.k === slotsProvider) || SlotsProviders[0];
-  const games = slotsProvider === 'all' ? AllSlotGames : AllSlotGames.filter(g => g[2] === slotsProvider);
+  const games = AllSlotGames.filter(g => g[2] === slotsProvider);
   return `
-<div class="stack-col" style="height:100%;gap:10px;">
-  <!-- Slots provider selector -->
-  <div class="glass" style="padding:10px 12px;display:flex;align-items:center;gap:12px;flex-shrink:0;">
-    <div class="card-h" style="margin:0;flex-shrink:0;"><div class="label">PROVIDER</div></div>
-    <div style="display:flex;gap:6px;overflow-x:auto;flex:1;" class="hide-scroll">
-      ${SlotsProviders.map(p => {
-        const act = p.k === slotsProvider;
-        return `<button onclick="setSlotsProvider('${p.k}')" style="flex-shrink:0;display:flex;align-items:center;gap:8px;padding:6px 12px;border-radius:10px;cursor:pointer;font-family:inherit;border:1px solid ${act?'#9DE134':'rgba(255,255,255,.08)'};${act?'background:rgba(157,225,52,.15);color:white;box-shadow:0 0 12px rgba(157,225,52,.25);':'background:rgba(255,255,255,.04);color:#A1A1AA;'}transition:all .2s;">
-          <span style="font-size:16px;">${p.e}</span>
-          <div style="text-align:left;">
-            <div style="font-size:11px;font-weight:800;">${p.n}</div>
-            <div style="font-size:9px;opacity:.7;">${p.sub}</div>
-          </div>
-        </button>`;
-      }).join('')}
+<div class="stack-col" style="height:100%;gap:14px;">
+  <div class="cat-header">
+    <div>
+      <div class="cat-title">🎰 SLOTS</div>
+      <div class="cat-sub">Choose a provider, slide to find your game</div>
     </div>
-    <div style="font-size:10px;color:#9DE134;font-weight:800;flex-shrink:0;display:flex;align-items:center;gap:4px;"><span style="width:6px;height:6px;border-radius:50%;background:#9DE134;animation:live-pulse 1.4s infinite;"></span>${games.length} GAMES</div>
+    <div class="cat-meta">${games.length} games · ${provider.n}</div>
   </div>
-
-  <!-- Filter rail + game grid -->
-  <div class="screen-grid cols-side" style="flex:1;min-height:0;">
-    <div class="glass" style="padding:12px;display:flex;flex-direction:column;gap:10px;">
-      <div class="glass amber" style="padding:10px;background:linear-gradient(135deg,rgba(255,182,39,.2),rgba(15,15,18,.4));">
-        <div style="font-size:8px;color:#FFB627;font-weight:800;letter-spacing:1px;">JACKPOT</div>
-        <div style="font-family:'Orbitron';font-weight:900;font-size:18px;background:linear-gradient(180deg,#FFE787,#FFB627);-webkit-background-clip:text;background-clip:text;color:transparent;" class="num-mono" id="jackpot-val">৳ 1,24,87,302</div>
-        <div style="font-size:9px;color:#71717A;">↑ ৳ 234/sec</div>
-      </div>
-      <div>
-        <div class="card-h"><div class="label">SORT</div></div>
-        <div style="display:flex;flex-direction:column;gap:4px;margin-top:6px;">
-          ${[['🔥 Hot','active'],['✨ New',''],['🏆 Top wins',''],['📈 RTP',''],['🎯 Megaways',''],['💰 Buy bonus',''],['💎 Jackpot','']].map(([n,a])=>`<button style="text-align:left;padding:6px 10px;border-radius:8px;cursor:pointer;font-size:11px;font-family:inherit;border:none;${a?'background:#9DE134;color:#0a0a0a;font-weight:800':'background:transparent;color:#D4D4D8'}">${n}</button>`).join('')}
-        </div>
-      </div>
-      <div style="border-top:1px solid rgba(255,255,255,.06);padding-top:10px;">
-        <div class="card-h"><div class="label">VOLATILITY</div></div>
-        <div style="display:flex;flex-direction:column;gap:4px;margin-top:6px;">
-          ${['Low','Medium','High','Very High'].map(v=>`<button style="text-align:left;padding:6px 10px;border-radius:8px;cursor:pointer;font-size:11px;font-family:inherit;border:none;background:transparent;color:#D4D4D8;">${v}</button>`).join('')}
-        </div>
-      </div>
-      <div style="border-top:1px solid rgba(255,255,255,.06);padding-top:10px;">
-        <div style="font-size:9px;color:#9DE134;font-weight:800;letter-spacing:1px;">${provider.n.toUpperCase()}</div>
-        <div style="font-size:9px;color:#71717A;margin-top:2px;line-height:1.4;">${provider.sub}</div>
-      </div>
-    </div>
-
-    <div class="scroll-y hide-scroll" style="display:grid;grid-template-columns:repeat(7,1fr);gap:8px;align-content:start;">
-      ${games.map(([n,prov,_pkey,img,rtp])=>`<button class="glass hover" style="padding:0;overflow:hidden;cursor:pointer;border:none;" onclick="setScreen('slotroom')">
-        <div style="position:relative;aspect-ratio:1;">
-          <img src="${GAME_IMG(img)}" style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover;">
-          <div style="position:absolute;inset:0;background:linear-gradient(180deg,transparent 50%,rgba(5,5,7,.85));"></div>
-          <span style="position:absolute;top:6px;right:6px;padding:2px 5px;border-radius:4px;background:rgba(0,0,0,.8);color:#9DE134;font-size:9px;font-weight:800;">${rtp}%</span>
-        </div>
-        <div style="padding:5px 7px;text-align:left;">
-          <div style="font-size:10px;font-weight:800;color:white;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${n}</div>
-          <div style="font-size:8px;color:#71717A;">${prov}</div>
-        </div>
-      </button>`).join('')}
-      ${games.length === 0 ? '<div style="grid-column:1/-1;padding:40px;text-align:center;color:#71717A;font-size:12px;">No games from this provider yet · check back soon</div>' : ''}
-    </div>
-  </div>
+  ${ProviderStrip(SlotsProviders, slotsProvider, 'setSlotsProvider')}
+  ${GameCarousel('slots-car-' + slotsProvider, games, slotCardHTML)}
 </div>`;
 };
 
