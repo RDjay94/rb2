@@ -122,6 +122,9 @@ tailwind.config = {
 </head>
 <body class="min-h-screen">
 
+</head>
+<body class="min-h-screen">
+
 <!-- ============================== PASSWORD GATE ============================== -->
 <div id="gate">
   <div class="grid-bg-mask"></div>
@@ -486,19 +489,18 @@ const Home = () => `
 
     <!-- CENTER: HOT GAMES — the entire focus of the lobby -->
     <div class="flex-1 min-w-0 flex flex-col p-3 gap-2 min-h-0">
-      <!-- Hot Games header -->
-      <div class="flex items-center justify-between flex-shrink-0">
-        <div class="flex items-center gap-2.5">
-          <span class="text-[9px] px-2 py-1 rounded-full bg-red-500 font-black light-flicker">🔥 FEATURED</span>
-          <div class="font-display font-black text-2xl neon-text gold-text leading-none">HOT GAMES</div>
-          <span class="text-[10px] text-zinc-500 font-normal flex items-center gap-1"><span class="w-1.5 h-1.5 rounded-full bg-brand live-dot"></span><span class="num-mono">16,842</span> online</span>
+      <!-- Hot Games header — compact -->
+      <div class="flex items-center justify-between gap-2 flex-shrink-0">
+        <div class="flex items-center gap-2 min-w-0">
+          <span class="text-[9px] px-1.5 py-0.5 rounded bg-red-500 font-black light-flicker leading-none">🔥</span>
+          <div class="font-display font-black text-base neon-text gold-text leading-none whitespace-nowrap">HOT GAMES</div>
+          <span class="text-[9px] text-zinc-500 flex items-center gap-1 whitespace-nowrap"><span class="w-1 h-1 rounded-full bg-brand live-dot"></span><span class="num-mono">16,842</span></span>
         </div>
-        <div class="flex gap-1">
-          <button class="px-2.5 py-1 rounded text-[10px] font-bold bg-brand text-ink-0">All</button>
-          <button class="px-2.5 py-1 rounded text-[10px] font-bold bg-ink-2 border border-line">🔥 Hot</button>
-          <button class="px-2.5 py-1 rounded text-[10px] font-bold bg-ink-2 border border-line">✨ New</button>
-          <button class="px-2.5 py-1 rounded text-[10px] font-bold bg-ink-2 border border-line">💎 Jackpot</button>
-          <button class="px-2.5 py-1 rounded text-[10px] font-bold bg-ink-2 border border-line">View all →</button>
+        <div class="flex gap-1 flex-shrink-0">
+          <button class="px-2 py-0.5 rounded text-[10px] font-bold bg-brand text-ink-0">All</button>
+          <button class="px-2 py-0.5 rounded text-[10px] font-bold bg-ink-2 border border-line">Hot</button>
+          <button class="px-2 py-0.5 rounded text-[10px] font-bold bg-ink-2 border border-line">New</button>
+          <button class="px-2 py-0.5 rounded text-[10px] font-bold bg-ink-2 border border-line">Jackpot</button>
         </div>
       </div>
 
@@ -518,14 +520,9 @@ const Home = () => `
             <button onclick="setProtoScreen('${k==='slots'?'slotroom':k==='crash'?'crash':'live'}')" class="card-3d rounded-xl overflow-hidden border border-line text-left relative bg-ink-2 group">
               <div class="h-full relative">
                 <img src="game-assets/generated/${img}.png" alt="${n}" class="absolute inset-0 w-full h-full object-cover" loading="lazy">
-                <div class="absolute inset-0 bg-gradient-to-t from-ink-0/90 via-ink-0/20 to-transparent"></div>
+                <div class="absolute inset-0 bg-gradient-to-t from-ink-0/90 via-ink-0/10 to-transparent"></div>
                 <div class="absolute top-1.5 left-1.5 text-[8px] px-1.5 py-0.5 rounded font-black ${tag==='HOT'?'bg-red-500':tag==='LIVE'?'bg-red-500 flex items-center gap-0.5':tag==='NEW'?'bg-cyan-500':'bg-brand text-ink-0'}">${tag==='LIVE'?'<span class="w-1 h-1 rounded-full bg-white live-dot"></span>':''}${tag}</div>
                 <div class="absolute top-1.5 right-1.5 text-[8px] px-1.5 py-0.5 rounded bg-black/80 font-bold num-mono">${wins}</div>
-                <!-- Big-win popup bottom -->
-                <div class="absolute inset-x-2 bottom-9 px-1.5 py-1 rounded bg-ink-0/90 backdrop-blur border border-brand/40">
-                  <div class="text-[8px] text-brand font-bold">M****61 won</div>
-                  <div class="text-[11px] font-black gold-text num-mono">৳ 12,400</div>
-                </div>
                 <!-- Footer with title -->
                 <div class="absolute inset-x-0 bottom-0 px-2 py-1.5 bg-ink-0/85 backdrop-blur">
                   <div class="text-[12px] font-black truncate">${n}</div>
