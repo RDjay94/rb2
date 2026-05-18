@@ -1,3 +1,56 @@
+// ============================== SPLINE 3D SCENE CONFIG ==============================
+// Paste your Spline scene URLs here. Get them from:
+//   spline.design → your scene → Export → Code → copy "Public URL" (ends in .splinecode)
+// Leave a value as '' to fall back to the 2D/CSS version.
+//
+// Tip: Start with templates from spline.design/community — many free 3D characters,
+// wheels, casino-chip stacks, and trophies you can fork and tweak.
+const SplineScenes = {
+  // The big character on Lobby's center stage. Try a 3D character / mascot scene.
+  avatar:    '', // e.g. 'https://prod.spline.design/XXXXX/scene.splinecode'
+
+  // The fortune wheel on Lobby's left card. Try a 3D rotating wheel.
+  wheel:     '',
+
+  // Big 3D RajaBaji logo (used in splash + login). Try animated text or logo mark.
+  logo:      '',
+
+  // Background scene for the lobby (placed below the layout). E.g. floating coins,
+  // particle system, or abstract neon environment.
+  lobbyBg:   '',
+
+  // Slot machine for Slot Room. E.g. 3D slot machine model.
+  slotMachine: '',
+
+  // Crash/Aviator plane scene. E.g. 3D plane flying.
+  plane:     '',
+
+  // Tournament trophy (used on Leaderboard hero).
+  trophy:    '',
+
+  // Promotion gift box (used on Promotions hero + Calendar mystery box).
+  giftBox:   '',
+};
+
+// Render a Spline embed or a CSS fallback if the URL is empty.
+// Usage: ${SplineSlot('avatar', { fallback: '<div>🤴</div>', height: '280px' })}
+function SplineSlot(sceneKey, opts = {}){
+  const url = SplineScenes[sceneKey];
+  const id = 'spline-' + sceneKey + '-' + Math.floor(Math.random()*1e9);
+  const fallback = opts.fallback || '';
+  if (!url) {
+    return `<div class="spline-slot" style="${opts.style||''}">
+      ${fallback}
+      ${opts.showStatus ? '<div class="spline-status fallback">FALLBACK · 2D</div>' : ''}
+    </div>`;
+  }
+  return `<div class="spline-slot" style="${opts.style||''}">
+    <div class="spline-loader" id="${id}-loader"><div class="spinner"></div></div>
+    <spline-viewer url="${url}" loading-anim-type="spinner-big-light" events-target="global" onload="document.getElementById('${id}-loader')?.classList.add('hidden')"></spline-viewer>
+    ${opts.showStatus ? '<div class="spline-status live">3D · LIVE</div>' : ''}
+  </div>`;
+}
+
 // ============================== FRAMEWORK ==============================
 let currentScreen = 'lobby';
 const Screens = {};
@@ -297,6 +350,7 @@ setInterval(() => {
 
 // ============================== LOBBY ==============================
 Screens.lobby = () => `
+${SplineScenes.lobbyBg ? `<div style="position:absolute;inset:0;z-index:2;pointer-events:none;opacity:.6;">${SplineSlot('lobbyBg')}</div>` : ''}
 <div class="layout-lobby">
   <!-- LEFT -->
   <div class="stack-col">
@@ -335,17 +389,20 @@ Screens.lobby = () => `
     </div>
   </div>
 
-  <!-- CENTER: AVATAR -->
+  <!-- CENTER: AVATAR (Spline 3D scene with CSS fallback) -->
   <div class="avatar-stage">
     <div class="spotlight"></div>
     <div class="energy-ring-2"></div>
     <div class="energy-ring"></div>
     <div class="character-wrap" id="character-wrap" onclick="emote()">
-      <div class="tier-emblem"><span class="icon">🥈</span><span class="tier-name">SILVER II</span></div>
-      <div class="orbit" id="orbit"></div>
-      <div class="character" id="character">🤴</div>
-      <div class="name-plate"><div class="name">RD JAY</div><div class="skin">ROYAL PANJABI</div></div>
-      <div class="bubble" id="bubble"><div class="bn" id="bubble-bn">🏏 চলো খেলি!</div><div class="en" id="bubble-en">Let's play!</div></div>
+      <div class="tier-emblem" style="z-index:8;"><span class="icon">🥈</span><span class="tier-name">SILVER II</span></div>
+      ${SplineSlot('avatar', {
+        style: 'position:absolute;inset:0;',
+        showStatus: true,
+        fallback: `<div class="orbit" id="orbit"></div><div class="character" id="character" style="position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);">🤴</div>`
+      })}
+      <div class="name-plate" style="z-index:8;"><div class="name">RD JAY</div><div class="skin">ROYAL PANJABI</div></div>
+      <div class="bubble" id="bubble" style="z-index:8;"><div class="bn" id="bubble-bn">🏏 চলো খেলি!</div><div class="en" id="bubble-en">Let's play!</div></div>
     </div>
   </div>
 
