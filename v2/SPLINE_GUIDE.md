@@ -1,6 +1,22 @@
 # Adding Spline 3D scenes to V2
 
-V2 is wired to accept **Spline** (spline.design) 3D scenes as drop-in replacements for any visual element. When a scene URL is set, that element renders as a real interactive WebGL 3D scene. When empty, it falls back to the existing 2D/CSS version.
+V2 is wired to accept **Spline** (spline.design) 3D scenes as drop-in replacements for any visual element. When a scene URL is set, that element renders as a real interactive WebGL 3D scene. When empty (or if loading fails), it falls back to the existing 2D/CSS version automatically.
+
+## Currently active demo
+The Lobby `avatar` slot is preloaded with **Spline's classic robot demo scene** as a starter — open the lobby and you should see a 3D robot in the center stage. If you see "FALLBACK · URL DEAD" instead, the demo URL is no longer hosted by Spline (they retire old demos sometimes). Either way, your prototype keeps working — just paste your own URL when ready.
+
+## Other public demos you can test immediately
+Pop any of these into the `avatar` slot to verify your setup works before designing your own. Open `v2/screens.js`, replace the current `avatar:` value with one of these:
+
+```js
+// 3D character variants — try them one at a time
+avatar: 'https://prod.spline.design/6Wq1Q7YGyM-iab9i/scene.splinecode',  // robot (currently active)
+avatar: 'https://prod.spline.design/0NXIKtVdvjpz1QVQ/scene.splinecode',  // alt 1
+avatar: 'https://prod.spline.design/0pNZmpx1QSAxYHFp/scene.splinecode',  // alt 2
+avatar: 'https://prod.spline.design/JBhDFOoWhg88unb6/scene.splinecode',  // alt 3
+```
+
+If none of these load, Spline has retired them. The fastest fresh URL: go to **https://app.spline.design/community**, click any scene → "Open in Editor" → top-right Export → Code → copy URL. Paste back into the config.
 
 ## Quick start (15 minutes total)
 
