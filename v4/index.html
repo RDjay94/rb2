@@ -1,0 +1,1728 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#050505">
+<title>RajaBaji V4 — TurboBet</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Russo+One&family=Rajdhani:wght@500;600;700&family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg: #050505;
+  --bg-2: #0E0E10;
+  --bg-3: #16161A;
+  --bg-4: #1F1F26;
+  --red: #FF2D20;
+  --red-glow: rgba(255,45,32,0.55);
+  --red-deep: #B11A12;
+  --orange: #FF8A1F;
+  --orange-glow: rgba(255,138,31,0.55);
+  --green: #9DE134;
+  --green-glow: rgba(157,225,52,0.5);
+  --chrome: #E5E7EB;
+  --chrome-2: #9CA3AF;
+  --ink: #ffffff;
+  --mute: #71717A;
+  --line: rgba(229,231,235,0.10);
+  --line-strong: rgba(255,45,32,0.45);
+}
+*, *::before, *::after { box-sizing: border-box; }
+html, body { margin: 0; height: 100%; background: var(--bg); color: var(--ink); font-family: 'Inter', system-ui, sans-serif; overflow: hidden; }
+button { font-family: inherit; cursor: pointer; }
+.h, .display { font-family: 'Russo One', sans-serif; letter-spacing: 1px; }
+.cond { font-family: 'Rajdhani', sans-serif; letter-spacing: 0.5px; }
+
+/* ================ STAGE ================ */
+.stage { position: relative; width: 100%; height: 100vh; overflow: hidden; background: var(--bg); }
+
+/* speedlines */
+.speedlines { position: absolute; inset: 0; overflow: hidden; pointer-events: none; }
+.line-streak {
+  position: absolute;
+  height: 1px;
+  width: 200%;
+  left: -50%;
+  filter: blur(0.5px);
+  opacity: 0;
+  animation: streak-zoom var(--dur, 6s) linear infinite;
+  animation-delay: var(--delay, 0s);
+}
+.line-streak.red { background: linear-gradient(90deg, transparent, var(--red) 50%, transparent); box-shadow: 0 0 8px var(--red), 0 0 16px var(--red-glow); }
+.line-streak.orange { background: linear-gradient(90deg, transparent, var(--orange) 50%, transparent); box-shadow: 0 0 8px var(--orange), 0 0 16px var(--orange-glow); }
+.line-streak.green { background: linear-gradient(90deg, transparent, var(--green) 50%, transparent); box-shadow: 0 0 8px var(--green), 0 0 16px var(--green-glow); }
+.line-streak.chrome { background: linear-gradient(90deg, transparent, #fff 50%, transparent); opacity: 0.3 !important; }
+@keyframes streak-zoom {
+  0% { transform: translateX(-30%) skewX(-22deg); opacity: 0; }
+  10% { opacity: 0.7; }
+  90% { opacity: 0.55; }
+  100% { transform: translateX(60%) skewX(-22deg); opacity: 0; }
+}
+
+/* checkerboard side strip */
+.checker {
+  position: absolute; pointer-events: none;
+  top: 0; bottom: 0; width: 12px;
+  background-image:
+    linear-gradient(45deg, var(--ink) 25%, transparent 25%),
+    linear-gradient(-45deg, var(--ink) 25%, transparent 25%),
+    linear-gradient(45deg, transparent 75%, var(--ink) 75%),
+    linear-gradient(-45deg, transparent 75%, var(--ink) 75%);
+  background-size: 12px 12px;
+  background-position: 0 0, 0 6px, 6px -6px, -6px 0;
+  opacity: 0.07;
+}
+.checker.left { left: 0; }
+.checker.right { right: 0; }
+
+/* radial spotlight */
+.bg-spot {
+  position: absolute; inset: 0; pointer-events: none;
+  background:
+    radial-gradient(ellipse at 20% 18%, rgba(255,45,32,0.18), transparent 50%),
+    radial-gradient(ellipse at 78% 82%, rgba(255,138,31,0.14), transparent 50%);
+}
+
+/* grid overlay */
+.bg-grid {
+  position: absolute; inset: 0; pointer-events: none;
+  background-image:
+    linear-gradient(rgba(229,231,235,0.03) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(229,231,235,0.03) 1px, transparent 1px);
+  background-size: 36px 36px;
+}
+
+/* ================ LAYOUT ================ */
+.app {
+  position: relative; z-index: 2;
+  display: grid;
+  grid-template-rows: 40px 26px 1fr 56px;
+  grid-template-columns: 90px 1fr 280px;
+  grid-template-areas:
+    "topbar topbar topbar"
+    "ticker ticker ticker"
+    "rail main right"
+    "dock dock dock";
+  height: 100vh;
+  gap: 8px;
+  padding: 8px 18px;
+}
+
+/* ================ TOPBAR ================ */
+.topbar {
+  grid-area: topbar;
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 0 14px;
+  background: linear-gradient(180deg, var(--bg-3), var(--bg-2));
+  border: 1px solid var(--line);
+  border-left: 3px solid var(--red);
+  clip-path: polygon(0 0, 100% 0, calc(100% - 16px) 100%, 0 100%);
+  position: relative;
+}
+.topbar::after {
+  content: ''; position: absolute;
+  top: 0; bottom: 0; right: 0;
+  width: 4px; background: var(--red);
+  box-shadow: 0 0 14px var(--red-glow);
+}
+.brand {
+  display: flex; align-items: center; gap: 12px;
+}
+.brand-mark {
+  width: 30px; height: 30px;
+  background: linear-gradient(135deg, var(--red), var(--red-deep));
+  display: grid; place-items: center;
+  color: var(--ink); font-family: 'Russo One'; font-size: 18px;
+  clip-path: polygon(20% 0, 100% 0, 80% 100%, 0 100%);
+  box-shadow: 0 0 18px var(--red-glow);
+}
+.brand-name { font-family: 'Russo One'; font-size: 18px; color: var(--ink); letter-spacing: 2px; }
+.brand-name .a { color: var(--red); }
+.brand-sub { font-family: 'Rajdhani'; font-size: 10px; color: var(--mute); letter-spacing: 4px; font-weight: 600; margin-top: -2px; }
+
+.topbar-mid { display: flex; gap: 8px; align-items: center; }
+.search-bar {
+  display: flex; align-items: center; gap: 6px;
+  background: var(--bg);
+  border: 1px solid var(--line);
+  padding: 5px 10px;
+  font-size: 11px; color: var(--mute);
+  min-width: 220px;
+  clip-path: polygon(8px 0, 100% 0, calc(100% - 8px) 100%, 0 100%);
+}
+.search-bar input { background: transparent; border: 0; outline: 0; color: var(--ink); font-size: 12px; flex: 1; font-family: 'Rajdhani'; font-weight: 600; }
+.search-bar:focus-within { border-color: var(--red); }
+
+.live-chip {
+  display: flex; align-items: center; gap: 5px;
+  font-family: 'Rajdhani'; font-weight: 700;
+  font-size: 11px; color: var(--red);
+  padding: 4px 9px;
+  background: rgba(255,45,32,0.1);
+  border: 1px solid rgba(255,45,32,0.4);
+  clip-path: polygon(5px 0, 100% 0, calc(100% - 5px) 100%, 0 100%);
+}
+.live-dot {
+  width: 6px; height: 6px; border-radius: 50%; background: var(--red);
+  box-shadow: 0 0 8px var(--red);
+  animation: blink 1.2s ease-in-out infinite;
+}
+@keyframes blink { 0%,100% { opacity: 1; } 50% { opacity: 0.3; } }
+
+.topbar-right { display: flex; align-items: center; gap: 6px; }
+.balance-chip {
+  display: flex; align-items: center; gap: 6px;
+  background: var(--bg);
+  border: 1px solid var(--line);
+  padding: 5px 11px;
+  font-family: 'Russo One'; font-size: 12px;
+  color: var(--green);
+  clip-path: polygon(8px 0, 100% 0, calc(100% - 8px) 100%, 0 100%);
+}
+.balance-chip .lbl { color: var(--mute); font-family: 'Rajdhani'; font-size: 9px; letter-spacing: 1.5px; }
+.vip-chip {
+  display: flex; align-items: center; gap: 5px;
+  padding: 4px 9px;
+  background: linear-gradient(135deg, var(--orange), var(--red));
+  font-family: 'Russo One'; font-size: 10px;
+  color: var(--ink); letter-spacing: 1.5px;
+  clip-path: polygon(5px 0, 100% 0, calc(100% - 5px) 100%, 0 100%);
+}
+.icon-btn {
+  width: 28px; height: 28px;
+  background: var(--bg);
+  border: 1px solid var(--line);
+  display: grid; place-items: center;
+  font-size: 13px; color: var(--chrome);
+  position: relative;
+}
+.icon-btn:hover { border-color: var(--red); color: var(--red); }
+.icon-btn .dot { position: absolute; top: -2px; right: -2px; width: 7px; height: 7px; border-radius: 50%; background: var(--orange); box-shadow: 0 0 6px var(--orange); }
+
+/* ================ TICKER ================ */
+.ticker {
+  grid-area: ticker;
+  display: flex; align-items: center; gap: 10px;
+  padding: 0 14px;
+  background: var(--bg-2);
+  border: 1px solid var(--line);
+  border-top: 1px solid rgba(255,45,32,0.3);
+  border-bottom: 1px solid rgba(255,138,31,0.3);
+  overflow: hidden;
+  position: relative;
+}
+.ticker::before {
+  content: ''; position: absolute;
+  top: 0; bottom: 0; left: 80px; width: 8px;
+  background: linear-gradient(90deg, var(--bg-2), transparent);
+  z-index: 2; pointer-events: none;
+}
+.ticker-label {
+  font-family: 'Russo One'; font-size: 10px;
+  letter-spacing: 2px; color: var(--red);
+  white-space: nowrap;
+  padding-right: 12px;
+  border-right: 2px solid var(--red);
+  z-index: 3; position: relative;
+}
+.ticker-track {
+  display: flex; gap: 30px;
+  font-family: 'Rajdhani'; font-weight: 600;
+  font-size: 12px; color: var(--ink);
+  white-space: nowrap;
+  animation: ticker-roll 32s linear infinite;
+}
+.ticker-track strong { color: var(--orange); font-weight: 700; }
+.ticker-track .green { color: var(--green); }
+@keyframes ticker-roll {
+  0% { transform: translateX(0); }
+  100% { transform: translateX(-50%); }
+}
+
+/* ================ LEFT RAIL ================ */
+.rail {
+  grid-area: rail;
+  display: flex; flex-direction: column; gap: 4px;
+  padding: 6px 3px;
+  background: linear-gradient(180deg, var(--bg-2), var(--bg-3));
+  border: 1px solid var(--line);
+  border-top: 2px solid var(--red);
+}
+.rail-item {
+  display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 3px;
+  padding: 8px 4px;
+  background: transparent;
+  border: 0;
+  border-left: 3px solid transparent;
+  color: var(--mute);
+  font-family: 'Russo One'; font-size: 9px;
+  letter-spacing: 1px;
+  transition: all .2s;
+  text-align: center;
+  position: relative;
+}
+.rail-item .ic { font-size: 18px; line-height: 1; filter: grayscale(1) brightness(2); }
+.rail-item:hover { color: var(--chrome); background: var(--bg-3); }
+.rail-item:hover .ic { filter: none; }
+.rail-item.active {
+  color: var(--red);
+  background: linear-gradient(90deg, rgba(255,45,32,0.18), transparent);
+  border-left-color: var(--red);
+}
+.rail-item.active .ic { filter: none; }
+.rail-item.active::after {
+  content: ''; position: absolute;
+  right: 0; top: 50%; transform: translateY(-50%);
+  width: 3px; height: 22px;
+  background: var(--red);
+  box-shadow: 0 0 8px var(--red-glow);
+}
+.rail-divider { height: 1px; background: var(--line); margin: 4px 8px; }
+
+/* ================ MAIN ================ */
+.main {
+  grid-area: main;
+  position: relative;
+  background: linear-gradient(180deg, var(--bg-2), var(--bg));
+  border: 1px solid var(--line);
+  overflow: hidden;
+}
+.screen {
+  position: absolute; inset: 0;
+  padding: 14px;
+  display: none;
+  flex-direction: column;
+  gap: 12px;
+  overflow-y: auto;
+  scrollbar-width: thin;
+}
+.screen.active { display: flex; animation: zoom-in .4s ease both; }
+@keyframes zoom-in {
+  from { opacity: 0; transform: translateX(20px); }
+  to { opacity: 1; transform: translateX(0); }
+}
+
+.screen-head {
+  display: flex; align-items: flex-end; justify-content: space-between;
+  border-bottom: 1px solid var(--line);
+  padding-bottom: 10px;
+  position: relative;
+}
+.screen-head::after {
+  content: ''; position: absolute;
+  bottom: -1px; left: 0;
+  width: 80px; height: 2px;
+  background: linear-gradient(90deg, var(--red), var(--orange));
+  box-shadow: 0 0 10px var(--red-glow);
+}
+.screen-title {
+  font-family: 'Russo One';
+  font-size: 22px;
+  letter-spacing: 1px;
+  color: var(--ink);
+  text-transform: uppercase;
+  line-height: 1;
+}
+.screen-title .accent { color: var(--red); }
+.screen-sub {
+  font-family: 'Rajdhani'; font-weight: 600;
+  font-size: 11px; color: var(--orange);
+  letter-spacing: 3px;
+  text-transform: uppercase;
+  margin-top: 3px;
+}
+
+.tabs {
+  display: flex; gap: 0;
+}
+.tab {
+  padding: 7px 14px;
+  background: var(--bg-3);
+  border: 1px solid var(--line);
+  border-right-width: 0;
+  font-family: 'Russo One'; font-size: 10px;
+  color: var(--mute); letter-spacing: 1px;
+  text-transform: uppercase;
+  transition: all .15s;
+}
+.tab:first-child { clip-path: polygon(6px 0, 100% 0, 100% 100%, 0 100%); }
+.tab:last-child { border-right-width: 1px; clip-path: polygon(0 0, 100% 0, calc(100% - 6px) 100%, 0 100%); }
+.tab:hover { color: var(--ink); }
+.tab.active { background: var(--red); color: var(--ink); border-color: var(--red); box-shadow: 0 0 10px var(--red-glow); }
+
+/* HERO RACING CARDS */
+.hero-row {
+  display: grid; grid-template-columns: 2fr 1fr 1fr;
+  gap: 10px;
+  min-height: 170px;
+}
+.hero-main {
+  position: relative;
+  background:
+    linear-gradient(135deg, rgba(255,45,32,0.4), transparent 60%),
+    radial-gradient(circle at 80% 50%, rgba(255,138,31,0.3), transparent 60%),
+    var(--bg-3);
+  border: 1px solid var(--red);
+  padding: 18px 22px;
+  display: flex; flex-direction: column; justify-content: space-between;
+  overflow: hidden;
+  clip-path: polygon(0 0, calc(100% - 20px) 0, 100% 100%, 20px 100%);
+}
+.hero-main::before {
+  content: '';
+  position: absolute; right: -50px; top: -30%; width: 200px; height: 160%;
+  background: repeating-linear-gradient(90deg, transparent 0, transparent 12px, var(--ink) 12px, var(--ink) 14px);
+  opacity: 0.04;
+  transform: skewX(-20deg);
+}
+.hero-tag {
+  display: inline-flex; align-self: flex-start;
+  background: var(--red);
+  padding: 3px 10px;
+  font-family: 'Russo One'; font-size: 9px; color: var(--ink);
+  letter-spacing: 2px;
+  clip-path: polygon(5px 0, 100% 0, calc(100% - 5px) 100%, 0 100%);
+}
+.hero-title { font-family: 'Russo One'; font-size: 30px; line-height: 1; color: var(--ink); margin-top: 8px; text-transform: uppercase; }
+.hero-title .accent { color: var(--red); text-shadow: 0 0 18px var(--red-glow); }
+.hero-sub { font-family: 'Rajdhani'; font-weight: 600; font-size: 13px; color: var(--orange); margin-top: 4px; letter-spacing: 2px; text-transform: uppercase; }
+.hero-cta {
+  align-self: flex-start;
+  padding: 10px 22px;
+  background: linear-gradient(135deg, var(--red), var(--red-deep));
+  color: var(--ink);
+  border: 0;
+  font-family: 'Russo One'; font-size: 11px;
+  letter-spacing: 2px;
+  margin-top: 12px;
+  clip-path: polygon(8px 0, 100% 0, calc(100% - 8px) 100%, 0 100%);
+  box-shadow: 0 0 18px var(--red-glow);
+}
+.hero-cta:hover { background: linear-gradient(135deg, var(--orange), var(--red)); }
+
+.hero-mini {
+  position: relative;
+  background: var(--bg-3);
+  border: 1px solid var(--line);
+  padding: 14px;
+  display: flex; flex-direction: column; justify-content: space-between;
+  clip-path: polygon(0 0, calc(100% - 14px) 0, 100% 100%, 14px 100%);
+  cursor: pointer; transition: all .2s;
+}
+.hero-mini:hover { border-color: var(--orange); transform: translateY(-2px); box-shadow: 0 6px 18px rgba(255,138,31,0.25); }
+.hero-mini-tag { font-family: 'Russo One'; font-size: 9px; color: var(--orange); letter-spacing: 2px; }
+.hero-mini-title { font-family: 'Russo One'; font-size: 14px; color: var(--ink); text-transform: uppercase; }
+.hero-mini-meta { font-family: 'Rajdhani'; font-weight: 600; font-size: 11px; color: var(--mute); }
+.hero-mini-prize { font-family: 'Russo One'; font-size: 18px; color: var(--green); text-shadow: 0 0 10px var(--green-glow); }
+
+/* SECTION TITLE */
+.section-title {
+  display: flex; align-items: center; gap: 10px;
+  font-family: 'Russo One'; font-size: 12px;
+  color: var(--ink); letter-spacing: 2px;
+  text-transform: uppercase;
+}
+.section-title::before {
+  content: ''; width: 4px; height: 16px;
+  background: var(--red);
+  box-shadow: 0 0 8px var(--red-glow);
+}
+.section-title .line { flex: 1; height: 1px; background: linear-gradient(90deg, var(--line) 0%, transparent 100%); }
+.section-title .more { font-family: 'Rajdhani'; font-weight: 700; font-size: 10px; color: var(--orange); letter-spacing: 1.5px; cursor: pointer; }
+.section-title .more:hover { color: var(--red); }
+
+/* GAME GRID */
+.game-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+  gap: 8px;
+}
+.game-card {
+  position: relative;
+  aspect-ratio: 4/5;
+  background: var(--bg-3);
+  border: 1px solid var(--line);
+  overflow: hidden;
+  cursor: pointer;
+  transition: all .25s;
+  display: flex; flex-direction: column; justify-content: flex-end;
+  padding: 8px;
+  clip-path: polygon(0 0, calc(100% - 10px) 0, 100% 10px, 100% 100%, 10px 100%, 0 calc(100% - 10px));
+}
+.game-card::before {
+  content: ''; position: absolute; inset: 0;
+  background-image: var(--bg, none);
+  background-size: cover;
+  background-position: center;
+  opacity: 0.55;
+  transition: opacity .2s;
+}
+.game-card::after {
+  content: ''; position: absolute; inset: 0;
+  background: linear-gradient(180deg, transparent 35%, rgba(0,0,0,0.85));
+}
+.game-card:hover { transform: translateY(-2px); border-color: var(--red); box-shadow: 0 8px 18px rgba(0,0,0,0.5), 0 0 16px var(--red-glow); }
+.game-card:hover::before { opacity: 0.85; }
+.game-name { position: relative; z-index: 2; font-family: 'Russo One'; font-size: 10px; color: var(--ink); text-transform: uppercase; letter-spacing: 0.5px; }
+.game-provider { position: relative; z-index: 2; font-family: 'Rajdhani'; font-weight: 600; font-size: 9px; color: var(--orange); letter-spacing: 1.5px; }
+.game-tag { position: absolute; top: 6px; left: 6px; z-index: 3; font-family: 'Russo One'; font-size: 8px; padding: 3px 6px; color: var(--ink); letter-spacing: 0.5px; clip-path: polygon(3px 0, 100% 0, calc(100% - 3px) 100%, 0 100%); }
+.game-tag.hot { background: var(--red); }
+.game-tag.new { background: var(--green); color: var(--bg); }
+.game-tag.fast { background: var(--orange); color: var(--bg); }
+
+.provider-bar {
+  display: flex; gap: 6px; overflow-x: auto;
+  padding-bottom: 4px; scrollbar-width: thin;
+}
+.provider-chip {
+  padding: 6px 12px;
+  background: var(--bg-3);
+  border: 1px solid var(--line);
+  font-family: 'Russo One'; font-size: 9px;
+  color: var(--mute); letter-spacing: 1.5px;
+  white-space: nowrap;
+  clip-path: polygon(5px 0, 100% 0, calc(100% - 5px) 100%, 0 100%);
+}
+.provider-chip:hover { color: var(--ink); border-color: var(--orange); }
+.provider-chip.active { background: var(--red); color: var(--ink); border-color: var(--red); box-shadow: 0 0 10px var(--red-glow); }
+
+/* ================ RIGHT RAIL ================ */
+.right {
+  grid-area: right;
+  display: flex; flex-direction: column; gap: 8px;
+  overflow-y: auto; scrollbar-width: thin;
+}
+.panel {
+  background: var(--bg-2);
+  border: 1px solid var(--line);
+  padding: 12px;
+  position: relative;
+}
+.panel.accent { border-left: 3px solid var(--red); }
+.panel-title {
+  font-family: 'Russo One'; font-size: 11px;
+  color: var(--ink); letter-spacing: 2px;
+  margin: 0 0 10px;
+  text-transform: uppercase;
+  display: flex; align-items: center; gap: 8px;
+}
+.panel-title::before {
+  content: ''; width: 14px; height: 2px;
+  background: var(--red); box-shadow: 0 0 6px var(--red-glow);
+}
+
+.wallet-rows { display: flex; flex-direction: column; gap: 4px; }
+.wallet-row {
+  display: flex; justify-content: space-between; align-items: center;
+  padding: 6px 0;
+  border-bottom: 1px solid var(--line);
+}
+.wallet-row:last-child { border-bottom: 0; }
+.wallet-lbl { font-family: 'Rajdhani'; font-weight: 600; font-size: 10px; color: var(--mute); letter-spacing: 1.5px; text-transform: uppercase; }
+.wallet-val { font-family: 'Russo One'; font-size: 14px; color: var(--ink); }
+.wallet-val.red { color: var(--red); }
+.wallet-val.green { color: var(--green); }
+.wallet-val.orange { color: var(--orange); }
+
+.wallet-actions { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; margin-top: 10px; }
+.btn {
+  padding: 8px;
+  background: var(--bg-3);
+  border: 1px solid var(--line);
+  color: var(--ink);
+  font-family: 'Russo One'; font-size: 10px; letter-spacing: 1.5px;
+  clip-path: polygon(5px 0, 100% 0, calc(100% - 5px) 100%, 0 100%);
+  transition: all .15s;
+}
+.btn:hover { border-color: var(--red); color: var(--red); }
+.btn.primary {
+  background: linear-gradient(135deg, var(--red), var(--red-deep));
+  border-color: var(--red);
+  box-shadow: 0 0 12px var(--red-glow);
+}
+.btn.primary:hover { color: var(--ink); background: linear-gradient(135deg, var(--orange), var(--red)); }
+.btn.green {
+  background: linear-gradient(135deg, var(--green), #6BB821);
+  border-color: var(--green);
+  color: var(--bg);
+}
+.btn.green:hover { color: var(--bg); }
+
+.mission-item { display: flex; align-items: center; gap: 8px; padding: 7px 0; border-bottom: 1px solid var(--line); }
+.mission-item:last-child { border-bottom: 0; }
+.mission-ic { width: 28px; height: 28px; background: linear-gradient(135deg, var(--red), var(--red-deep)); display: grid; place-items: center; font-size: 14px; clip-path: polygon(20% 0, 100% 0, 80% 100%, 0 100%); }
+.mission-name { flex: 1; font-family: 'Rajdhani'; font-weight: 600; font-size: 11px; color: var(--ink); }
+.mission-bar { height: 4px; background: var(--bg); margin-top: 3px; }
+.mission-bar > span { display: block; height: 100%; background: linear-gradient(90deg, var(--red), var(--orange)); }
+.mission-prog { font-family: 'Rajdhani'; font-weight: 600; font-size: 9px; color: var(--mute); letter-spacing: 1px; }
+
+.wins-list { max-height: 180px; overflow-y: auto; scrollbar-width: thin; }
+.win-item { display: flex; align-items: center; gap: 8px; padding: 4px 0; font-size: 11px; }
+.win-avatar { width: 22px; height: 22px; background: linear-gradient(135deg, var(--red), var(--orange)); flex-shrink: 0; clip-path: polygon(20% 0, 100% 0, 80% 100%, 0 100%); }
+.win-user { font-family: 'Rajdhani'; font-weight: 700; color: var(--ink); font-size: 10px; }
+.win-game { font-family: 'Rajdhani'; font-weight: 500; color: var(--mute); font-size: 9px; }
+.win-amt { font-family: 'Russo One'; color: var(--green); font-size: 11px; margin-left: auto; }
+
+.promo-banner {
+  background:
+    linear-gradient(135deg, rgba(255,45,32,0.4), transparent 60%),
+    radial-gradient(circle at top right, rgba(255,138,31,0.3), transparent 60%),
+    var(--bg-3);
+  border: 1px solid var(--orange);
+  padding: 14px;
+  position: relative; overflow: hidden;
+  clip-path: polygon(0 0, calc(100% - 14px) 0, 100% 100%, 14px 100%);
+}
+.promo-banner::before { content: '⚡'; position: absolute; right: 12px; top: 8px; font-size: 38px; opacity: 0.25; transform: rotate(-12deg); }
+.promo-pill { display: inline-block; padding: 3px 8px; background: var(--green); color: var(--bg); font-family: 'Russo One'; font-size: 9px; letter-spacing: 2px; clip-path: polygon(4px 0, 100% 0, calc(100% - 4px) 100%, 0 100%); }
+.promo-headline { font-family: 'Russo One'; font-size: 16px; color: var(--ink); margin: 8px 0 2px; line-height: 1.1; text-transform: uppercase; }
+.promo-sub { font-family: 'Rajdhani'; font-weight: 600; font-size: 11px; color: var(--mute); margin-bottom: 10px; }
+
+/* ================ DOCK ================ */
+.dock {
+  grid-area: dock;
+  display: flex; align-items: stretch; justify-content: space-around;
+  gap: 4px;
+  padding: 6px;
+  background: linear-gradient(180deg, var(--bg-2), var(--bg-3));
+  border: 1px solid var(--line);
+  border-top: 2px solid var(--red);
+}
+.dock-btn {
+  display: flex; align-items: center; gap: 8px;
+  padding: 8px 16px;
+  background: var(--bg-3);
+  border: 1px solid var(--line);
+  color: var(--ink);
+  font-family: 'Russo One'; font-size: 10px;
+  letter-spacing: 2px;
+  clip-path: polygon(8px 0, 100% 0, calc(100% - 8px) 100%, 0 100%);
+  flex: 1; justify-content: center;
+  transition: all .15s;
+}
+.dock-btn .ic { font-size: 14px; }
+.dock-btn:hover { border-color: var(--orange); color: var(--orange); }
+.dock-btn.deposit {
+  background: linear-gradient(135deg, var(--red), var(--red-deep));
+  border-color: var(--red);
+  box-shadow: 0 0 14px var(--red-glow);
+}
+.dock-btn.deposit:hover { background: linear-gradient(135deg, var(--orange), var(--red)); color: var(--ink); }
+.dock-btn.withdraw {
+  background: linear-gradient(135deg, var(--green), #6BB821);
+  border-color: var(--green);
+  color: var(--bg);
+}
+.dock-btn.withdraw:hover { color: var(--bg); }
+
+/* ================ MODALS ================ */
+.modal-overlay {
+  position: fixed; inset: 0; z-index: 1000;
+  background: rgba(5,5,5,0.85);
+  backdrop-filter: blur(6px);
+  display: none; place-items: center;
+}
+.modal-overlay.show { display: grid; }
+.modal {
+  background: var(--bg-2);
+  border: 1px solid var(--red);
+  border-left: 4px solid var(--red);
+  padding: 26px;
+  width: 92%; max-width: 400px;
+  position: relative;
+  animation: pop-in .25s ease both;
+  clip-path: polygon(0 0, calc(100% - 18px) 0, 100% 18px, 100% 100%, 18px 100%, 0 calc(100% - 18px));
+  box-shadow: 0 30px 60px rgba(0,0,0,0.7), 0 0 30px var(--red-glow);
+}
+@keyframes pop-in { from { opacity: 0; transform: scale(0.94) translateY(8px); } to { opacity: 1; transform: scale(1) translateY(0); } }
+.modal-close { position: absolute; right: 12px; top: 12px; background: transparent; border: 0; color: var(--mute); font-size: 18px; }
+.modal-title { font-family: 'Russo One'; font-size: 16px; color: var(--red); letter-spacing: 2px; margin: 0 0 4px; text-transform: uppercase; }
+.modal-sub { font-family: 'Rajdhani'; font-weight: 600; font-size: 11px; color: var(--mute); letter-spacing: 2px; text-transform: uppercase; margin-bottom: 18px; }
+.modal label { display: block; font-family: 'Russo One'; font-size: 9px; color: var(--mute); margin: 10px 0 5px; letter-spacing: 2px; text-transform: uppercase; }
+.modal input, .modal select {
+  width: 100%; padding: 9px 12px;
+  background: var(--bg);
+  border: 1px solid var(--line);
+  color: var(--ink);
+  font-family: 'Rajdhani'; font-weight: 600;
+  font-size: 13px;
+  outline: none;
+}
+.modal input:focus, .modal select:focus { border-color: var(--red); }
+.modal-btn {
+  width: 100%;
+  padding: 12px;
+  background: linear-gradient(135deg, var(--red), var(--red-deep));
+  color: var(--ink);
+  border: 0;
+  font-family: 'Russo One'; font-size: 12px;
+  letter-spacing: 3px;
+  margin-top: 14px;
+  clip-path: polygon(10px 0, 100% 0, calc(100% - 10px) 100%, 0 100%);
+  box-shadow: 0 6px 16px var(--red-glow);
+}
+.modal-btn:hover { background: linear-gradient(135deg, var(--orange), var(--red)); }
+.modal-foot { text-align: center; font-family: 'Rajdhani'; font-weight: 600; font-size: 11px; color: var(--mute); margin-top: 10px; }
+.modal-foot a { color: var(--red); text-decoration: none; cursor: pointer; }
+
+/* amount grid */
+.amt-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; }
+.amt-chip {
+  padding: 8px 4px;
+  background: var(--bg);
+  border: 1px solid var(--line);
+  font-family: 'Russo One'; font-size: 11px;
+  color: var(--ink);
+  position: relative;
+  clip-path: polygon(5px 0, 100% 0, calc(100% - 5px) 100%, 0 100%);
+}
+.amt-chip:hover, .amt-chip.active { border-color: var(--red); color: var(--red); }
+.amt-chip .bonus { position: absolute; top: -7px; right: 0; background: var(--green); color: var(--bg); font-size: 7px; padding: 1px 4px; font-family: 'Russo One'; letter-spacing: 0.5px; }
+
+.method-row { display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; }
+.method-btn {
+  padding: 10px 5px;
+  background: var(--bg);
+  border: 1px solid var(--line);
+  display: flex; flex-direction: column; align-items: center; gap: 4px;
+  font-family: 'Rajdhani'; font-weight: 700; font-size: 10px; color: var(--ink);
+  clip-path: polygon(5px 0, 100% 0, calc(100% - 5px) 100%, 0 100%);
+}
+.method-btn:hover, .method-btn.active { border-color: var(--red); color: var(--red); }
+.method-ic { font-size: 18px; }
+
+/* VIP cards */
+.vip-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; }
+.vip-card {
+  padding: 14px;
+  background: var(--bg-3);
+  border: 1px solid var(--line);
+  display: flex; flex-direction: column; gap: 8px;
+  position: relative;
+  overflow: hidden;
+  clip-path: polygon(0 0, calc(100% - 16px) 0, 100% 16px, 100% 100%, 16px 100%, 0 calc(100% - 16px));
+}
+.vip-card::before {
+  content: ''; position: absolute; right: -20px; top: -20px;
+  width: 80px; height: 80px;
+  background: var(--vip-glow, rgba(255,45,32,0.15));
+  filter: blur(28px);
+}
+.vip-tier-name { font-family: 'Russo One'; font-size: 13px; color: var(--ink); text-transform: uppercase; }
+.vip-tier-num { font-family: 'Russo One'; font-size: 38px; color: var(--vip-color, var(--red)); line-height: 1; text-shadow: 0 0 18px var(--vip-color, var(--red-glow)); }
+.vip-perks { font-family: 'Rajdhani'; font-weight: 600; font-size: 11px; color: var(--mute); padding: 0; margin: 0; }
+.vip-perks li { list-style: none; padding-left: 14px; position: relative; margin-bottom: 3px; }
+.vip-perks li::before { content: '▸'; color: var(--vip-color, var(--red)); position: absolute; left: 0; }
+.vip-card.active { border-color: var(--red); box-shadow: 0 0 22px var(--red-glow); }
+
+/* Mission boxes */
+.mission-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(110px, 1fr)); gap: 8px; }
+.chest {
+  position: relative;
+  aspect-ratio: 1;
+  background: var(--bg-3);
+  border: 1px solid var(--line);
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+  gap: 5px;
+  cursor: pointer;
+  transition: all .15s;
+  clip-path: polygon(0 0, calc(100% - 10px) 0, 100% 10px, 100% 100%, 10px 100%, 0 calc(100% - 10px));
+}
+.chest:hover { border-color: var(--orange); transform: translateY(-2px); }
+.chest .chest-ic { font-size: 28px; filter: drop-shadow(0 0 8px var(--orange-glow)); }
+.chest .chest-lvl { font-family: 'Russo One'; font-size: 11px; color: var(--orange); letter-spacing: 1.5px; }
+.chest .chest-prize { font-family: 'Rajdhani'; font-weight: 700; font-size: 10px; color: var(--mute); }
+.chest.locked { opacity: 0.4; }
+.chest.locked .chest-ic { filter: grayscale(1); }
+.chest .red-dot { position: absolute; top: 6px; right: 6px; width: 8px; height: 8px; background: var(--red); box-shadow: 0 0 6px var(--red); border-radius: 50%; }
+
+/* Inbox list */
+.inbox-list { display: flex; flex-direction: column; gap: 6px; }
+.inbox-item { display: flex; align-items: center; gap: 10px; padding: 12px; background: var(--bg-3); border: 1px solid var(--line); cursor: pointer; transition: all .15s; clip-path: polygon(0 0, calc(100% - 12px) 0, 100% 100%, 12px 100%); }
+.inbox-item:hover { border-color: var(--red); }
+.inbox-ic { width: 36px; height: 36px; background: linear-gradient(135deg, var(--red), var(--red-deep)); display: grid; place-items: center; font-size: 16px; clip-path: polygon(20% 0, 100% 0, 80% 100%, 0 100%); }
+.inbox-body { flex: 1; min-width: 0; }
+.inbox-title { font-family: 'Russo One'; font-size: 11px; color: var(--ink); letter-spacing: 1px; text-transform: uppercase; }
+.inbox-snippet { font-family: 'Rajdhani'; font-weight: 600; font-size: 11px; color: var(--mute); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.inbox-time { font-family: 'Russo One'; font-size: 10px; color: var(--orange); letter-spacing: 1px; }
+.inbox-item.unread .inbox-title::after { content: '●'; color: var(--red); margin-left: 6px; font-size: 9px; }
+
+/* Settings */
+.settings-list { display: flex; flex-direction: column; gap: 5px; }
+.setting-row {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 12px 14px;
+  background: var(--bg-3);
+  border: 1px solid var(--line);
+  clip-path: polygon(0 0, calc(100% - 10px) 0, 100% 100%, 10px 100%);
+}
+.setting-name { font-family: 'Russo One'; font-size: 12px; color: var(--ink); letter-spacing: 1px; text-transform: uppercase; }
+.setting-sub { font-family: 'Rajdhani'; font-weight: 600; font-size: 11px; color: var(--mute); margin-top: 2px; }
+.toggle {
+  position: relative; width: 40px; height: 20px;
+  background: var(--bg);
+  border: 1px solid var(--line);
+  cursor: pointer; transition: all .15s;
+}
+.toggle::after { content: ''; position: absolute; width: 16px; height: 16px; background: var(--mute); top: 1px; left: 1px; transition: all .15s; }
+.toggle.on { background: var(--red); border-color: var(--red); box-shadow: 0 0 10px var(--red-glow); }
+.toggle.on::after { background: var(--ink); left: 21px; }
+
+/* Refer */
+.refer-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.refer-stats { background: linear-gradient(135deg, rgba(255,45,32,0.18), var(--bg-3)); border: 1px solid var(--red); padding: 16px; display: flex; flex-direction: column; gap: 14px; clip-path: polygon(0 0, calc(100% - 16px) 0, 100% 100%, 16px 100%); }
+.refer-row { display: flex; justify-content: space-between; }
+.refer-big { font-family: 'Russo One'; font-size: 24px; color: var(--green); text-shadow: 0 0 8px var(--green-glow); }
+.refer-lbl { font-family: 'Russo One'; font-size: 9px; color: var(--mute); letter-spacing: 2px; text-transform: uppercase; }
+.refer-code { background: var(--bg); border: 1px solid var(--red); padding: 10px 12px; font-family: 'Russo One'; font-size: 16px; color: var(--red); letter-spacing: 3px; text-align: center; box-shadow: 0 0 12px var(--red-glow); }
+.refer-share { display: flex; gap: 6px; margin-top: 6px; }
+.refer-share button { flex: 1; padding: 9px; background: var(--bg-3); border: 1px solid var(--line); color: var(--ink); font-family: 'Russo One'; font-size: 10px; letter-spacing: 1px; clip-path: polygon(5px 0, 100% 0, calc(100% - 5px) 100%, 0 100%); }
+.refer-share button:hover { border-color: var(--orange); color: var(--orange); }
+
+/* Toast */
+.toast {
+  position: fixed; bottom: 80px; left: 50%; transform: translateX(-50%);
+  background: linear-gradient(135deg, var(--red), var(--red-deep));
+  color: var(--ink);
+  padding: 12px 28px;
+  font-family: 'Russo One'; font-size: 11px;
+  letter-spacing: 2px;
+  clip-path: polygon(10px 0, 100% 0, calc(100% - 10px) 100%, 0 100%);
+  box-shadow: 0 10px 30px rgba(0,0,0,0.6), 0 0 22px var(--red-glow);
+  z-index: 2000;
+  opacity: 0; pointer-events: none;
+  transition: all .3s;
+}
+.toast.show { opacity: 1; transform: translateX(-50%) translateY(-10px); }
+
+/* Speedometer widget */
+.speedo {
+  display: flex; align-items: center; gap: 10px;
+  padding: 10px 12px;
+  background: var(--bg-3);
+  border: 1px solid var(--line);
+  border-left: 3px solid var(--green);
+  clip-path: polygon(0 0, calc(100% - 12px) 0, 100% 100%, 12px 100%);
+}
+.speedo-num { font-family: 'Russo One'; font-size: 22px; color: var(--green); text-shadow: 0 0 12px var(--green-glow); }
+.speedo-lbl { font-family: 'Rajdhani'; font-weight: 700; font-size: 10px; color: var(--mute); letter-spacing: 2px; text-transform: uppercase; }
+.speedo-meta { font-family: 'Russo One'; font-size: 13px; color: var(--ink); }
+
+/* Sports row */
+.sport-row {
+  display: grid; grid-template-columns: 70px 1fr auto;
+  gap: 14px; align-items: center;
+  padding: 12px 14px;
+  background: var(--bg-3);
+  border: 1px solid var(--line);
+  cursor: pointer; transition: all .15s;
+  clip-path: polygon(0 0, calc(100% - 14px) 0, 100% 100%, 14px 100%);
+}
+.sport-row:hover { border-color: var(--red); }
+.sport-tag-time { font-family: 'Russo One'; font-size: 10px; color: var(--orange); letter-spacing: 1.5px; }
+.sport-tag-time.live { color: var(--red); animation: blink 1.4s infinite; }
+.sport-meta { font-family: 'Rajdhani'; font-weight: 600; font-size: 10px; color: var(--mute); margin-top: 2px; letter-spacing: 1px; text-transform: uppercase; }
+.sport-name { font-family: 'Russo One'; font-size: 14px; color: var(--ink); text-transform: uppercase; }
+.sport-vs { color: var(--mute); margin: 0 8px; }
+.sport-score { font-family: 'Rajdhani'; font-weight: 700; font-size: 12px; color: var(--green); margin-top: 4px; }
+.sport-odds { display: flex; gap: 5px; }
+.sport-odds .odd { min-width: 50px; padding: 8px 8px; background: var(--bg); border: 1px solid var(--line); font-family: 'Russo One'; font-size: 11px; color: var(--ink); text-align: center; clip-path: polygon(5px 0, 100% 0, calc(100% - 5px) 100%, 0 100%); }
+.sport-odds .odd:hover { border-color: var(--red); color: var(--red); }
+
+/* Responsive */
+@media (max-width: 1100px) {
+  .app { grid-template-columns: 78px 1fr 240px; padding: 6px 12px; }
+  .hero-row { grid-template-columns: 1fr 1fr; }
+  .hero-mini:last-child { display: none; }
+}
+@media (max-width: 820px) {
+  .app { grid-template-columns: 70px 1fr; grid-template-areas: "topbar topbar" "ticker ticker" "rail main" "dock dock"; }
+  .right { display: none; }
+}
+@media (max-height: 580px) {
+  .app { grid-template-rows: 36px 22px 1fr 50px; }
+  .hero-title { font-size: 22px; }
+}
+</style>
+</head>
+<body>
+
+<div class="stage">
+  <div class="bg-spot"></div>
+  <div class="bg-grid"></div>
+  <div class="speedlines" id="speedlines"></div>
+  <div class="checker left"></div>
+  <div class="checker right"></div>
+
+  <div class="app">
+
+    <!-- TOPBAR -->
+    <header class="topbar">
+      <div class="brand">
+        <div class="brand-mark">R</div>
+        <div>
+          <div class="brand-name">RAJA<span class="a">BAJI</span></div>
+          <div class="brand-sub">TURBO · V4</div>
+        </div>
+      </div>
+      <div class="topbar-mid">
+        <div class="search-bar">
+          <span>⌕</span>
+          <input placeholder="SEARCH GAMES, MATCHES, EVENTS">
+        </div>
+        <div class="live-chip">
+          <span class="live-dot"></span>
+          <span>LIVE · 9,842</span>
+        </div>
+      </div>
+      <div class="topbar-right">
+        <div class="balance-chip">
+          <span class="lbl">BAL</span>
+          <span>৳12,450</span>
+        </div>
+        <div class="vip-chip">VIP · GOLD</div>
+        <button class="icon-btn" onclick="openModal('inbox-modal')">📩<span class="dot"></span></button>
+        <button class="icon-btn" onclick="go('settings')">⚙</button>
+        <button class="icon-btn" onclick="openModal('login-modal')">⛯</button>
+      </div>
+    </header>
+
+    <!-- TICKER -->
+    <div class="ticker">
+      <div class="ticker-label">▶ LIVE FEED</div>
+      <div class="ticker-track" id="ticker-track"></div>
+    </div>
+
+    <!-- LEFT RAIL -->
+    <nav class="rail">
+      <button class="rail-item active" data-nav="lobby"><span class="ic">🏁</span><span>LOBBY</span></button>
+      <button class="rail-item" data-nav="live"><span class="ic">🎲</span><span>LIVE</span></button>
+      <button class="rail-item" data-nav="slots"><span class="ic">🎰</span><span>SLOTS</span></button>
+      <button class="rail-item" data-nav="fishing"><span class="ic">🐠</span><span>FISH</span></button>
+      <button class="rail-item" data-nav="sports"><span class="ic">🏏</span><span>SPORTS</span></button>
+      <div class="rail-divider"></div>
+      <button class="rail-item" data-nav="bonus"><span class="ic">🔥</span><span>BONUS</span></button>
+      <button class="rail-item" data-nav="vip"><span class="ic">⚡</span><span>VIP</span></button>
+      <button class="rail-item" data-nav="mission"><span class="ic">🎯</span><span>MISSION</span></button>
+      <button class="rail-item" data-nav="refer"><span class="ic">🤝</span><span>REFER</span></button>
+    </nav>
+
+    <!-- MAIN -->
+    <main class="main" id="main">
+
+      <!-- LOBBY -->
+      <section class="screen active" data-screen="lobby">
+        <div class="screen-head">
+          <div>
+            <div class="screen-title">PIT <span class="accent">LANE</span></div>
+            <div class="screen-sub">Fastest games · Bangladesh #1 turbo casino</div>
+          </div>
+          <div class="tabs">
+            <button class="tab active">HOT</button>
+            <button class="tab">NEW</button>
+            <button class="tab">TURBO</button>
+            <button class="tab">MY PICKS</button>
+          </div>
+        </div>
+
+        <div class="hero-row">
+          <div class="hero-main">
+            <div class="hero-tag">★ HEADLINE</div>
+            <div>
+              <div class="hero-title">AVIATOR <span class="accent">TURBO</span></div>
+              <div class="hero-sub">Cash out before the crash · 1000x potential</div>
+            </div>
+            <button class="hero-cta" onclick="playGame('Aviator Turbo','SPRIBE')">▶ LAUNCH NOW</button>
+          </div>
+          <div class="hero-mini">
+            <div class="hero-mini-tag">⚡ JACKPOT</div>
+            <div>
+              <div class="hero-mini-title">MEGA REELS</div>
+              <div class="hero-mini-meta">PRAGMATIC PLAY</div>
+            </div>
+            <div class="hero-mini-prize">৳ 8,42,000</div>
+          </div>
+          <div class="hero-mini">
+            <div class="hero-mini-tag">⚡ TOURNAMENT</div>
+            <div>
+              <div class="hero-mini-title">CRAZY TIME</div>
+              <div class="hero-mini-meta">EVOLUTION LIVE</div>
+            </div>
+            <div class="hero-mini-prize">৳ 5,00,000</div>
+          </div>
+        </div>
+
+        <div class="speedo">
+          <div>
+            <div class="speedo-lbl">FAST CASHOUT</div>
+            <div class="speedo-num">≤ 3 MIN</div>
+          </div>
+          <div style="width:1px;height:32px;background:var(--line);"></div>
+          <div>
+            <div class="speedo-lbl">TODAY'S PAYOUTS</div>
+            <div class="speedo-meta">৳ 1.84 CRORE</div>
+          </div>
+          <div style="width:1px;height:32px;background:var(--line);"></div>
+          <div>
+            <div class="speedo-lbl">BIGGEST WIN</div>
+            <div class="speedo-meta" style="color:var(--green);">৳ 18,40,000</div>
+          </div>
+        </div>
+
+        <div class="section-title">HOT GAMES <span class="line"></span><span class="more">VIEW ALL ▸</span></div>
+        <div class="game-grid" id="hot-grid"></div>
+
+        <div class="section-title">LIVE CASINO <span class="line"></span><span class="more">VIEW ALL ▸</span></div>
+        <div class="game-grid" id="live-grid"></div>
+      </section>
+
+      <!-- LIVE CASINO -->
+      <section class="screen" data-screen="live">
+        <div class="screen-head">
+          <div>
+            <div class="screen-title">LIVE <span class="accent">FLOOR</span></div>
+            <div class="screen-sub">Real dealers · Real time · Real wins</div>
+          </div>
+        </div>
+        <div class="provider-bar">
+          <button class="provider-chip active">ALL</button>
+          <button class="provider-chip">EVOLUTION</button>
+          <button class="provider-chip">PRAGMATIC LIVE</button>
+          <button class="provider-chip">EZUGI</button>
+          <button class="provider-chip">SA GAMING</button>
+          <button class="provider-chip">SEXY GAMING</button>
+          <button class="provider-chip">VIVO</button>
+        </div>
+        <div class="game-grid" id="live-grid-2"></div>
+      </section>
+
+      <!-- SLOTS -->
+      <section class="screen" data-screen="slots">
+        <div class="screen-head">
+          <div>
+            <div class="screen-title">SLOT <span class="accent">CIRCUIT</span></div>
+            <div class="screen-sub">Reels spinning at full throttle</div>
+          </div>
+        </div>
+        <div class="provider-bar">
+          <button class="provider-chip active">ALL</button>
+          <button class="provider-chip">PRAGMATIC</button>
+          <button class="provider-chip">JILI</button>
+          <button class="provider-chip">PG SOFT</button>
+          <button class="provider-chip">SPADEGAMING</button>
+          <button class="provider-chip">HABANERO</button>
+          <button class="provider-chip">CQ9</button>
+          <button class="provider-chip">RTG</button>
+        </div>
+        <div class="game-grid" id="slots-grid"></div>
+      </section>
+
+      <!-- FISHING -->
+      <section class="screen" data-screen="fishing">
+        <div class="screen-head">
+          <div>
+            <div class="screen-title">FISH <span class="accent">FRENZY</span></div>
+            <div class="screen-sub">Hunt the deep · Catch the prize</div>
+          </div>
+        </div>
+        <div class="provider-bar">
+          <button class="provider-chip active">ALL</button>
+          <button class="provider-chip">JILI</button>
+          <button class="provider-chip">CQ9</button>
+          <button class="provider-chip">SPADEGAMING</button>
+          <button class="provider-chip">FACHAI</button>
+        </div>
+        <div class="game-grid" id="fishing-grid"></div>
+      </section>
+
+      <!-- SPORTS -->
+      <section class="screen" data-screen="sports">
+        <div class="screen-head">
+          <div>
+            <div class="screen-title">SPORT <span class="accent">BOOK</span></div>
+            <div class="screen-sub">Bangladesh's #1 cricket exchange</div>
+          </div>
+          <div class="tabs">
+            <button class="tab active">LIVE</button>
+            <button class="tab">TODAY</button>
+            <button class="tab">UPCOMING</button>
+            <button class="tab">EXCHANGE</button>
+          </div>
+        </div>
+        <div id="sports-list" style="display:flex;flex-direction:column;gap:8px;"></div>
+      </section>
+
+      <!-- BONUS -->
+      <section class="screen" data-screen="bonus">
+        <div class="screen-head">
+          <div>
+            <div class="screen-title">BONUS <span class="accent">GARAGE</span></div>
+            <div class="screen-sub">Refuel your bankroll</div>
+          </div>
+          <div class="tabs">
+            <button class="tab active">ALL</button>
+            <button class="tab">SPORTS</button>
+            <button class="tab">SLOTS</button>
+            <button class="tab">LIVE</button>
+          </div>
+        </div>
+        <div id="bonus-grid" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:10px;"></div>
+      </section>
+
+      <!-- VIP -->
+      <section class="screen" data-screen="vip">
+        <div class="screen-head">
+          <div>
+            <div class="screen-title">VIP <span class="accent">PIT CREW</span></div>
+            <div class="screen-sub">Gold Card · 38,420 / 50,000 valid stake</div>
+          </div>
+        </div>
+        <div class="panel" style="padding:14px;">
+          <div style="display:flex;justify-content:space-between;font-family:'Russo One';font-size:10px;color:var(--mute);margin-bottom:6px;letter-spacing:1.5px;">
+            <span>GOLD CARD</span><span>→ PLATINUM</span>
+          </div>
+          <div style="height:8px;background:var(--bg);border:1px solid var(--line);position:relative;overflow:hidden;">
+            <div style="width:77%;height:100%;background:linear-gradient(90deg,var(--red),var(--orange));box-shadow:0 0 12px var(--red-glow);"></div>
+          </div>
+          <div style="font-family:'Rajdhani';font-weight:600;font-size:11px;color:var(--mute);margin-top:6px;letter-spacing:1px;">৳ 11,580 STAKE TO TIER UP</div>
+        </div>
+        <div class="vip-grid">
+          <div class="vip-card" style="--vip-color:#9CA3AF;--vip-glow:rgba(156,163,175,0.3);">
+            <div class="vip-tier-name">NEW PLAYER</div>
+            <div class="vip-tier-num">01</div>
+            <ul class="vip-perks">
+              <li>3% Weekly Rescue</li>
+              <li>৳288 Birthday Bonus</li>
+              <li>৳30k Daily Withdraw</li>
+            </ul>
+          </div>
+          <div class="vip-card" style="--vip-color:#94A3B8;--vip-glow:rgba(148,163,184,0.3);">
+            <div class="vip-tier-name">SILVER</div>
+            <div class="vip-tier-num">02</div>
+            <ul class="vip-perks">
+              <li>5% Weekly Rescue</li>
+              <li>৳888 Upgrade Bonus</li>
+              <li>৳688 Birthday</li>
+            </ul>
+          </div>
+          <div class="vip-card active" style="--vip-color:#FF8A1F;--vip-glow:rgba(255,138,31,0.4);">
+            <div class="vip-tier-name">GOLD · YOURS</div>
+            <div class="vip-tier-num">03</div>
+            <ul class="vip-perks">
+              <li>6% Weekly Rescue</li>
+              <li>৳1,888 Upgrade Bonus</li>
+              <li>৳1,288 Birthday</li>
+            </ul>
+          </div>
+          <div class="vip-card" style="--vip-color:#E5E7EB;--vip-glow:rgba(229,231,235,0.3);">
+            <div class="vip-tier-name">PLATINUM</div>
+            <div class="vip-tier-num">04</div>
+            <ul class="vip-perks">
+              <li>8% Weekly Rescue</li>
+              <li>৳3,888 Upgrade Bonus</li>
+              <li>৳2,888 Birthday</li>
+            </ul>
+          </div>
+        </div>
+      </section>
+
+      <!-- MISSION -->
+      <section class="screen" data-screen="mission">
+        <div class="screen-head">
+          <div>
+            <div class="screen-title">MISSION <span class="accent">GRID</span></div>
+            <div class="screen-sub">15 levels · 3 unclaimed rewards</div>
+          </div>
+        </div>
+        <div class="mission-grid" id="mission-grid"></div>
+      </section>
+
+      <!-- REFER -->
+      <section class="screen" data-screen="refer">
+        <div class="screen-head">
+          <div>
+            <div class="screen-title">REFER <span class="accent">& EARN</span></div>
+            <div class="screen-sub">0.70% lifetime commission · ৳500 per signup</div>
+          </div>
+        </div>
+        <div class="refer-grid">
+          <div class="refer-stats">
+            <div>
+              <div class="refer-lbl">YOUR CODE</div>
+              <div class="refer-code">RAJA8842</div>
+              <div class="refer-share">
+                <button onclick="copyRef()">📋 COPY LINK</button>
+                <button onclick="toast('Sharing to your network...')">📨 SHARE</button>
+              </div>
+            </div>
+            <div class="refer-row">
+              <div>
+                <div class="refer-lbl">RECRUITED</div>
+                <div class="refer-big">23</div>
+              </div>
+              <div>
+                <div class="refer-lbl">COMMISSION</div>
+                <div class="refer-big">৳ 8,420</div>
+              </div>
+              <div>
+                <div class="refer-lbl">TURNOVER</div>
+                <div class="refer-big">৳ 12.4L</div>
+              </div>
+            </div>
+          </div>
+          <div class="panel accent">
+            <div class="panel-title">COMMISSION TABLE</div>
+            <div style="font-family:'Rajdhani';font-weight:600;font-size:12px;">
+              <div style="display:flex;justify-content:space-between;padding:7px 0;border-bottom:1px solid var(--line);"><span>SLOTS</span><span style="color:var(--green);font-family:'Russo One';">0.10% — 0.70%</span></div>
+              <div style="display:flex;justify-content:space-between;padding:7px 0;border-bottom:1px solid var(--line);"><span>LIVE CASINO</span><span style="color:var(--green);font-family:'Russo One';">0.15% — 0.65%</span></div>
+              <div style="display:flex;justify-content:space-between;padding:7px 0;border-bottom:1px solid var(--line);"><span>SPORTS</span><span style="color:var(--green);font-family:'Russo One';">0.20% — 0.70%</span></div>
+              <div style="display:flex;justify-content:space-between;padding:7px 0;border-bottom:1px solid var(--line);"><span>FISHING</span><span style="color:var(--green);font-family:'Russo One';">0.10% — 0.50%</span></div>
+              <div style="display:flex;justify-content:space-between;padding:7px 0;"><span>SKILL GAME</span><span style="color:var(--green);font-family:'Russo One';">0.10% — 0.40%</span></div>
+            </div>
+            <button class="btn primary" style="width:100%;margin-top:14px;padding:11px;" onclick="toast('৳ 8,420 commission claimed!')">⚡ COLLECT NOW</button>
+          </div>
+        </div>
+      </section>
+
+      <!-- SETTINGS -->
+      <section class="screen" data-screen="settings">
+        <div class="screen-head">
+          <div>
+            <div class="screen-title">SETTINGS <span class="accent">PANEL</span></div>
+            <div class="screen-sub">Tune your machine</div>
+          </div>
+        </div>
+        <div class="settings-list">
+          <div class="setting-row">
+            <div><div class="setting-name">MUSIC</div><div class="setting-sub">Track audio</div></div>
+            <div class="toggle on" onclick="this.classList.toggle('on')"></div>
+          </div>
+          <div class="setting-row">
+            <div><div class="setting-name">SOUND FX</div><div class="setting-sub">Engine & UI sounds</div></div>
+            <div class="toggle on" onclick="this.classList.toggle('on')"></div>
+          </div>
+          <div class="setting-row">
+            <div><div class="setting-name">NOTIFICATIONS</div><div class="setting-sub">Mission & promo alerts</div></div>
+            <div class="toggle on" onclick="this.classList.toggle('on')"></div>
+          </div>
+          <div class="setting-row">
+            <div><div class="setting-name">LANGUAGE</div><div class="setting-sub">English · বাংলা</div></div>
+            <div style="color:var(--orange);font-family:'Russo One';font-size:11px;">EN ▾</div>
+          </div>
+          <div class="setting-row">
+            <div><div class="setting-name">PASSWORD</div><div class="setting-sub">Last changed 28 days ago</div></div>
+            <div style="color:var(--orange);font-family:'Russo One';font-size:11px;">CHANGE ▸</div>
+          </div>
+          <div class="setting-row">
+            <div><div class="setting-name">VERSION</div><div class="setting-sub">RajaBaji TURBO V4.0 · Build 2026.05</div></div>
+            <div style="color:var(--mute);font-family:'Rajdhani';font-weight:700;font-size:11px;">UP TO DATE</div>
+          </div>
+          <div class="setting-row" style="border-color:rgba(255,45,32,0.5);" onclick="if(confirm('Log out?')) toast('Logging out...')">
+            <div><div class="setting-name" style="color:var(--red);">LOGOUT</div><div class="setting-sub">End session</div></div>
+            <div style="color:var(--red);font-family:'Russo One';font-size:11px;">▸</div>
+          </div>
+        </div>
+      </section>
+
+    </main>
+
+    <!-- RIGHT RAIL -->
+    <aside class="right">
+      <div class="panel accent">
+        <div class="panel-title">WALLET</div>
+        <div class="wallet-rows">
+          <div class="wallet-row"><span class="wallet-lbl">MAIN</span><span class="wallet-val green">৳12,450</span></div>
+          <div class="wallet-row"><span class="wallet-lbl">BONUS</span><span class="wallet-val">৳840</span></div>
+          <div class="wallet-row"><span class="wallet-lbl">COMMISSION</span><span class="wallet-val orange">৳8,420</span></div>
+          <div class="wallet-row"><span class="wallet-lbl">REBATE</span><span class="wallet-val">৳322</span></div>
+        </div>
+        <div class="wallet-actions">
+          <button class="btn primary" onclick="openModal('deposit-modal')">DEPOSIT</button>
+          <button class="btn green" onclick="openModal('withdraw-modal')">WITHDRAW</button>
+        </div>
+      </div>
+
+      <div class="panel">
+        <div class="panel-title">⚡ ACTIVE MISSIONS</div>
+        <div class="mission-item">
+          <div class="mission-ic">💰</div>
+          <div style="flex:1;">
+            <div class="mission-name">Wager ৳5,000 today</div>
+            <div class="mission-bar"><span style="width:64%"></span></div>
+            <div class="mission-prog">3,200 / 5,000</div>
+          </div>
+        </div>
+        <div class="mission-item">
+          <div class="mission-ic">🎰</div>
+          <div style="flex:1;">
+            <div class="mission-name">Spin 50 slot rounds</div>
+            <div class="mission-bar"><span style="width:42%"></span></div>
+            <div class="mission-prog">21 / 50</div>
+          </div>
+        </div>
+        <div class="mission-item">
+          <div class="mission-ic">🐟</div>
+          <div style="flex:1;">
+            <div class="mission-name">Catch 100 fish</div>
+            <div class="mission-bar"><span style="width:88%"></span></div>
+            <div class="mission-prog">88 / 100</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="panel">
+        <div class="panel-title">▶ LIVE WINS</div>
+        <div class="wins-list" id="wins-list"></div>
+      </div>
+
+      <div class="promo-banner">
+        <div class="promo-pill">+200%</div>
+        <div class="promo-headline">RAMADAN<br>TRIPLE BOOST</div>
+        <div class="promo-sub">Up to ৳6,000 · Limited time</div>
+        <button class="btn green" onclick="go('bonus')">CLAIM NOW ▸</button>
+      </div>
+    </aside>
+
+    <!-- DOCK -->
+    <footer class="dock">
+      <button class="dock-btn deposit" onclick="openModal('deposit-modal')"><span class="ic">⚡</span>DEPOSIT</button>
+      <button class="dock-btn withdraw" onclick="openModal('withdraw-modal')"><span class="ic">▼</span>WITHDRAW</button>
+      <button class="dock-btn" onclick="go('refer')"><span class="ic">🤝</span>REFER</button>
+      <button class="dock-btn" onclick="toast('Rebate vault opening...')"><span class="ic">↺</span>REBATE</button>
+      <button class="dock-btn" onclick="openModal('inbox-modal')"><span class="ic">📩</span>INBOX</button>
+      <button class="dock-btn" onclick="openModal('support-modal')"><span class="ic">💬</span>SUPPORT</button>
+    </footer>
+
+  </div>
+</div>
+
+<!-- ============ MODALS ============ -->
+
+<!-- Login -->
+<div class="modal-overlay" id="login-modal" onclick="if(event.target===this)closeModal('login-modal')">
+  <div class="modal">
+    <button class="modal-close" onclick="closeModal('login-modal')">✕</button>
+    <div class="modal-title">► START YOUR ENGINE</div>
+    <div class="modal-sub">Driver credentials</div>
+    <label>USERNAME</label>
+    <input placeholder="driver_8842">
+    <label>PASSWORD</label>
+    <input type="password" placeholder="••••••••">
+    <button class="modal-btn" onclick="closeModal('login-modal'); toast('Welcome back, driver!')">▶ IGNITE</button>
+    <div class="modal-foot">New driver? <a onclick="closeModal('login-modal'); openModal('register-modal')">Register here ▸</a></div>
+  </div>
+</div>
+
+<!-- Register -->
+<div class="modal-overlay" id="register-modal" onclick="if(event.target===this)closeModal('register-modal')">
+  <div class="modal">
+    <button class="modal-close" onclick="closeModal('register-modal')">✕</button>
+    <div class="modal-title">► JOIN THE GRID</div>
+    <div class="modal-sub">Setup your driver profile</div>
+    <label>USERNAME</label><input placeholder="Pick a handle">
+    <label>PHONE (BD)</label><input placeholder="+880 ...">
+    <label>PASSWORD</label><input type="password" placeholder="Min 8 characters">
+    <label>REFERRAL CODE (OPTIONAL)</label><input placeholder="RAJA....">
+    <button class="modal-btn" onclick="closeModal('register-modal'); toast('Welcome to the grid!')">▶ ENTER GRID</button>
+  </div>
+</div>
+
+<!-- Deposit -->
+<div class="modal-overlay" id="deposit-modal" onclick="if(event.target===this)closeModal('deposit-modal')">
+  <div class="modal" style="max-width:440px;">
+    <button class="modal-close" onclick="closeModal('deposit-modal')">✕</button>
+    <div class="modal-title">⚡ DEPOSIT</div>
+    <div class="modal-sub">+3.5% INSTANT BONUS</div>
+    <label>PAYMENT METHOD</label>
+    <div class="method-row">
+      <button class="method-btn active"><span class="method-ic">💰</span>BKASH</button>
+      <button class="method-btn"><span class="method-ic">💎</span>NAGAD</button>
+      <button class="method-btn"><span class="method-ic">🚀</span>ROCKET</button>
+    </div>
+    <label style="margin-top:14px;">AMOUNT (৳200 — ৳30,000)</label>
+    <div class="amt-grid">
+      <button class="amt-chip">৳200<span class="bonus">+3.5%</span></button>
+      <button class="amt-chip">৳500<span class="bonus">+3.5%</span></button>
+      <button class="amt-chip">৳800<span class="bonus">+3.5%</span></button>
+      <button class="amt-chip active">৳1,000<span class="bonus">+3.5%</span></button>
+      <button class="amt-chip">৳1,500<span class="bonus">+3.5%</span></button>
+      <button class="amt-chip">৳3,000<span class="bonus">+3.5%</span></button>
+    </div>
+    <label>CUSTOM AMOUNT</label>
+    <input type="number" placeholder="Or type your own (200 - 30,000)">
+    <label>PROMOTION</label>
+    <select>
+      <option>— NO PROMOTION —</option>
+      <option>Ramadan Triple Boost (+200%)</option>
+      <option>Daily Reload (+5%)</option>
+    </select>
+    <button class="modal-btn" onclick="closeModal('deposit-modal'); toast('৳ 1,000 deposit confirmed!')">▶ CONFIRM DEPOSIT</button>
+  </div>
+</div>
+
+<!-- Withdraw -->
+<div class="modal-overlay" id="withdraw-modal" onclick="if(event.target===this)closeModal('withdraw-modal')">
+  <div class="modal" style="max-width:420px;">
+    <button class="modal-close" onclick="closeModal('withdraw-modal')">✕</button>
+    <div class="modal-title">▼ WITHDRAW</div>
+    <div class="modal-sub">AVAIL · ৳12,450 · ≤ 3 MIN PAYOUT</div>
+    <label>DESTINATION WALLET</label>
+    <select>
+      <option>bKash · ****8842</option>
+      <option>Nagad · ****1290</option>
+    </select>
+    <label>AMOUNT (MIN ৳500 · MAX ৳30,000)</label>
+    <input type="number" placeholder="Enter amount">
+    <button class="modal-btn" onclick="closeModal('withdraw-modal'); toast('Withdrawal submitted · 3 min ETA')">▶ SUBMIT</button>
+  </div>
+</div>
+
+<!-- Inbox -->
+<div class="modal-overlay" id="inbox-modal" onclick="if(event.target===this)closeModal('inbox-modal')">
+  <div class="modal" style="max-width:460px;">
+    <button class="modal-close" onclick="closeModal('inbox-modal')">✕</button>
+    <div class="modal-title">📩 INBOX</div>
+    <div class="modal-sub">Latest dispatch</div>
+    <div class="inbox-list">
+      <div class="inbox-item unread">
+        <div class="inbox-ic">🔥</div>
+        <div class="inbox-body">
+          <div class="inbox-title">Ramadan Triple Boost Live</div>
+          <div class="inbox-snippet">Deposit 3x during holy month · earn up to ৳6,000...</div>
+        </div>
+        <div class="inbox-time">2H</div>
+      </div>
+      <div class="inbox-item unread">
+        <div class="inbox-ic">⚡</div>
+        <div class="inbox-body">
+          <div class="inbox-title">Auto Deposit Bonus Raised</div>
+          <div class="inbox-snippet">Bonus rate increased to 3.5% across all wallets...</div>
+        </div>
+        <div class="inbox-time">5H</div>
+      </div>
+      <div class="inbox-item">
+        <div class="inbox-ic">🏏</div>
+        <div class="inbox-body">
+          <div class="inbox-title">IPL 2026 Reward Box opens tomorrow</div>
+          <div class="inbox-snippet">Stake during any IPL fixture for chest rewards...</div>
+        </div>
+        <div class="inbox-time">1D</div>
+      </div>
+      <div class="inbox-item">
+        <div class="inbox-ic">▲</div>
+        <div class="inbox-body">
+          <div class="inbox-title">SureTech bKash maintenance complete</div>
+          <div class="inbox-snippet">Services restored to normal speed...</div>
+        </div>
+        <div class="inbox-time">2D</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Support -->
+<div class="modal-overlay" id="support-modal" onclick="if(event.target===this)closeModal('support-modal')">
+  <div class="modal" style="max-width:380px;">
+    <button class="modal-close" onclick="closeModal('support-modal')">✕</button>
+    <div class="modal-title">💬 PIT CREW</div>
+    <div class="modal-sub">24/7 driver support</div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;">
+      <button class="method-btn"><span class="method-ic">💬</span>LIVE CHAT</button>
+      <button class="method-btn"><span class="method-ic">📞</span>WHATSAPP</button>
+      <button class="method-btn"><span class="method-ic">✈</span>TELEGRAM</button>
+      <button class="method-btn"><span class="method-ic">f</span>FACEBOOK</button>
+    </div>
+    <label style="margin-top:14px;">QUICK MESSAGE</label>
+    <input placeholder="What's your issue?">
+    <button class="modal-btn" onclick="closeModal('support-modal'); toast('Pit crew responding ASAP')">▶ SEND</button>
+  </div>
+</div>
+
+<!-- Game launch -->
+<div class="modal-overlay" id="game-modal" onclick="if(event.target===this)closeModal('game-modal')">
+  <div class="modal" style="max-width:440px;text-align:center;">
+    <button class="modal-close" onclick="closeModal('game-modal')">✕</button>
+    <div style="font-family:'Russo One';font-size:48px;color:var(--red);text-shadow:0 0 20px var(--red-glow);margin:20px 0;">▶</div>
+    <div class="modal-title" id="game-modal-name">LOADING</div>
+    <div class="modal-sub" id="game-modal-provider">Engine warming up...</div>
+    <div style="margin:20px 0;">
+      <div style="height:4px;background:var(--bg);position:relative;overflow:hidden;">
+        <div id="load-bar" style="width:0;height:100%;background:linear-gradient(90deg,var(--red),var(--orange));box-shadow:0 0 10px var(--red-glow);transition:width 1.4s ease;"></div>
+      </div>
+    </div>
+    <button class="modal-btn" onclick="closeModal('game-modal'); toast('Session ended')">▶ BACK TO PIT</button>
+  </div>
+</div>
+
+<!-- Toast -->
+<div class="toast" id="toast"></div>
+
+<script>
+// ============ SPEEDLINES ============
+(function(){
+  const wrap = document.getElementById('speedlines');
+  const colors = ['red','orange','green','chrome'];
+  for (let i = 0; i < 18; i++) {
+    const s = document.createElement('div');
+    s.className = 'line-streak ' + colors[Math.floor(Math.random() * colors.length)];
+    s.style.top = (Math.random() * 100) + '%';
+    s.style.setProperty('--dur', (4 + Math.random() * 8) + 's');
+    s.style.setProperty('--delay', (-Math.random() * 8) + 's');
+    wrap.appendChild(s);
+  }
+})();
+
+// ============ TICKER ============
+(function(){
+  const items = [
+    '⚡ <strong>khan_dhk</strong> just won <span class="green">৳ 24,800</span> on Crazy Time',
+    '🔥 <strong>Mega Reels</strong> jackpot at <span class="green">৳ 8,42,000</span> · climbing fast',
+    '🏏 IPL 2026 · Bangladesh vs India · LIVE NOW · BD favourite at 1.85',
+    '▶ <strong>rajiv88</strong> hit <span class="green">৳ 1,84,000</span> on Aviator Turbo',
+    '⚡ Ramadan Triple Boost · +200% bonus · ends in 14 days',
+    '🐟 Fishing tournament · top 10 share <span class="green">৳ 1,00,000</span> · 4h left'
+  ];
+  const html = items.map(t => `<span>${t}</span>`).join('') + items.map(t => `<span>${t}</span>`).join('');
+  document.getElementById('ticker-track').innerHTML = html;
+})();
+
+// ============ GAMES DATA ============
+const GAMES = {
+  hot: [
+    { name: 'Aviator', provider: 'SPRIBE', tag: 'hot', img: '../game-assets/generated/aviator.png' },
+    { name: 'Crazy Time', provider: 'EVOLUTION', tag: 'hot', img: '../game-assets/generated/crazy_time.png' },
+    { name: 'Super Ace', provider: 'JILI', tag: 'hot', img: '../game-assets/generated/super_ace.png' },
+    { name: 'Money Coming', provider: 'JILI', img: '../game-assets/generated/money_coming.png' },
+    { name: 'Mega Wheel', provider: 'PRAGMATIC', tag: 'new', img: '../game-assets/generated/mega_wheel.png' },
+    { name: 'Plinko', provider: 'SPRIBE', tag: 'fast', img: '../game-assets/generated/plinko.png' },
+    { name: 'Aviatrix', provider: 'RAJABAJI', tag: 'hot', img: '../game-assets/generated/aviatrix.png' },
+    { name: 'Chicken Road', provider: 'INOUT', img: '../game-assets/generated/chicken_road.png' }
+  ],
+  live: [
+    { name: 'Crazy Time', provider: 'EVOLUTION', tag: 'hot', img: '../game-assets/generated/crazy_time.png' },
+    { name: 'Funky Time', provider: 'EVOLUTION', img: '../game-assets/generated/funky_time.png' },
+    { name: 'Lightning Roulette', provider: 'EVOLUTION', tag: 'hot', img: '../game-assets/generated/lightning_roulette.png' },
+    { name: 'Mega Wheel', provider: 'PRAGMATIC', img: '../game-assets/generated/mega_wheel.png' },
+    { name: 'Andar Bahar', provider: 'EZUGI' },
+    { name: 'Teen Patti', provider: 'SUPERSPADE', tag: 'new' },
+    { name: 'Dragon Tiger', provider: 'EVOLUTION' },
+    { name: 'Live Baccarat', provider: 'SA GAMING' },
+    { name: 'Sicbo', provider: 'PRAGMATIC LIVE' }
+  ],
+  slots: [
+    { name: 'Sweet Bonanza', provider: 'PRAGMATIC', tag: 'hot', img: '../game-assets/generated/sweet_bonanza.png' },
+    { name: 'Big Bass', provider: 'PRAGMATIC', img: '../game-assets/generated/big_bass.png' },
+    { name: 'Super Ace', provider: 'JILI', tag: 'hot', img: '../game-assets/generated/super_ace.png' },
+    { name: 'Money Coming', provider: 'JILI', img: '../game-assets/generated/money_coming.png' },
+    { name: 'Gates of Olympus', provider: 'PRAGMATIC', tag: 'fast' },
+    { name: 'Fortune Tiger', provider: 'PG SOFT', tag: 'hot' },
+    { name: 'Boxing King', provider: 'JILI' },
+    { name: 'Wild West Gold', provider: 'PRAGMATIC' },
+    { name: 'Caishen Wins', provider: 'PG SOFT', tag: 'new' },
+    { name: 'Treasures of Aztec', provider: 'PG SOFT' },
+    { name: 'Mahjong Ways 2', provider: 'PG SOFT' },
+    { name: 'Bonanza Gold', provider: 'PRAGMATIC' }
+  ],
+  fishing: [
+    { name: 'Boom Legend', provider: 'JILI', tag: 'hot' },
+    { name: 'Royal Fishing', provider: 'JILI' },
+    { name: 'Bombing Fishing', provider: 'JILI' },
+    { name: 'All-Star Fishing', provider: 'JILI' },
+    { name: 'Dragon Fortune', provider: 'CQ9' },
+    { name: 'Fishing God', provider: 'SPADEGAMING' },
+    { name: 'Fishing Wars', provider: 'FACHAI', tag: 'new' },
+    { name: 'Happy Fishing', provider: 'JILI' }
+  ]
+};
+
+function makeCard(g) {
+  const tagHtml = g.tag ? `<span class="game-tag ${g.tag}">${g.tag.toUpperCase()}</span>` : '';
+  const bg = g.img ? `style="--bg:url('${g.img}')"` : '';
+  return `<div class="game-card" ${bg} onclick="playGame('${g.name}','${g.provider}')">
+    ${tagHtml}
+    <div class="game-name">${g.name}</div>
+    <div class="game-provider">${g.provider}</div>
+  </div>`;
+}
+
+document.getElementById('hot-grid').innerHTML = GAMES.hot.map(makeCard).join('');
+document.getElementById('live-grid').innerHTML = GAMES.live.slice(0, 6).map(makeCard).join('');
+document.getElementById('live-grid-2').innerHTML = GAMES.live.map(makeCard).join('');
+document.getElementById('slots-grid').innerHTML = GAMES.slots.map(makeCard).join('');
+document.getElementById('fishing-grid').innerHTML = GAMES.fishing.map(makeCard).join('');
+
+// ============ SPORTS ============
+const SPORTS = [
+  { tag: 'LIVE', home: 'BANGLADESH', away: 'INDIA', score: '142/4 (16.2)', time: 'T20I · 2nd Innings', odds: ['1.85', '2.10', '11.0'] },
+  { tag: 'LIVE', home: 'MUMBAI INDIANS', away: 'CHENNAI SK', score: '186/6 (20)', time: 'IPL 2026 · Match 24', odds: ['1.45', '2.80', '7.5'] },
+  { tag: '3:30PM', home: 'PAKISTAN', away: 'SRI LANKA', score: '—', time: 'ODI · Today', odds: ['2.20', '1.75', '9.0'] },
+  { tag: '7:00PM', home: 'DELHI CAPITALS', away: 'KKR', score: '—', time: 'IPL · Today', odds: ['1.95', '1.90', '8.0'] },
+  { tag: 'TMRW', home: 'BPL CUP', away: 'FINAL', score: '—', time: 'Tomorrow · 7:30pm', odds: ['—', '—', '—'] }
+];
+document.getElementById('sports-list').innerHTML = SPORTS.map(m => `
+  <div class="sport-row">
+    <div>
+      <div class="sport-tag-time ${m.tag === 'LIVE' ? 'live' : ''}">${m.tag}</div>
+      <div class="sport-meta">${m.time}</div>
+    </div>
+    <div>
+      <div class="sport-name">${m.home} <span class="sport-vs">VS</span> ${m.away}</div>
+      ${m.score !== '—' ? `<div class="sport-score">${m.score}</div>` : ''}
+    </div>
+    <div class="sport-odds">
+      ${m.odds.map(o => `<div class="odd">${o}</div>`).join('')}
+    </div>
+  </div>
+`).join('');
+
+// ============ BONUS GRID ============
+const BONUSES = [
+  { title: 'RAMADAN TRIPLE BOOST', amt: '৳6,000', desc: 'Deposit 3x during holy month', tag: 'LIMITED' },
+  { title: 'DAILY LOGIN FUEL', amt: '৳88/DAY', desc: 'Free coins on every visit', tag: 'DAILY' },
+  { title: 'WEEKEND TURBO', amt: '+10%', desc: 'Boost every Sat & Sun deposit', tag: 'WEEKEND' },
+  { title: 'CRICKET CASHBACK', amt: '৳1,000', desc: 'Wager on IPL · earn rebate', tag: 'IPL 2026' },
+  { title: 'HIGH ROLLER VIP', amt: '৳50,000', desc: 'Deposit ৳10k+ for elite perks', tag: 'VIP' },
+  { title: 'BIRTHDAY BLAST', amt: '৳1,288', desc: 'Surprise on your day · Gold+', tag: 'EXCLUSIVE' }
+];
+document.getElementById('bonus-grid').innerHTML = BONUSES.map(b => `
+  <div class="panel" style="background:linear-gradient(135deg,rgba(255,45,32,0.15),var(--bg-3));border-left:3px solid var(--red);cursor:pointer;">
+    <div style="display:flex;justify-content:space-between;align-items:flex-start;">
+      <div style="font-family:'Russo One';font-size:9px;color:var(--orange);letter-spacing:2px;">${b.tag}</div>
+      <div style="font-family:'Russo One';font-size:18px;color:var(--green);text-shadow:0 0 8px var(--green-glow);">${b.amt}</div>
+    </div>
+    <div style="font-family:'Russo One';font-size:14px;color:var(--ink);margin-top:8px;text-transform:uppercase;">${b.title}</div>
+    <div style="font-family:'Rajdhani';font-weight:600;font-size:11px;color:var(--mute);margin-top:3px;letter-spacing:0.5px;">${b.desc}</div>
+    <button class="btn primary" style="width:100%;margin-top:10px;padding:9px;" onclick="event.stopPropagation();toast('Bonus activated!')">▶ CLAIM</button>
+  </div>
+`).join('');
+
+// ============ MISSION GRID ============
+const MISSIONS = [
+  { lvl: 1, ic: '🎁', prize: '৳200', state: 'open' },
+  { lvl: 2, ic: '📦', prize: '৳500', state: 'open' },
+  { lvl: 3, ic: '🪙', prize: '৳800', state: 'open', unread: true },
+  { lvl: 4, ic: '💼', prize: '৳1,500', state: 'open' },
+  { lvl: 5, ic: '🎯', prize: '৳3,000', state: 'open', unread: true },
+  { lvl: 6, ic: '🏺', prize: '৳5,000', state: 'open', unread: true },
+  { lvl: 7, ic: '⚱️', prize: '৳8,000', state: 'locked' },
+  { lvl: 8, ic: '🔮', prize: '৳12,000', state: 'locked' },
+  { lvl: 9, ic: '👑', prize: '৳20,000', state: 'locked' },
+  { lvl: 10, ic: '💎', prize: '৳30,000', state: 'locked' },
+  { lvl: 12, ic: '🪔', prize: '৳50,000', state: 'locked' },
+  { lvl: 15, ic: '📱', prize: 'iPhone 17', state: 'locked' },
+  { lvl: 18, ic: '🏎️', prize: 'S25 Ultra', state: 'locked' },
+  { lvl: 20, ic: '🏆', prize: 'GRAND', state: 'locked' }
+];
+document.getElementById('mission-grid').innerHTML = MISSIONS.map(m => `
+  <div class="chest ${m.state}" onclick="${m.state === 'open' ? `toast('Box LVL ${m.lvl} cracked: ${m.prize}!')` : `toast('Locked · need LVL ${m.lvl}')`}">
+    ${m.unread ? '<div class="red-dot"></div>' : ''}
+    <div class="chest-ic">${m.ic}</div>
+    <div class="chest-lvl">LVL ${m.lvl}</div>
+    <div class="chest-prize">${m.prize}</div>
+  </div>
+`).join('');
+
+// ============ WINS TICKER ============
+const WIN_NAMES = ['kh4n_d', 'rajiv88', 'sumon_bd', 'shahin12', 'aysha7', 'ifaz44', 'mehedi8', 'rifat03', 'amir90', 'mishu56'];
+const WIN_GAMES = ['Crazy Time', 'Aviator', 'Sweet Bonanza', 'Super Ace', 'Lightning Roulette', 'Plinko', 'Mega Wheel'];
+function randWin() {
+  const u = WIN_NAMES[Math.floor(Math.random() * WIN_NAMES.length)];
+  const g = WIN_GAMES[Math.floor(Math.random() * WIN_GAMES.length)];
+  const a = (Math.floor(Math.random() * 80) + 5) * 1000;
+  return { u, g, a };
+}
+function renderWins() {
+  const wins = Array.from({ length: 8 }, randWin);
+  document.getElementById('wins-list').innerHTML = wins.map(w => `
+    <div class="win-item">
+      <div class="win-avatar"></div>
+      <div>
+        <div class="win-user">${w.u}</div>
+        <div class="win-game">${w.g}</div>
+      </div>
+      <div class="win-amt">+৳${w.a.toLocaleString()}</div>
+    </div>
+  `).join('');
+}
+renderWins();
+setInterval(renderWins, 6000);
+
+// ============ NAVIGATION ============
+function go(name) {
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  const target = document.querySelector(`.screen[data-screen="${name}"]`);
+  if (target) target.classList.add('active');
+  document.querySelectorAll('.rail-item').forEach(b => b.classList.toggle('active', b.dataset.nav === name));
+}
+document.querySelectorAll('.rail-item').forEach(b => {
+  b.addEventListener('click', () => go(b.dataset.nav));
+});
+
+// ============ MODALS ============
+function openModal(id) { document.getElementById(id).classList.add('show'); }
+function closeModal(id) { document.getElementById(id).classList.remove('show'); }
+
+// ============ GAME LAUNCH ============
+function playGame(name, provider) {
+  document.getElementById('game-modal-name').textContent = name.toUpperCase();
+  document.getElementById('game-modal-provider').textContent = provider ? `— ${provider} —` : 'Engine warming up...';
+  document.getElementById('load-bar').style.width = '0';
+  openModal('game-modal');
+  setTimeout(() => { document.getElementById('load-bar').style.width = '100%'; }, 50);
+}
+
+// ============ TOAST ============
+let toastT;
+function toast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  clearTimeout(toastT);
+  toastT = setTimeout(() => t.classList.remove('show'), 2400);
+}
+
+// ============ COPY REFERRAL ============
+function copyRef() {
+  if (navigator.clipboard) navigator.clipboard.writeText('https://rajabaji.net?ref=RAJA8842');
+  toast('Referral link copied!');
+}
+
+// ============ TABS / CHIPS ============
+document.querySelectorAll('.tabs').forEach(bar => {
+  bar.addEventListener('click', e => {
+    const t = e.target.closest('.tab');
+    if (!t) return;
+    bar.querySelectorAll('.tab').forEach(x => x.classList.toggle('active', x === t));
+  });
+});
+document.querySelectorAll('.provider-bar').forEach(bar => {
+  bar.addEventListener('click', e => {
+    const t = e.target.closest('.provider-chip');
+    if (!t) return;
+    bar.querySelectorAll('.provider-chip').forEach(x => x.classList.toggle('active', x === t));
+  });
+});
+document.querySelectorAll('.amt-grid').forEach(bar => {
+  bar.addEventListener('click', e => {
+    const t = e.target.closest('.amt-chip');
+    if (!t) return;
+    bar.querySelectorAll('.amt-chip').forEach(x => x.classList.toggle('active', x === t));
+  });
+});
+document.querySelectorAll('.method-row').forEach(bar => {
+  bar.addEventListener('click', e => {
+    const t = e.target.closest('.method-btn');
+    if (!t) return;
+    bar.querySelectorAll('.method-btn').forEach(x => x.classList.toggle('active', x === t));
+  });
+});
+
+// ============ ESC closes modals ============
+document.addEventListener('keydown', e => {
+  if (e.key === 'Escape') document.querySelectorAll('.modal-overlay.show').forEach(m => m.classList.remove('show'));
+});
+</script>
+
+</body>
+</html>

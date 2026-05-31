@@ -1,0 +1,1601 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#07051A">
+<title>RajaBaji V3 — Arcane Hall</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@500;600;700;800;900&family=Inter:wght@400;500;600;700;800&family=Cormorant+Garamond:ital,wght@0,500;0,700;1,500&display=swap" rel="stylesheet">
+<style>
+:root {
+  --ink: #07051A;
+  --ink-2: #120A2A;
+  --ink-3: #1B1235;
+  --gold: #D4AF37;
+  --gold-2: #F5C84B;
+  --gold-glow: rgba(245,200,75,0.55);
+  --purple: #5B2D8C;
+  --purple-2: #8B5CF6;
+  --emerald: #10B981;
+  --crimson: #DC2626;
+  --cream: #FAF4E0;
+  --mute: #8B7BB8;
+  --line: rgba(245,200,75,0.18);
+  --line-strong: rgba(245,200,75,0.45);
+  --glass: rgba(27,18,53,0.55);
+  --glass-2: rgba(91,45,140,0.18);
+}
+*, *::before, *::after { box-sizing: border-box; }
+html, body { margin: 0; height: 100%; background: var(--ink); color: var(--cream); font-family: 'Inter', system-ui, sans-serif; overflow: hidden; }
+button { font-family: inherit; cursor: pointer; }
+
+/* ================ STAGE ================ */
+.stage { position: relative; width: 100%; height: 100vh; overflow: hidden; }
+
+/* mystic background — midnight + warm gold pools */
+.bg-mystic {
+  position: absolute; inset: 0;
+  background:
+    radial-gradient(ellipse at 18% 25%, rgba(245,200,75,0.10), transparent 45%),
+    radial-gradient(ellipse at 82% 75%, rgba(139,92,246,0.16), transparent 50%),
+    radial-gradient(ellipse at 50% 100%, rgba(91,45,140,0.18), transparent 55%),
+    linear-gradient(180deg, #07051A 0%, #120A2A 60%, #07051A 100%);
+}
+
+/* hex grid layer */
+.bg-hex {
+  position: absolute; inset: -20px;
+  background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='56' height='64' viewBox='0 0 56 64'><polygon points='28,2 54,16 54,48 28,62 2,48 2,16' fill='none' stroke='rgba(212,175,55,0.07)' stroke-width='1'/></svg>");
+  background-size: 56px 64px;
+  opacity: 0.85;
+  pointer-events: none;
+}
+
+/* drifting embers */
+.embers { position: absolute; inset: 0; overflow: hidden; pointer-events: none; }
+.ember {
+  position: absolute; width: 3px; height: 3px; border-radius: 50%;
+  background: var(--gold-2);
+  box-shadow: 0 0 8px var(--gold-2), 0 0 16px var(--gold-glow);
+  animation: ember-rise var(--dur, 18s) linear infinite;
+  animation-delay: var(--delay, 0s);
+  opacity: 0;
+}
+@keyframes ember-rise {
+  0% { transform: translate(0, 100vh) scale(0.6); opacity: 0; }
+  10% { opacity: 0.6; }
+  90% { opacity: 0.5; }
+  100% { transform: translate(var(--dx, 30px), -10vh) scale(1); opacity: 0; }
+}
+
+/* giant owl watermark behind everything */
+.bg-owl {
+  position: absolute; left: 50%; top: 54%;
+  transform: translate(-50%, -50%);
+  width: min(70vh, 60vw);
+  height: min(70vh, 60vw);
+  opacity: 0.04;
+  pointer-events: none;
+  background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 200 200'><g fill='%23F5C84B'><ellipse cx='100' cy='110' rx='62' ry='75'/><circle cx='75' cy='85' r='22' fill='%2307051A'/><circle cx='125' cy='85' r='22' fill='%2307051A'/><circle cx='75' cy='85' r='10' fill='%23F5C84B'/><circle cx='125' cy='85' r='10' fill='%23F5C84B'/><polygon points='100,95 92,108 108,108' fill='%23D4AF37'/><path d='M40 50 Q60 30 80 55' stroke='%23F5C84B' stroke-width='3' fill='none'/><path d='M160 50 Q140 30 120 55' stroke='%23F5C84B' stroke-width='3' fill='none'/></g></svg>");
+  background-size: contain;
+  background-repeat: no-repeat;
+  background-position: center;
+  filter: drop-shadow(0 0 60px rgba(245,200,75,0.35));
+}
+
+/* ================ LAYOUT ================ */
+.app {
+  position: relative; z-index: 2;
+  display: grid;
+  grid-template-rows: 36px 24px 1fr 60px;
+  grid-template-columns: 96px 1fr 280px;
+  grid-template-areas:
+    "topbar topbar topbar"
+    "marquee marquee marquee"
+    "rail main right"
+    "dock dock dock";
+  height: 100vh;
+  gap: 6px;
+  padding: 6px;
+}
+
+/* ================ TOPBAR ================ */
+.topbar {
+  grid-area: topbar;
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 0 14px;
+  background: linear-gradient(180deg, rgba(27,18,53,0.85), rgba(7,5,26,0.65));
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  backdrop-filter: blur(10px);
+}
+.brand {
+  display: flex; align-items: center; gap: 10px;
+  font-family: 'Cinzel', serif;
+}
+.brand-mark {
+  width: 28px; height: 28px;
+  background: radial-gradient(circle at 30% 30%, var(--gold-2), var(--gold) 60%, #8B6B1F);
+  border-radius: 50%;
+  display: grid; place-items: center;
+  color: var(--ink); font-weight: 900; font-size: 16px;
+  box-shadow: 0 0 14px var(--gold-glow), inset 0 -2px 6px rgba(0,0,0,0.4);
+}
+.brand-name { font-size: 16px; font-weight: 700; letter-spacing: 3px; color: var(--gold-2); }
+.brand-sub { font-size: 9px; letter-spacing: 4px; color: var(--mute); font-family: 'Cinzel'; }
+
+.topbar-mid { display: flex; gap: 8px; align-items: center; }
+.search-pill {
+  display: flex; align-items: center; gap: 6px;
+  background: rgba(7,5,26,0.6);
+  border: 1px solid var(--line);
+  border-radius: 16px;
+  padding: 4px 10px 4px 8px;
+  font-size: 11px; color: var(--mute);
+  min-width: 220px;
+}
+.search-pill:focus-within { border-color: var(--gold); }
+.search-pill input { background: transparent; border: 0; outline: 0; color: var(--cream); font-size: 11px; flex: 1; font-family: inherit; }
+.online-chip {
+  font-size: 10px; color: var(--emerald);
+  display: flex; align-items: center; gap: 4px;
+  padding: 3px 8px;
+  border: 1px solid rgba(16,185,129,0.4);
+  border-radius: 12px;
+}
+.online-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--emerald); box-shadow: 0 0 6px var(--emerald); animation: pulse 1.6s ease-in-out infinite; }
+@keyframes pulse { 0%,100% { opacity: 1; } 50% { opacity: 0.4; } }
+
+.topbar-right { display: flex; align-items: center; gap: 8px; }
+.balance-pill {
+  display: flex; align-items: center; gap: 6px;
+  background: linear-gradient(135deg, rgba(212,175,55,0.18), rgba(91,45,140,0.18));
+  border: 1px solid var(--line-strong);
+  padding: 4px 10px;
+  border-radius: 14px;
+  font-size: 12px; font-weight: 700;
+  color: var(--gold-2);
+}
+.balance-icon { font-size: 13px; }
+.vip-chip {
+  display: flex; align-items: center; gap: 5px;
+  padding: 3px 8px;
+  background: linear-gradient(135deg, var(--gold), #8B6B1F);
+  border-radius: 12px;
+  font-size: 10px; font-weight: 800;
+  color: var(--ink);
+  letter-spacing: 1px;
+  font-family: 'Cinzel';
+}
+.icon-btn {
+  width: 26px; height: 26px;
+  background: rgba(7,5,26,0.55);
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  display: grid; place-items: center;
+  font-size: 13px;
+  color: var(--gold-2);
+  position: relative;
+}
+.icon-btn:hover { border-color: var(--gold); background: rgba(91,45,140,0.3); }
+.icon-btn .dot { position: absolute; top: -2px; right: -2px; width: 7px; height: 7px; border-radius: 50%; background: var(--crimson); box-shadow: 0 0 6px var(--crimson); }
+
+/* ================ MARQUEE ================ */
+.marquee {
+  grid-area: marquee;
+  display: flex; align-items: center; gap: 10px;
+  padding: 0 12px;
+  background: linear-gradient(90deg, rgba(91,45,140,0.25), rgba(7,5,26,0.4), rgba(91,45,140,0.25));
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  overflow: hidden;
+}
+.marquee-label {
+  font-size: 9px; letter-spacing: 2px;
+  color: var(--gold-2); font-weight: 700;
+  white-space: nowrap;
+  border-right: 1px solid var(--line);
+  padding-right: 10px;
+}
+.marquee-track {
+  display: flex; gap: 36px;
+  font-size: 11px; color: var(--cream);
+  white-space: nowrap;
+  animation: marquee-slide 35s linear infinite;
+}
+.marquee-track strong { color: var(--gold-2); font-weight: 700; }
+@keyframes marquee-slide {
+  0% { transform: translateX(0); }
+  100% { transform: translateX(-50%); }
+}
+
+/* ================ LEFT RAIL ================ */
+.rail {
+  grid-area: rail;
+  display: flex; flex-direction: column; gap: 5px;
+  padding: 8px 4px;
+  background: linear-gradient(180deg, rgba(27,18,53,0.6), rgba(7,5,26,0.5));
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  overflow-y: auto;
+  scrollbar-width: thin;
+}
+.rail-item {
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+  gap: 3px;
+  padding: 8px 4px;
+  background: transparent;
+  border: 1px solid transparent;
+  border-radius: 8px;
+  color: var(--mute);
+  font-size: 9px;
+  font-weight: 600;
+  letter-spacing: 0.5px;
+  transition: all .2s;
+  text-align: center;
+}
+.rail-item .ic { font-size: 18px; line-height: 1; }
+.rail-item:hover { color: var(--gold-2); border-color: var(--line); background: rgba(91,45,140,0.2); }
+.rail-item.active {
+  color: var(--ink);
+  background: linear-gradient(135deg, var(--gold-2), var(--gold));
+  border-color: var(--gold);
+  box-shadow: 0 0 12px var(--gold-glow);
+}
+.rail-divider { height: 1px; background: var(--line); margin: 4px 8px; }
+
+/* ================ MAIN ================ */
+.main {
+  grid-area: main;
+  position: relative;
+  background: linear-gradient(180deg, rgba(27,18,53,0.4), rgba(7,5,26,0.35));
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  overflow: hidden;
+}
+.screen {
+  position: absolute; inset: 0;
+  padding: 12px;
+  display: none;
+  flex-direction: column;
+  gap: 10px;
+  overflow-y: auto;
+  scrollbar-width: thin;
+}
+.screen.active { display: flex; animation: screen-in .4s ease both; }
+@keyframes screen-in {
+  from { opacity: 0; transform: translateY(8px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* screen heading */
+.screen-head { display: flex; align-items: center; justify-content: space-between; }
+.screen-title {
+  font-family: 'Cinzel'; font-weight: 700;
+  font-size: 18px; letter-spacing: 2px;
+  color: var(--gold-2);
+  display: flex; align-items: center; gap: 8px;
+}
+.screen-title::before { content: ''; width: 16px; height: 2px; background: var(--gold); display: inline-block; box-shadow: 0 0 8px var(--gold); }
+.screen-sub {
+  font-family: 'Cormorant Garamond'; font-style: italic;
+  font-size: 12px; color: var(--mute);
+}
+.tab-bar {
+  display: flex; gap: 6px;
+}
+.tab {
+  padding: 5px 12px;
+  background: rgba(7,5,26,0.6);
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  font-size: 10px; font-weight: 700;
+  color: var(--mute);
+  letter-spacing: 1px;
+}
+.tab:hover { color: var(--gold-2); border-color: var(--gold); }
+.tab.active { background: linear-gradient(135deg, var(--gold-2), var(--gold)); color: var(--ink); border-color: var(--gold); }
+
+/* hexagonal hero showcase */
+.hex-showcase {
+  display: grid; grid-template-columns: 1.5fr 1fr 1fr;
+  gap: 10px;
+  min-height: 180px;
+}
+.hex-hero {
+  position: relative;
+  border-radius: 14px;
+  overflow: hidden;
+  border: 1px solid var(--gold);
+  background:
+    linear-gradient(135deg, rgba(245,200,75,0.12), rgba(91,45,140,0.2)),
+    radial-gradient(circle at 70% 50%, rgba(245,200,75,0.3), transparent 60%),
+    #1B1235;
+  padding: 16px;
+  display: flex; flex-direction: column; justify-content: space-between;
+  box-shadow: 0 0 24px rgba(245,200,75,0.15);
+}
+.hex-hero::before {
+  content: ''; position: absolute; inset: 0;
+  background: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='80' height='92' viewBox='0 0 80 92'><polygon points='40,2 78,22 78,70 40,90 2,70 2,22' fill='none' stroke='rgba(245,200,75,0.12)' stroke-width='1'/></svg>") top right / 80px 92px no-repeat;
+  opacity: 0.7;
+  pointer-events: none;
+}
+.hero-badge {
+  display: inline-flex; align-self: flex-start;
+  background: var(--crimson); color: white;
+  padding: 3px 8px; border-radius: 4px;
+  font-size: 9px; font-weight: 800; letter-spacing: 1.5px;
+}
+.hero-title { font-family: 'Cinzel'; font-weight: 800; font-size: 26px; line-height: 1.1; color: var(--cream); margin-top: 8px; text-shadow: 0 2px 8px rgba(0,0,0,0.6); }
+.hero-sub { font-family: 'Cormorant Garamond'; font-style: italic; font-size: 14px; color: var(--gold-2); margin-top: 4px; }
+.hero-cta {
+  align-self: flex-start;
+  padding: 8px 18px;
+  background: linear-gradient(135deg, var(--gold-2), var(--gold));
+  color: var(--ink);
+  border: 0;
+  border-radius: 6px;
+  font-weight: 800;
+  font-size: 11px;
+  letter-spacing: 1.5px;
+  margin-top: 10px;
+  box-shadow: 0 4px 12px rgba(212,175,55,0.4), inset 0 -2px 4px rgba(0,0,0,0.2);
+}
+.hex-hero-mini {
+  position: relative;
+  border-radius: 12px;
+  overflow: hidden;
+  border: 1px solid var(--line);
+  background: linear-gradient(135deg, var(--ink-3), var(--ink-2));
+  padding: 12px;
+  display: flex; flex-direction: column; justify-content: space-between;
+  cursor: pointer; transition: all .2s;
+}
+.hex-hero-mini:hover { border-color: var(--gold); transform: translateY(-2px); box-shadow: 0 8px 18px rgba(212,175,55,0.2); }
+.hex-hero-mini .mini-tag { font-size: 9px; letter-spacing: 1.5px; color: var(--gold-2); font-weight: 700; }
+.hex-hero-mini .mini-title { font-family: 'Cinzel'; font-weight: 700; font-size: 14px; color: var(--cream); }
+.hex-hero-mini .mini-meta { font-size: 10px; color: var(--mute); }
+.hex-hero-mini .mini-prize { font-size: 16px; font-weight: 800; color: var(--gold-2); font-family: 'Cinzel'; }
+
+/* game grid */
+.section-title { font-family: 'Cinzel'; font-size: 13px; font-weight: 700; color: var(--gold-2); letter-spacing: 2px; margin: 2px 0; display: flex; align-items: center; gap: 8px; }
+.section-title .line { flex: 1; height: 1px; background: linear-gradient(90deg, var(--gold), transparent); }
+.section-title .more { font-family: 'Inter'; font-size: 10px; color: var(--mute); letter-spacing: 0.5px; }
+.section-title .more:hover { color: var(--gold-2); }
+
+.game-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+  gap: 8px;
+}
+.game-card {
+  position: relative;
+  aspect-ratio: 4/5;
+  border-radius: 10px;
+  overflow: hidden;
+  border: 1px solid var(--line);
+  background: linear-gradient(135deg, var(--ink-3), var(--ink-2));
+  cursor: pointer;
+  transition: all .25s;
+  display: flex; flex-direction: column; justify-content: flex-end;
+  padding: 8px;
+}
+.game-card::before {
+  content: ''; position: absolute; inset: 0;
+  background-image: var(--bg, none);
+  background-size: cover;
+  background-position: center;
+  opacity: 0.55;
+  transition: opacity .2s;
+}
+.game-card::after {
+  content: ''; position: absolute; inset: 0;
+  background: linear-gradient(180deg, transparent 40%, rgba(7,5,26,0.85));
+}
+.game-card:hover { transform: translateY(-3px); border-color: var(--gold); box-shadow: 0 10px 26px rgba(0,0,0,0.4), 0 0 18px var(--gold-glow); }
+.game-card:hover::before { opacity: 0.85; }
+.game-name { position: relative; z-index: 2; font-size: 10px; font-weight: 700; color: var(--cream); }
+.game-provider { position: relative; z-index: 2; font-size: 8px; color: var(--gold-2); letter-spacing: 1px; }
+.game-tag { position: absolute; top: 6px; left: 6px; z-index: 3; font-size: 8px; padding: 2px 5px; background: var(--crimson); color: white; border-radius: 3px; font-weight: 800; letter-spacing: 0.5px; }
+.game-tag.hot { background: var(--crimson); }
+.game-tag.new { background: var(--emerald); }
+.game-tag.featured { background: linear-gradient(135deg, var(--gold-2), var(--gold)); color: var(--ink); }
+
+.provider-bar {
+  display: flex; gap: 6px; overflow-x: auto;
+  padding-bottom: 4px; scrollbar-width: thin;
+}
+.provider-chip {
+  padding: 5px 10px;
+  background: rgba(7,5,26,0.6);
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  font-size: 10px; font-weight: 700; color: var(--mute);
+  white-space: nowrap; letter-spacing: 0.5px;
+}
+.provider-chip:hover, .provider-chip.active { color: var(--gold-2); border-color: var(--gold); background: rgba(91,45,140,0.3); }
+.provider-chip.active { background: linear-gradient(135deg, var(--gold-2), var(--gold)); color: var(--ink); }
+
+/* ================ RIGHT RAIL ================ */
+.right {
+  grid-area: right;
+  display: flex; flex-direction: column; gap: 8px;
+  overflow-y: auto; scrollbar-width: thin;
+}
+.panel {
+  background: linear-gradient(180deg, rgba(27,18,53,0.7), rgba(7,5,26,0.55));
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  padding: 10px;
+  position: relative;
+}
+.panel-title { font-family: 'Cinzel'; font-size: 11px; font-weight: 700; letter-spacing: 2px; color: var(--gold-2); margin: 0 0 8px; display: flex; align-items: center; gap: 6px; }
+.panel-title .gem { width: 8px; height: 8px; transform: rotate(45deg); background: var(--gold); box-shadow: 0 0 6px var(--gold-glow); }
+
+.wallet-row { display: flex; justify-content: space-between; align-items: baseline; padding: 4px 0; border-bottom: 1px dashed var(--line); }
+.wallet-row:last-child { border-bottom: 0; }
+.wallet-label { font-size: 10px; color: var(--mute); }
+.wallet-val { font-family: 'Cinzel'; font-size: 13px; font-weight: 700; color: var(--cream); }
+.wallet-val.gold { color: var(--gold-2); }
+
+.wallet-actions { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; margin-top: 8px; }
+.wallet-btn {
+  padding: 6px 8px;
+  border-radius: 6px;
+  border: 1px solid var(--gold);
+  background: linear-gradient(180deg, rgba(245,200,75,0.15), transparent);
+  color: var(--gold-2);
+  font-size: 10px; font-weight: 800; letter-spacing: 1px;
+}
+.wallet-btn.primary {
+  background: linear-gradient(135deg, var(--gold-2), var(--gold));
+  color: var(--ink);
+}
+.wallet-btn:hover { box-shadow: 0 0 12px var(--gold-glow); }
+
+.mission-item { display: flex; align-items: center; gap: 8px; padding: 5px 0; border-bottom: 1px dashed var(--line); }
+.mission-item:last-child { border-bottom: 0; }
+.mission-ic { width: 24px; height: 24px; border-radius: 6px; background: linear-gradient(135deg, var(--purple-2), var(--purple)); display: grid; place-items: center; font-size: 12px; }
+.mission-name { flex: 1; font-size: 10px; color: var(--cream); }
+.mission-bar { height: 4px; background: rgba(245,200,75,0.15); border-radius: 2px; overflow: hidden; margin-top: 2px; }
+.mission-bar > span { display: block; height: 100%; background: linear-gradient(90deg, var(--gold), var(--gold-2)); border-radius: 2px; }
+.mission-prog { font-size: 9px; color: var(--mute); }
+
+.wins-list { max-height: 200px; overflow-y: auto; scrollbar-width: thin; }
+.win-item { display: flex; align-items: center; gap: 8px; padding: 4px 0; font-size: 10px; }
+.win-avatar { width: 18px; height: 18px; border-radius: 50%; background: linear-gradient(135deg, var(--purple-2), var(--gold)); flex-shrink: 0; }
+.win-user { color: var(--cream); font-weight: 600; }
+.win-game { color: var(--mute); font-size: 9px; }
+.win-amt { color: var(--gold-2); font-weight: 700; margin-left: auto; }
+
+.promo-banner {
+  background:
+    linear-gradient(135deg, rgba(220,38,38,0.35), rgba(91,45,140,0.3)),
+    radial-gradient(ellipse at top right, rgba(245,200,75,0.3), transparent 60%),
+    var(--ink-2);
+  border: 1px solid var(--crimson);
+  border-radius: 10px;
+  padding: 12px;
+  position: relative; overflow: hidden;
+}
+.promo-banner::before { content: '🎁'; position: absolute; right: 8px; top: 8px; font-size: 36px; opacity: 0.3; }
+.promo-pill { display: inline-block; padding: 2px 6px; background: var(--gold); color: var(--ink); border-radius: 3px; font-size: 8px; font-weight: 800; letter-spacing: 1px; }
+.promo-headline { font-family: 'Cinzel'; font-size: 14px; font-weight: 800; color: var(--cream); margin: 6px 0 2px; line-height: 1.15; }
+.promo-sub { font-size: 9px; color: var(--mute); margin-bottom: 8px; }
+.promo-btn {
+  display: inline-block;
+  background: var(--cream); color: var(--ink);
+  padding: 5px 10px; border-radius: 5px;
+  font-weight: 800; font-size: 10px; letter-spacing: 1px;
+  border: 0;
+}
+
+/* ================ DOCK ================ */
+.dock {
+  grid-area: dock;
+  display: flex; align-items: center; justify-content: space-around;
+  background: linear-gradient(180deg, rgba(27,18,53,0.85), rgba(7,5,26,0.85));
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  padding: 0 12px;
+}
+.dock-btn {
+  display: flex; align-items: center; gap: 8px;
+  padding: 8px 14px;
+  background: rgba(7,5,26,0.6);
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  color: var(--cream);
+  font-size: 11px; font-weight: 700;
+  letter-spacing: 0.5px;
+  transition: all .2s;
+}
+.dock-btn:hover { color: var(--gold-2); border-color: var(--gold); background: rgba(91,45,140,0.2); box-shadow: 0 0 12px var(--gold-glow); }
+.dock-btn.cta {
+  background: linear-gradient(135deg, var(--gold-2), var(--gold));
+  color: var(--ink);
+  border-color: var(--gold);
+  box-shadow: 0 0 14px var(--gold-glow);
+}
+.dock-btn.cta:hover { transform: translateY(-1px); }
+.dock-ic { font-size: 14px; }
+.dock-divider { width: 1px; height: 24px; background: var(--line); }
+
+/* ================ MODALS ================ */
+.modal-overlay {
+  position: fixed; inset: 0; z-index: 1000;
+  background: rgba(7,5,26,0.85);
+  backdrop-filter: blur(8px);
+  display: none; place-items: center;
+}
+.modal-overlay.show { display: grid; }
+.modal {
+  background: linear-gradient(180deg, var(--ink-3), var(--ink-2));
+  border: 1px solid var(--gold);
+  border-radius: 14px;
+  padding: 26px;
+  width: 90%; max-width: 380px;
+  box-shadow: 0 30px 60px rgba(0,0,0,0.6), 0 0 40px var(--gold-glow);
+  position: relative;
+  animation: modal-in .25s ease both;
+}
+@keyframes modal-in { from { opacity: 0; transform: scale(0.95); } to { opacity: 1; transform: scale(1); } }
+.modal-close { position: absolute; right: 12px; top: 12px; background: transparent; border: 0; color: var(--mute); font-size: 18px; }
+.modal-title { font-family: 'Cinzel'; font-size: 16px; font-weight: 700; color: var(--gold-2); letter-spacing: 2px; text-align: center; margin: 0 0 4px; }
+.modal-sub { font-family: 'Cormorant Garamond'; font-style: italic; font-size: 12px; color: var(--mute); text-align: center; margin-bottom: 16px; }
+.modal label { display: block; font-size: 10px; color: var(--mute); margin: 8px 0 4px; letter-spacing: 1px; text-transform: uppercase; }
+.modal input, .modal select {
+  width: 100%; padding: 9px 12px;
+  background: rgba(7,5,26,0.7);
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  color: var(--cream);
+  font-size: 13px;
+  outline: none;
+  font-family: inherit;
+}
+.modal input:focus, .modal select:focus { border-color: var(--gold); }
+.modal-btn {
+  width: 100%;
+  padding: 11px;
+  background: linear-gradient(135deg, var(--gold-2), var(--gold));
+  color: var(--ink);
+  border: 0; border-radius: 6px;
+  font-weight: 800; font-size: 13px;
+  letter-spacing: 2px;
+  margin-top: 14px;
+  box-shadow: 0 6px 16px rgba(212,175,55,0.4);
+}
+.modal-foot { text-align: center; font-size: 10px; color: var(--mute); margin-top: 10px; }
+.modal-foot a { color: var(--gold-2); text-decoration: none; cursor: pointer; }
+
+/* deposit amount grid */
+.amt-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; }
+.amt-chip {
+  padding: 8px;
+  background: rgba(7,5,26,0.7);
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  font-size: 12px; font-weight: 700;
+  color: var(--cream);
+  position: relative;
+}
+.amt-chip:hover, .amt-chip.active { border-color: var(--gold); background: rgba(91,45,140,0.25); color: var(--gold-2); }
+.amt-chip .bonus { position: absolute; top: -6px; right: -4px; background: var(--emerald); color: white; font-size: 7px; padding: 1px 4px; border-radius: 3px; font-weight: 800; }
+
+.method-row { display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; }
+.method-btn {
+  padding: 10px 6px;
+  background: rgba(7,5,26,0.7);
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  display: flex; flex-direction: column; align-items: center; gap: 4px;
+  font-size: 10px; font-weight: 700; color: var(--cream);
+}
+.method-btn:hover, .method-btn.active { border-color: var(--gold); color: var(--gold-2); }
+.method-ic { font-size: 18px; }
+
+/* VIP cards */
+.vip-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; }
+.vip-card {
+  padding: 14px;
+  border-radius: 12px;
+  border: 1px solid var(--line);
+  background: linear-gradient(160deg, var(--ink-3), var(--ink-2));
+  display: flex; flex-direction: column; gap: 6px;
+  position: relative;
+  overflow: hidden;
+}
+.vip-card::before {
+  content: ''; position: absolute; inset: 0;
+  background: radial-gradient(circle at top right, var(--vip-glow, rgba(212,175,55,0.2)), transparent 60%);
+  pointer-events: none;
+}
+.vip-tier-name { font-family: 'Cinzel'; font-size: 14px; font-weight: 700; color: var(--cream); position: relative; }
+.vip-tier-num { font-family: 'Cinzel'; font-size: 30px; font-weight: 900; color: var(--vip-color, var(--gold-2)); line-height: 1; position: relative; }
+.vip-perks { font-size: 10px; color: var(--mute); display: flex; flex-direction: column; gap: 3px; position: relative; }
+.vip-perks li { list-style: none; padding-left: 14px; position: relative; }
+.vip-perks li::before { content: '◆'; color: var(--vip-color, var(--gold)); position: absolute; left: 0; font-size: 8px; top: 3px; }
+.vip-card.active { border-color: var(--gold); box-shadow: 0 0 18px var(--gold-glow); }
+
+/* Mission chest grid */
+.mission-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(110px, 1fr)); gap: 8px; }
+.chest {
+  position: relative;
+  aspect-ratio: 1;
+  border-radius: 10px;
+  border: 1px solid var(--line);
+  background: linear-gradient(160deg, var(--ink-3), var(--ink-2));
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+  gap: 4px;
+  cursor: pointer;
+  transition: all .2s;
+}
+.chest:hover { border-color: var(--gold); transform: translateY(-2px); }
+.chest .chest-ic { font-size: 28px; filter: drop-shadow(0 0 8px rgba(245,200,75,0.5)); }
+.chest .chest-lvl { font-family: 'Cinzel'; font-size: 11px; color: var(--gold-2); font-weight: 700; letter-spacing: 1px; }
+.chest .chest-prize { font-size: 9px; color: var(--mute); }
+.chest.locked { opacity: 0.45; }
+.chest.locked .chest-ic { filter: grayscale(1); }
+.chest .red-dot { position: absolute; top: 6px; right: 6px; width: 7px; height: 7px; border-radius: 50%; background: var(--crimson); box-shadow: 0 0 8px var(--crimson); }
+
+/* Inbox list */
+.inbox-list { display: flex; flex-direction: column; gap: 6px; }
+.inbox-item { display: flex; align-items: center; gap: 10px; padding: 10px; background: rgba(7,5,26,0.6); border: 1px solid var(--line); border-radius: 8px; cursor: pointer; transition: all .2s; }
+.inbox-item:hover { border-color: var(--gold); background: rgba(91,45,140,0.2); }
+.inbox-ic { width: 32px; height: 32px; border-radius: 8px; background: linear-gradient(135deg, var(--purple-2), var(--purple)); display: grid; place-items: center; font-size: 16px; }
+.inbox-body { flex: 1; min-width: 0; }
+.inbox-title { font-family: 'Cinzel'; font-size: 12px; color: var(--cream); font-weight: 700; }
+.inbox-snippet { font-size: 10px; color: var(--mute); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.inbox-time { font-size: 9px; color: var(--mute); }
+.inbox-item.unread .inbox-title::after { content: '●'; color: var(--crimson); margin-left: 6px; font-size: 9px; vertical-align: middle; }
+
+/* Settings list */
+.settings-list { display: flex; flex-direction: column; gap: 4px; }
+.setting-row {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 10px 12px;
+  background: rgba(7,5,26,0.5);
+  border: 1px solid var(--line);
+  border-radius: 8px;
+}
+.setting-name { font-size: 12px; color: var(--cream); font-weight: 600; }
+.setting-sub { font-size: 10px; color: var(--mute); }
+.toggle {
+  position: relative; width: 36px; height: 18px;
+  background: rgba(7,5,26,0.8);
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  cursor: pointer;
+  transition: all .2s;
+}
+.toggle::after {
+  content: ''; position: absolute;
+  width: 14px; height: 14px;
+  background: var(--mute);
+  border-radius: 50%;
+  top: 1px; left: 1px;
+  transition: all .2s;
+}
+.toggle.on { background: var(--gold); border-color: var(--gold); }
+.toggle.on::after { background: var(--ink); left: 19px; }
+
+/* Refer */
+.refer-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.refer-stats {
+  background: linear-gradient(135deg, rgba(91,45,140,0.4), rgba(7,5,26,0.6));
+  border: 1px solid var(--line); border-radius: 12px; padding: 16px;
+  display: flex; flex-direction: column; gap: 12px;
+}
+.refer-stat-row { display: flex; justify-content: space-between; }
+.refer-big { font-family: 'Cinzel'; font-size: 22px; font-weight: 800; color: var(--gold-2); }
+.refer-lbl { font-size: 10px; color: var(--mute); letter-spacing: 1px; text-transform: uppercase; }
+.refer-code {
+  background: rgba(7,5,26,0.7); border: 1px dashed var(--gold);
+  border-radius: 6px; padding: 8px 10px;
+  font-family: 'Cinzel'; font-size: 14px; color: var(--gold-2);
+  letter-spacing: 2px; text-align: center;
+}
+.refer-share { display: flex; gap: 6px; margin-top: 6px; }
+.refer-share button { flex: 1; padding: 8px; border-radius: 6px; background: rgba(91,45,140,0.3); border: 1px solid var(--line); color: var(--cream); font-size: 11px; font-weight: 700; }
+.refer-share button:hover { border-color: var(--gold); color: var(--gold-2); }
+
+/* Toast */
+.toast {
+  position: fixed; bottom: 80px; left: 50%; transform: translateX(-50%);
+  background: linear-gradient(135deg, var(--gold-2), var(--gold));
+  color: var(--ink);
+  padding: 10px 22px;
+  border-radius: 22px;
+  font-weight: 800; font-size: 12px;
+  letter-spacing: 1px;
+  box-shadow: 0 10px 30px rgba(0,0,0,0.5), 0 0 20px var(--gold-glow);
+  z-index: 2000;
+  opacity: 0; pointer-events: none;
+  transition: all .3s;
+}
+.toast.show { opacity: 1; transform: translateX(-50%) translateY(-10px); }
+
+/* Responsive */
+@media (max-width: 1100px) {
+  .app { grid-template-columns: 80px 1fr 240px; }
+  .hex-showcase { grid-template-columns: 1fr 1fr; }
+  .hex-hero-mini:last-child { display: none; }
+}
+@media (max-width: 820px) {
+  .app { grid-template-columns: 70px 1fr; grid-template-areas: "topbar topbar" "marquee marquee" "rail main" "dock dock"; }
+  .right { display: none; }
+}
+@media (max-height: 580px) {
+  .app { grid-template-rows: 32px 22px 1fr 52px; }
+  .hero-title { font-size: 20px; }
+}
+</style>
+</head>
+<body>
+
+<div class="stage">
+  <div class="bg-mystic"></div>
+  <div class="bg-hex"></div>
+  <div class="bg-owl"></div>
+  <div class="embers" id="embers"></div>
+
+  <div class="app">
+
+    <!-- TOPBAR -->
+    <header class="topbar">
+      <div class="brand">
+        <div class="brand-mark">R</div>
+        <div>
+          <div class="brand-name">RAJABAJI</div>
+          <div class="brand-sub">ARCANE HALL · V3</div>
+        </div>
+      </div>
+      <div class="topbar-mid">
+        <div class="search-pill">
+          <span>🔍</span>
+          <input placeholder="Seek thy game...">
+        </div>
+        <div class="online-chip">
+          <span class="online-dot"></span>
+          <span>9,842 wagering</span>
+        </div>
+      </div>
+      <div class="topbar-right">
+        <div class="balance-pill">
+          <span class="balance-icon">⬢</span>
+          <span>৳12,450.00</span>
+        </div>
+        <div class="vip-chip">VIP · GOLD</div>
+        <button class="icon-btn" onclick="openModal('inbox-modal')" title="Inbox">📜<span class="dot"></span></button>
+        <button class="icon-btn" onclick="go('settings')" title="Settings">⚙️</button>
+        <button class="icon-btn" onclick="openModal('login-modal')" title="Sign in">🔑</button>
+      </div>
+    </header>
+
+    <!-- MARQUEE -->
+    <div class="marquee">
+      <div class="marquee-label">⟁ DECREE</div>
+      <div class="marquee-track" id="marquee-track"></div>
+    </div>
+
+    <!-- LEFT RAIL -->
+    <nav class="rail">
+      <button class="rail-item active" data-nav="lobby"><span class="ic">🏰</span><span>LOBBY</span></button>
+      <button class="rail-item" data-nav="live"><span class="ic">🎭</span><span>LIVE</span></button>
+      <button class="rail-item" data-nav="slots"><span class="ic">🎰</span><span>SLOTS</span></button>
+      <button class="rail-item" data-nav="fishing"><span class="ic">🐟</span><span>FISHING</span></button>
+      <button class="rail-item" data-nav="sports"><span class="ic">🏏</span><span>SPORTS</span></button>
+      <div class="rail-divider"></div>
+      <button class="rail-item" data-nav="bonus"><span class="ic">🎁</span><span>BONUS</span></button>
+      <button class="rail-item" data-nav="vip"><span class="ic">👑</span><span>VIP</span></button>
+      <button class="rail-item" data-nav="mission"><span class="ic">🗝️</span><span>QUESTS</span></button>
+      <button class="rail-item" data-nav="refer"><span class="ic">🤝</span><span>REFER</span></button>
+    </nav>
+
+    <!-- MAIN -->
+    <main class="main" id="main">
+
+      <!-- LOBBY -->
+      <section class="screen active" data-screen="lobby">
+        <div class="screen-head">
+          <div>
+            <div class="screen-title">Hall of Fortune</div>
+            <div class="screen-sub">— Where wisdom meets fortune —</div>
+          </div>
+          <div class="tab-bar">
+            <button class="tab active">Hot</button>
+            <button class="tab">New</button>
+            <button class="tab">Trending</button>
+            <button class="tab">My Picks</button>
+          </div>
+        </div>
+
+        <div class="hex-showcase">
+          <div class="hex-hero">
+            <div class="hero-badge">FEATURED</div>
+            <div>
+              <div class="hero-title">Aviator Ascendant</div>
+              <div class="hero-sub">Cash out before the eagle takes flight</div>
+            </div>
+            <button class="hero-cta" onclick="playGame('Aviator')">ENTER THE GAME →</button>
+          </div>
+          <div class="hex-hero-mini">
+            <div class="mini-tag">⬢ JACKPOT</div>
+            <div>
+              <div class="mini-title">Mega Reels</div>
+              <div class="mini-meta">Pragmatic Play</div>
+            </div>
+            <div class="mini-prize">৳ 8,42,000</div>
+          </div>
+          <div class="hex-hero-mini">
+            <div class="mini-tag">⬢ TOURNAMENT</div>
+            <div>
+              <div class="mini-title">Crazy Time Royale</div>
+              <div class="mini-meta">Live · Evolution</div>
+            </div>
+            <div class="mini-prize">৳ 5,00,000</div>
+          </div>
+        </div>
+
+        <div class="section-title">⬢ HOT GAMES <span class="line"></span><span class="more">View all →</span></div>
+        <div class="game-grid" id="hot-grid"></div>
+
+        <div class="section-title">⬢ LIVE CASINO <span class="line"></span><span class="more">View all →</span></div>
+        <div class="game-grid" id="live-grid"></div>
+      </section>
+
+      <!-- LIVE CASINO -->
+      <section class="screen" data-screen="live">
+        <div class="screen-head">
+          <div>
+            <div class="screen-title">Live Salon</div>
+            <div class="screen-sub">— Real dealers · real time —</div>
+          </div>
+        </div>
+        <div class="provider-bar">
+          <button class="provider-chip active">All</button>
+          <button class="provider-chip">Evolution</button>
+          <button class="provider-chip">Pragmatic Live</button>
+          <button class="provider-chip">Ezugi</button>
+          <button class="provider-chip">SA Gaming</button>
+          <button class="provider-chip">Sexy Gaming</button>
+          <button class="provider-chip">Vivo</button>
+        </div>
+        <div class="game-grid" id="live-grid-2"></div>
+      </section>
+
+      <!-- SLOTS -->
+      <section class="screen" data-screen="slots">
+        <div class="screen-head">
+          <div>
+            <div class="screen-title">Reel Cathedral</div>
+            <div class="screen-sub">— Where spinning dreams alight —</div>
+          </div>
+        </div>
+        <div class="provider-bar">
+          <button class="provider-chip active">All</button>
+          <button class="provider-chip">Pragmatic</button>
+          <button class="provider-chip">JILI</button>
+          <button class="provider-chip">PG Soft</button>
+          <button class="provider-chip">Spadegaming</button>
+          <button class="provider-chip">Habanero</button>
+          <button class="provider-chip">CQ9</button>
+          <button class="provider-chip">RTG</button>
+        </div>
+        <div class="game-grid" id="slots-grid"></div>
+      </section>
+
+      <!-- FISHING -->
+      <section class="screen" data-screen="fishing">
+        <div class="screen-head">
+          <div>
+            <div class="screen-title">Deep Tides</div>
+            <div class="screen-sub">— Cast thy net into the abyss —</div>
+          </div>
+        </div>
+        <div class="provider-bar">
+          <button class="provider-chip active">All</button>
+          <button class="provider-chip">JILI</button>
+          <button class="provider-chip">CQ9</button>
+          <button class="provider-chip">Spadegaming</button>
+          <button class="provider-chip">FaChai</button>
+        </div>
+        <div class="game-grid" id="fishing-grid"></div>
+      </section>
+
+      <!-- SPORTS / CRICKET -->
+      <section class="screen" data-screen="sports">
+        <div class="screen-head">
+          <div>
+            <div class="screen-title">Cricket Arena</div>
+            <div class="screen-sub">— Bangladesh's grand wager —</div>
+          </div>
+          <div class="tab-bar">
+            <button class="tab active">Live</button>
+            <button class="tab">Today</button>
+            <button class="tab">Tomorrow</button>
+            <button class="tab">Exchange</button>
+          </div>
+        </div>
+        <div id="sports-list" style="display:flex;flex-direction:column;gap:8px;"></div>
+      </section>
+
+      <!-- BONUS -->
+      <section class="screen" data-screen="bonus">
+        <div class="screen-head">
+          <div>
+            <div class="screen-title">Treasury of Boons</div>
+            <div class="screen-sub">— Claim what fortune offers —</div>
+          </div>
+          <div class="tab-bar">
+            <button class="tab active">All</button>
+            <button class="tab">Sports</button>
+            <button class="tab">Slots</button>
+            <button class="tab">Live</button>
+          </div>
+        </div>
+        <div id="bonus-grid" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:10px;"></div>
+      </section>
+
+      <!-- VIP -->
+      <section class="screen" data-screen="vip">
+        <div class="screen-head">
+          <div>
+            <div class="screen-title">Order of Tiers</div>
+            <div class="screen-sub">— Currently · Gold Card · 38,420 / 50,000 —</div>
+          </div>
+        </div>
+        <div class="panel" style="padding:14px;">
+          <div style="display:flex;justify-content:space-between;font-size:11px;color:var(--mute);margin-bottom:6px;letter-spacing:1px;">
+            <span>GOLD CARD</span><span>PLATINUM →</span>
+          </div>
+          <div style="height:8px;background:rgba(7,5,26,0.7);border-radius:4px;overflow:hidden;border:1px solid var(--line);">
+            <div style="width:77%;height:100%;background:linear-gradient(90deg,var(--gold),var(--gold-2));box-shadow:0 0 12px var(--gold-glow);"></div>
+          </div>
+          <div style="font-size:10px;color:var(--mute);margin-top:6px;">৳ 11,580 in valid stake to ascend</div>
+        </div>
+        <div class="vip-grid">
+          <div class="vip-card" style="--vip-color:#9CA3AF;--vip-glow:rgba(156,163,175,0.2);">
+            <div class="vip-tier-name">New Player</div>
+            <div class="vip-tier-num">I</div>
+            <ul class="vip-perks">
+              <li>3% Weekly Rescue</li>
+              <li>৳288 Birthday Boon</li>
+              <li>Daily Withdraw 30k</li>
+            </ul>
+          </div>
+          <div class="vip-card" style="--vip-color:#94A3B8;--vip-glow:rgba(148,163,184,0.25);">
+            <div class="vip-tier-name">Silver Card</div>
+            <div class="vip-tier-num">II</div>
+            <ul class="vip-perks">
+              <li>5% Weekly Rescue</li>
+              <li>৳888 Upgrade Bonus</li>
+              <li>৳688 Birthday Boon</li>
+            </ul>
+          </div>
+          <div class="vip-card active" style="--vip-color:#F5C84B;--vip-glow:rgba(245,200,75,0.4);">
+            <div class="vip-tier-name">Gold Card · Yours</div>
+            <div class="vip-tier-num">III</div>
+            <ul class="vip-perks">
+              <li>6% Weekly Rescue</li>
+              <li>৳1,888 Upgrade Bonus</li>
+              <li>৳1,288 Birthday Boon</li>
+            </ul>
+          </div>
+          <div class="vip-card" style="--vip-color:#E5E7EB;--vip-glow:rgba(229,231,235,0.3);">
+            <div class="vip-tier-name">Platinum Card</div>
+            <div class="vip-tier-num">IV</div>
+            <ul class="vip-perks">
+              <li>8% Weekly Rescue</li>
+              <li>৳3,888 Upgrade Bonus</li>
+              <li>৳2,888 Birthday Boon</li>
+            </ul>
+          </div>
+        </div>
+      </section>
+
+      <!-- MISSION -->
+      <section class="screen" data-screen="mission">
+        <div class="screen-head">
+          <div>
+            <div class="screen-title">Daily Quests</div>
+            <div class="screen-sub">— 15 chests · 3 unclaimed —</div>
+          </div>
+        </div>
+        <div class="mission-grid" id="mission-grid"></div>
+      </section>
+
+      <!-- REFER -->
+      <section class="screen" data-screen="refer">
+        <div class="screen-head">
+          <div>
+            <div class="screen-title">Brotherhood Pact</div>
+            <div class="screen-sub">— Earn 0.70% lifetime · ৳500 per friend —</div>
+          </div>
+        </div>
+        <div class="refer-grid">
+          <div class="refer-stats">
+            <div>
+              <div class="refer-lbl">My Referral Code</div>
+              <div class="refer-code">RAJA8842</div>
+              <div class="refer-share">
+                <button onclick="copyRef()">📋 Copy Link</button>
+                <button onclick="toast('Sharing to thy kin...')">📨 Share</button>
+              </div>
+            </div>
+            <div class="refer-stat-row">
+              <div>
+                <div class="refer-lbl">Recruited</div>
+                <div class="refer-big">23</div>
+              </div>
+              <div>
+                <div class="refer-lbl">Commission</div>
+                <div class="refer-big">৳ 8,420</div>
+              </div>
+              <div>
+                <div class="refer-lbl">Turnover</div>
+                <div class="refer-big">৳ 12.4L</div>
+              </div>
+            </div>
+          </div>
+          <div class="panel">
+            <div class="panel-title"><span class="gem"></span>Commission Table</div>
+            <div style="font-size:11px;">
+              <div style="display:flex;justify-content:space-between;padding:6px 0;border-bottom:1px dashed var(--line);"><span>Slots</span><span style="color:var(--gold-2);">0.10% — 0.70%</span></div>
+              <div style="display:flex;justify-content:space-between;padding:6px 0;border-bottom:1px dashed var(--line);"><span>Live Casino</span><span style="color:var(--gold-2);">0.15% — 0.65%</span></div>
+              <div style="display:flex;justify-content:space-between;padding:6px 0;border-bottom:1px dashed var(--line);"><span>Sports</span><span style="color:var(--gold-2);">0.20% — 0.70%</span></div>
+              <div style="display:flex;justify-content:space-between;padding:6px 0;border-bottom:1px dashed var(--line);"><span>Fishing</span><span style="color:var(--gold-2);">0.10% — 0.50%</span></div>
+              <div style="display:flex;justify-content:space-between;padding:6px 0;"><span>Skill Game</span><span style="color:var(--gold-2);">0.10% — 0.40%</span></div>
+            </div>
+            <button class="wallet-btn primary" style="width:100%;margin-top:10px;padding:10px;" onclick="toast('৳ 8,420 commission claimed!')">⚜ COLLECT NOW</button>
+          </div>
+        </div>
+      </section>
+
+      <!-- SETTINGS -->
+      <section class="screen" data-screen="settings">
+        <div class="screen-head">
+          <div>
+            <div class="screen-title">Sanctum</div>
+            <div class="screen-sub">— Configure thy hall —</div>
+          </div>
+        </div>
+        <div class="settings-list">
+          <div class="setting-row">
+            <div><div class="setting-name">Music</div><div class="setting-sub">Ambient soundscape</div></div>
+            <div class="toggle on" onclick="this.classList.toggle('on')"></div>
+          </div>
+          <div class="setting-row">
+            <div><div class="setting-name">Sound Effects</div><div class="setting-sub">Coin sounds and chimes</div></div>
+            <div class="toggle on" onclick="this.classList.toggle('on')"></div>
+          </div>
+          <div class="setting-row">
+            <div><div class="setting-name">Notifications</div><div class="setting-sub">Push alerts for missions</div></div>
+            <div class="toggle on" onclick="this.classList.toggle('on')"></div>
+          </div>
+          <div class="setting-row">
+            <div><div class="setting-name">Language</div><div class="setting-sub">English · বাংলা</div></div>
+            <div style="color:var(--gold-2);font-size:11px;font-weight:700;">EN ▾</div>
+          </div>
+          <div class="setting-row">
+            <div><div class="setting-name">Change Password</div><div class="setting-sub">Last changed 28 days ago</div></div>
+            <div style="color:var(--gold-2);font-size:11px;font-weight:700;">→</div>
+          </div>
+          <div class="setting-row">
+            <div><div class="setting-name">App Version</div><div class="setting-sub">RajaBaji V3.0 Arcane · Build 2026.05</div></div>
+            <div style="color:var(--mute);font-size:11px;">Up to date</div>
+          </div>
+          <div class="setting-row" style="border-color:rgba(220,38,38,0.5);" onclick="if(confirm('Are you sure you want to log out?')) toast('Logging out...')">
+            <div><div class="setting-name" style="color:var(--crimson);">Logout</div><div class="setting-sub">End session</div></div>
+            <div style="color:var(--crimson);font-size:11px;">→</div>
+          </div>
+        </div>
+      </section>
+
+    </main>
+
+    <!-- RIGHT RAIL -->
+    <aside class="right">
+      <div class="panel">
+        <div class="panel-title"><span class="gem"></span>Wallet</div>
+        <div class="wallet-row"><span class="wallet-label">Main</span><span class="wallet-val gold">৳ 12,450.00</span></div>
+        <div class="wallet-row"><span class="wallet-label">Bonus</span><span class="wallet-val">৳ 840.00</span></div>
+        <div class="wallet-row"><span class="wallet-label">Commission</span><span class="wallet-val">৳ 8,420.00</span></div>
+        <div class="wallet-row"><span class="wallet-label">Rebate</span><span class="wallet-val">৳ 322.50</span></div>
+        <div class="wallet-actions">
+          <button class="wallet-btn primary" onclick="openModal('deposit-modal')">DEPOSIT</button>
+          <button class="wallet-btn" onclick="openModal('withdraw-modal')">WITHDRAW</button>
+        </div>
+      </div>
+
+      <div class="panel">
+        <div class="panel-title"><span class="gem"></span>Daily Quests</div>
+        <div class="mission-item">
+          <div class="mission-ic">🎯</div>
+          <div style="flex:1;">
+            <div class="mission-name">Wager ৳5,000 today</div>
+            <div class="mission-bar"><span style="width:64%"></span></div>
+            <div class="mission-prog">3,200 / 5,000</div>
+          </div>
+        </div>
+        <div class="mission-item">
+          <div class="mission-ic">🎰</div>
+          <div style="flex:1;">
+            <div class="mission-name">Spin 50 slot rounds</div>
+            <div class="mission-bar"><span style="width:42%"></span></div>
+            <div class="mission-prog">21 / 50</div>
+          </div>
+        </div>
+        <div class="mission-item">
+          <div class="mission-ic">🐟</div>
+          <div style="flex:1;">
+            <div class="mission-name">Catch 100 fish</div>
+            <div class="mission-bar"><span style="width:88%"></span></div>
+            <div class="mission-prog">88 / 100</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="panel">
+        <div class="panel-title"><span class="gem"></span>Live Wins</div>
+        <div class="wins-list" id="wins-list"></div>
+      </div>
+
+      <div class="promo-banner">
+        <div class="promo-pill">RAMADAN BOON</div>
+        <div class="promo-headline">Triple Deposit Bonus</div>
+        <div class="promo-sub">Up to ৳6,000 · Limited time</div>
+        <button class="promo-btn" onclick="go('bonus')">Claim Now →</button>
+      </div>
+    </aside>
+
+    <!-- DOCK -->
+    <footer class="dock">
+      <button class="dock-btn cta" onclick="openModal('deposit-modal')"><span class="dock-ic">⬢</span>DEPOSIT</button>
+      <div class="dock-divider"></div>
+      <button class="dock-btn" onclick="openModal('withdraw-modal')"><span class="dock-ic">⬡</span>WITHDRAW</button>
+      <button class="dock-btn" onclick="go('refer')"><span class="dock-ic">🤝</span>REFER & EARN</button>
+      <button class="dock-btn" onclick="toast('Opening rebate vault...')"><span class="dock-ic">⚡</span>REBATE</button>
+      <button class="dock-btn" onclick="openModal('inbox-modal')"><span class="dock-ic">📜</span>INBOX</button>
+      <button class="dock-btn" onclick="openModal('support-modal')"><span class="dock-ic">⛯</span>SUPPORT</button>
+    </footer>
+
+  </div>
+</div>
+
+<!-- ============ MODALS ============ -->
+
+<!-- Login -->
+<div class="modal-overlay" id="login-modal" onclick="if(event.target===this)closeModal('login-modal')">
+  <div class="modal">
+    <button class="modal-close" onclick="closeModal('login-modal')">✕</button>
+    <div class="modal-title">⟁ ENTER THE HALL</div>
+    <div class="modal-sub">Speak thy name and seal</div>
+    <label>Username</label>
+    <input placeholder="warrior_8842">
+    <label>Password</label>
+    <input type="password" placeholder="••••••••">
+    <button class="modal-btn" onclick="closeModal('login-modal'); toast('Welcome, warrior!')">UNLOCK ENTRY</button>
+    <div class="modal-foot">No mark yet? <a onclick="closeModal('login-modal'); openModal('register-modal')">Register here</a></div>
+  </div>
+</div>
+
+<!-- Register -->
+<div class="modal-overlay" id="register-modal" onclick="if(event.target===this)closeModal('register-modal')">
+  <div class="modal">
+    <button class="modal-close" onclick="closeModal('register-modal')">✕</button>
+    <div class="modal-title">⟁ JOIN THE ORDER</div>
+    <div class="modal-sub">Forge thy first identity</div>
+    <label>Username</label><input placeholder="Choose your handle">
+    <label>Phone (Bangladesh)</label><input placeholder="+880 ...">
+    <label>Password</label><input type="password" placeholder="Min 8 characters">
+    <label>Referral Code (optional)</label><input placeholder="RAJA....">
+    <button class="modal-btn" onclick="closeModal('register-modal'); toast('Welcome to the hall!')">FORGE ACCOUNT</button>
+  </div>
+</div>
+
+<!-- Deposit -->
+<div class="modal-overlay" id="deposit-modal" onclick="if(event.target===this)closeModal('deposit-modal')">
+  <div class="modal" style="max-width:440px;">
+    <button class="modal-close" onclick="closeModal('deposit-modal')">✕</button>
+    <div class="modal-title">⬢ DEPOSIT</div>
+    <div class="modal-sub">Replenish thy coffers · +3.5% bonus</div>
+    <label>Payment Method</label>
+    <div class="method-row">
+      <button class="method-btn active"><span class="method-ic">💰</span>bKash</button>
+      <button class="method-btn"><span class="method-ic">💎</span>Nagad</button>
+      <button class="method-btn"><span class="method-ic">🚀</span>Rocket</button>
+    </div>
+    <label style="margin-top:14px;">Amount (৳200 — ৳30,000)</label>
+    <div class="amt-grid">
+      <button class="amt-chip">৳200<span class="bonus">+3.5%</span></button>
+      <button class="amt-chip">৳500<span class="bonus">+3.5%</span></button>
+      <button class="amt-chip">৳800<span class="bonus">+3.5%</span></button>
+      <button class="amt-chip active">৳1,000<span class="bonus">+3.5%</span></button>
+      <button class="amt-chip">৳1,500<span class="bonus">+3.5%</span></button>
+      <button class="amt-chip">৳3,000<span class="bonus">+3.5%</span></button>
+    </div>
+    <label>Custom Amount</label>
+    <input type="number" placeholder="Or type your own (200 - 30,000)">
+    <label>Promotion</label>
+    <select>
+      <option>— No promotion —</option>
+      <option>Ramadan Triple Boon (+200%)</option>
+      <option>Daily Reload (+5%)</option>
+    </select>
+    <button class="modal-btn" onclick="closeModal('deposit-modal'); toast('৳ 1,000 deposit confirmed!')">SUBMIT DEPOSIT</button>
+  </div>
+</div>
+
+<!-- Withdraw -->
+<div class="modal-overlay" id="withdraw-modal" onclick="if(event.target===this)closeModal('withdraw-modal')">
+  <div class="modal" style="max-width:420px;">
+    <button class="modal-close" onclick="closeModal('withdraw-modal')">✕</button>
+    <div class="modal-title">⬡ WITHDRAW</div>
+    <div class="modal-sub">Avail · ৳12,450.00</div>
+    <label>Destination Wallet</label>
+    <select>
+      <option>bKash · ****8842</option>
+      <option>Nagad · ****1290</option>
+    </select>
+    <label>Amount (Min ৳500 · Max ৳30,000)</label>
+    <input type="number" placeholder="Enter amount">
+    <button class="modal-btn" onclick="closeModal('withdraw-modal'); toast('Withdrawal of ৳ submitted')">SUBMIT WITHDRAW</button>
+  </div>
+</div>
+
+<!-- Inbox -->
+<div class="modal-overlay" id="inbox-modal" onclick="if(event.target===this)closeModal('inbox-modal')">
+  <div class="modal" style="max-width:460px;">
+    <button class="modal-close" onclick="closeModal('inbox-modal')">✕</button>
+    <div class="modal-title">📜 SCROLLS</div>
+    <div class="modal-sub">Royal decrees & dispatches</div>
+    <div class="inbox-list">
+      <div class="inbox-item unread">
+        <div class="inbox-ic">🎁</div>
+        <div class="inbox-body">
+          <div class="inbox-title">Ramadan Triple Boon Activated</div>
+          <div class="inbox-snippet">Deposit thrice during holy month and earn up to ৳6,000...</div>
+        </div>
+        <div class="inbox-time">2h</div>
+      </div>
+      <div class="inbox-item unread">
+        <div class="inbox-ic">⚡</div>
+        <div class="inbox-body">
+          <div class="inbox-title">Auto Deposit Bonus Raised</div>
+          <div class="inbox-snippet">Bonus rate raised to 3.5% across all e-wallet methods...</div>
+        </div>
+        <div class="inbox-time">5h</div>
+      </div>
+      <div class="inbox-item">
+        <div class="inbox-ic">🏏</div>
+        <div class="inbox-body">
+          <div class="inbox-title">IPL 2026 Reward Box opens tomorrow</div>
+          <div class="inbox-snippet">Wager during any IPL fixture for chest rewards...</div>
+        </div>
+        <div class="inbox-time">1d</div>
+      </div>
+      <div class="inbox-item">
+        <div class="inbox-ic">🔧</div>
+        <div class="inbox-body">
+          <div class="inbox-title">SureTech bKash maintenance complete</div>
+          <div class="inbox-snippet">Services have resumed normal operation...</div>
+        </div>
+        <div class="inbox-time">2d</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Support -->
+<div class="modal-overlay" id="support-modal" onclick="if(event.target===this)closeModal('support-modal')">
+  <div class="modal" style="max-width:380px;">
+    <button class="modal-close" onclick="closeModal('support-modal')">✕</button>
+    <div class="modal-title">⛯ COUNSEL</div>
+    <div class="modal-sub">24/7 royal envoys at thy service</div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;">
+      <button class="method-btn"><span class="method-ic">💬</span>Live Chat</button>
+      <button class="method-btn"><span class="method-ic">📞</span>WhatsApp</button>
+      <button class="method-btn"><span class="method-ic">✈️</span>Telegram</button>
+      <button class="method-btn"><span class="method-ic">f</span>Facebook</button>
+    </div>
+    <label style="margin-top:14px;">Quick question</label>
+    <input placeholder="Type thy concern...">
+    <button class="modal-btn" onclick="closeModal('support-modal'); toast('Envoy will respond shortly')">SEND TO ENVOY</button>
+  </div>
+</div>
+
+<!-- Game launch -->
+<div class="modal-overlay" id="game-modal" onclick="if(event.target===this)closeModal('game-modal')">
+  <div class="modal" style="max-width:440px;text-align:center;">
+    <button class="modal-close" onclick="closeModal('game-modal')">✕</button>
+    <div style="font-family:'Cinzel';font-size:48px;color:var(--gold-2);text-shadow:0 0 20px var(--gold-glow);margin:20px 0;" id="game-name-big">⬢</div>
+    <div class="modal-title" id="game-modal-name">LOADING</div>
+    <div class="modal-sub" id="game-modal-provider">Preparing thy table...</div>
+    <div style="margin:20px 0;">
+      <div style="height:4px;background:rgba(7,5,26,0.7);border-radius:2px;overflow:hidden;">
+        <div id="load-bar" style="width:0;height:100%;background:linear-gradient(90deg,var(--gold),var(--gold-2));box-shadow:0 0 8px var(--gold-glow);transition:width 1.4s ease;"></div>
+      </div>
+    </div>
+    <button class="modal-btn" onclick="closeModal('game-modal'); toast('Game session ended')">RETURN TO HALL</button>
+  </div>
+</div>
+
+<!-- Toast -->
+<div class="toast" id="toast"></div>
+
+<script>
+// ============ EMBERS ============
+(function(){
+  const wrap = document.getElementById('embers');
+  const N = 24;
+  for (let i = 0; i < N; i++) {
+    const e = document.createElement('div');
+    e.className = 'ember';
+    e.style.left = (Math.random() * 100) + '%';
+    e.style.setProperty('--dur', (10 + Math.random() * 18) + 's');
+    e.style.setProperty('--delay', (-Math.random() * 18) + 's');
+    e.style.setProperty('--dx', ((Math.random() - 0.5) * 80) + 'px');
+    wrap.appendChild(e);
+  }
+})();
+
+// ============ MARQUEE DATA ============
+(function(){
+  const items = [
+    '⬢ <strong>Mega Reels</strong> jackpot now ৳ 8,42,000 — climbing fast',
+    '⚜ Player <strong>khan_dhk</strong> just won ৳ 24,800 on Crazy Time',
+    '🏏 IPL 2026 Reward Box opens tomorrow · stake during any fixture',
+    '✨ Ramadan Triple Boon · deposit thrice for up to ৳ 6,000 bonus',
+    '⬢ <strong>Aviator Ascendant</strong> tournament · ৳ 5,00,000 pool',
+    '🐟 Fishing tournament · top 10 share ৳ 1,00,000'
+  ];
+  const html = items.map(t => `<span>${t}</span>`).join('') + items.map(t => `<span>${t}</span>`).join('');
+  document.getElementById('marquee-track').innerHTML = html;
+})();
+
+// ============ GAMES DATA ============
+const GAMES = {
+  hot: [
+    { name: 'Aviator', provider: 'SPRIBE', tag: 'hot', img: '../game-assets/generated/aviator.png' },
+    { name: 'Crazy Time', provider: 'EVOLUTION', tag: 'hot', img: '../game-assets/generated/crazy_time.png' },
+    { name: 'Super Ace', provider: 'JILI', tag: 'hot', img: '../game-assets/generated/super_ace.png' },
+    { name: 'Money Coming', provider: 'JILI', img: '../game-assets/generated/money_coming.png' },
+    { name: 'Mega Wheel', provider: 'PRAGMATIC', tag: 'new', img: '../game-assets/generated/mega_wheel.png' },
+    { name: 'Plinko', provider: 'SPRIBE', img: '../game-assets/generated/plinko.png' },
+    { name: 'Aviatrix', provider: 'RAJABAJI', tag: 'featured', img: '../game-assets/generated/aviatrix.png' },
+    { name: 'Chicken Road', provider: 'INOUT', img: '../game-assets/generated/chicken_road.png' }
+  ],
+  live: [
+    { name: 'Crazy Time', provider: 'EVOLUTION', tag: 'hot', img: '../game-assets/generated/crazy_time.png' },
+    { name: 'Funky Time', provider: 'EVOLUTION', img: '../game-assets/generated/funky_time.png' },
+    { name: 'Lightning Roulette', provider: 'EVOLUTION', tag: 'hot', img: '../game-assets/generated/lightning_roulette.png' },
+    { name: 'Mega Wheel', provider: 'PRAGMATIC', img: '../game-assets/generated/mega_wheel.png' },
+    { name: 'Andar Bahar', provider: 'EZUGI' },
+    { name: 'Teen Patti', provider: 'SUPERSPADE', tag: 'new' },
+    { name: 'Dragon Tiger', provider: 'EVOLUTION' },
+    { name: 'Live Baccarat', provider: 'SA GAMING' },
+    { name: 'Sicbo', provider: 'PRAGMATIC LIVE' }
+  ],
+  slots: [
+    { name: 'Sweet Bonanza', provider: 'PRAGMATIC', tag: 'hot', img: '../game-assets/generated/sweet_bonanza.png' },
+    { name: 'Big Bass', provider: 'PRAGMATIC', img: '../game-assets/generated/big_bass.png' },
+    { name: 'Super Ace', provider: 'JILI', tag: 'hot', img: '../game-assets/generated/super_ace.png' },
+    { name: 'Money Coming', provider: 'JILI', img: '../game-assets/generated/money_coming.png' },
+    { name: 'Gates of Olympus', provider: 'PRAGMATIC', tag: 'featured' },
+    { name: 'Fortune Tiger', provider: 'PG SOFT', tag: 'hot' },
+    { name: 'Boxing King', provider: 'JILI' },
+    { name: 'Wild West Gold', provider: 'PRAGMATIC' },
+    { name: 'Caishen Wins', provider: 'PG SOFT', tag: 'new' },
+    { name: 'Treasures of Aztec', provider: 'PG SOFT' },
+    { name: 'Mahjong Ways 2', provider: 'PG SOFT' },
+    { name: 'Bonanza Gold', provider: 'PRAGMATIC' }
+  ],
+  fishing: [
+    { name: 'Boom Legend', provider: 'JILI', tag: 'hot' },
+    { name: 'Royal Fishing', provider: 'JILI' },
+    { name: 'Bombing Fishing', provider: 'JILI' },
+    { name: 'All-Star Fishing', provider: 'JILI' },
+    { name: 'Dragon Fortune', provider: 'CQ9' },
+    { name: 'Fishing God', provider: 'SPADEGAMING' },
+    { name: 'Fishing Wars', provider: 'FACHAI', tag: 'new' },
+    { name: 'Happy Fishing', provider: 'JILI' }
+  ]
+};
+
+function makeCard(g) {
+  const tagHtml = g.tag ? `<span class="game-tag ${g.tag}">${g.tag.toUpperCase()}</span>` : '';
+  const bg = g.img ? `style="--bg:url('${g.img}')"` : '';
+  return `<div class="game-card" ${bg} onclick="playGame('${g.name}','${g.provider}')">
+    ${tagHtml}
+    <div class="game-name">${g.name}</div>
+    <div class="game-provider">${g.provider}</div>
+  </div>`;
+}
+
+document.getElementById('hot-grid').innerHTML = GAMES.hot.map(makeCard).join('');
+document.getElementById('live-grid').innerHTML = GAMES.live.slice(0, 6).map(makeCard).join('');
+document.getElementById('live-grid-2').innerHTML = GAMES.live.map(makeCard).join('');
+document.getElementById('slots-grid').innerHTML = GAMES.slots.map(makeCard).join('');
+document.getElementById('fishing-grid').innerHTML = GAMES.fishing.map(makeCard).join('');
+
+// ============ SPORTS ============
+const SPORTS = [
+  { tag: 'LIVE', home: 'Bangladesh', away: 'India', score: '142/4 (16.2)', time: 'In play · T20I', odds: ['1.85', '2.10', '11.0'] },
+  { tag: 'LIVE', home: 'Mumbai Indians', away: 'Chennai SK', score: '186/6 (20)', time: 'IPL · 2nd Innings', odds: ['1.45', '2.80', '7.5'] },
+  { tag: '3:30 PM', home: 'Pakistan', away: 'Sri Lanka', score: '—', time: 'Today · ODI', odds: ['2.20', '1.75', '9.0'] },
+  { tag: '7:00 PM', home: 'Delhi Capitals', away: 'KKR', score: '—', time: 'IPL · Today', odds: ['1.95', '1.90', '8.0'] },
+  { tag: 'TMRW', home: 'BPL Cup Final', away: '—', score: '—', time: 'Tomorrow', odds: ['—', '—', '—'] }
+];
+document.getElementById('sports-list').innerHTML = SPORTS.map(m => `
+  <div class="panel" style="display:grid;grid-template-columns:80px 1fr auto;gap:12px;align-items:center;cursor:pointer;">
+    <div>
+      <div style="font-size:9px;color:${m.tag === 'LIVE' ? 'var(--crimson)' : 'var(--gold-2)'};font-weight:800;letter-spacing:1px;${m.tag === 'LIVE' ? 'animation:pulse 1.5s infinite;' : ''}">${m.tag}</div>
+      <div style="font-size:9px;color:var(--mute);margin-top:2px;">${m.time}</div>
+    </div>
+    <div>
+      <div style="font-family:'Cinzel';font-size:14px;color:var(--cream);font-weight:700;">${m.home} <span style="color:var(--mute);">vs</span> ${m.away}</div>
+      <div style="font-size:11px;color:var(--gold-2);margin-top:2px;">${m.score}</div>
+    </div>
+    <div style="display:flex;gap:6px;">
+      ${m.odds.map(o => `<button class="amt-chip" style="min-width:50px;">${o}</button>`).join('')}
+    </div>
+  </div>
+`).join('');
+
+// ============ BONUS GRID ============
+const BONUSES = [
+  { title: 'Ramadan Triple Boon', amt: '৳6,000', desc: 'Deposit 3x during holy month', tag: 'LIMITED' },
+  { title: 'Daily Login Boon', amt: '৳88/day', desc: 'Claim free coins every visit', tag: 'EVERY DAY' },
+  { title: 'Weekend Reload', amt: '+10%', desc: 'Boost every Sat & Sun deposit', tag: 'WEEKEND' },
+  { title: 'Cricket Stakes', amt: '৳1,000', desc: 'Wager on IPL · earn rebate', tag: 'IPL 2026' },
+  { title: 'High Roller Pact', amt: '৳50,000', desc: 'Deposit ৳10k+ for elite perks', tag: 'VIP' },
+  { title: 'Birthday Boon', amt: '৳1,288', desc: 'Surprise on thy day · Gold tier+', tag: 'EXCLUSIVE' }
+];
+document.getElementById('bonus-grid').innerHTML = BONUSES.map(b => `
+  <div class="panel" style="padding:14px;background:linear-gradient(135deg,rgba(91,45,140,0.35),rgba(7,5,26,0.5));border:1px solid var(--gold);cursor:pointer;">
+    <div style="display:flex;justify-content:space-between;align-items:flex-start;">
+      <div style="font-size:9px;color:var(--gold-2);font-weight:800;letter-spacing:1.5px;">${b.tag}</div>
+      <div style="font-family:'Cinzel';font-size:18px;color:var(--gold-2);font-weight:800;">${b.amt}</div>
+    </div>
+    <div style="font-family:'Cinzel';font-size:15px;color:var(--cream);font-weight:700;margin-top:6px;">${b.title}</div>
+    <div style="font-size:11px;color:var(--mute);margin-top:3px;">${b.desc}</div>
+    <button class="wallet-btn primary" style="width:100%;margin-top:10px;padding:8px;" onclick="event.stopPropagation();toast('Boon activated!')">⚜ CLAIM</button>
+  </div>
+`).join('');
+
+// ============ MISSION GRID ============
+const MISSIONS = [
+  { lvl: 1, ic: '🎁', prize: '৳200', state: 'open' },
+  { lvl: 2, ic: '📦', prize: '৳500', state: 'open' },
+  { lvl: 3, ic: '🪙', prize: '৳800', state: 'open', unread: true },
+  { lvl: 4, ic: '💼', prize: '৳1,500', state: 'open' },
+  { lvl: 5, ic: '🎯', prize: '৳3,000', state: 'open', unread: true },
+  { lvl: 6, ic: '🏺', prize: '৳5,000', state: 'open', unread: true },
+  { lvl: 7, ic: '⚱️', prize: '৳8,000', state: 'locked' },
+  { lvl: 8, ic: '🔮', prize: '৳12,000', state: 'locked' },
+  { lvl: 9, ic: '👑', prize: '৳20,000', state: 'locked' },
+  { lvl: 10, ic: '💎', prize: '৳30,000', state: 'locked' },
+  { lvl: 12, ic: '🪔', prize: '৳50,000', state: 'locked' },
+  { lvl: 15, ic: '📱', prize: 'iPhone 17', state: 'locked' },
+  { lvl: 18, ic: '🏎️', prize: 'S25 Ultra', state: 'locked' },
+  { lvl: 20, ic: '🏆', prize: 'GRAND', state: 'locked' }
+];
+document.getElementById('mission-grid').innerHTML = MISSIONS.map(m => `
+  <div class="chest ${m.state}" onclick="${m.state === 'open' ? `toast('Chest ${m.lvl} opened: ${m.prize}!')` : `toast('Locked · reach level ${m.lvl}')`}">
+    ${m.unread ? '<div class="red-dot"></div>' : ''}
+    <div class="chest-ic">${m.ic}</div>
+    <div class="chest-lvl">LVL ${m.lvl}</div>
+    <div class="chest-prize">${m.prize}</div>
+  </div>
+`).join('');
+
+// ============ WINS TICKER ============
+const WIN_NAMES = ['kh4n_d', 'rajiv88', 'sumon_bd', 'shahin12', 'aysha7', 'ifaz44', 'mehedi8', 'rifat03', 'amir90', 'mishu56'];
+const WIN_GAMES = ['Crazy Time', 'Aviator', 'Sweet Bonanza', 'Super Ace', 'Lightning Roulette', 'Plinko', 'Mega Wheel'];
+function randWin() {
+  const u = WIN_NAMES[Math.floor(Math.random() * WIN_NAMES.length)];
+  const g = WIN_GAMES[Math.floor(Math.random() * WIN_GAMES.length)];
+  const a = (Math.floor(Math.random() * 80) + 5) * 1000;
+  return { u, g, a };
+}
+function renderWins() {
+  const list = document.getElementById('wins-list');
+  const wins = Array.from({ length: 8 }, randWin);
+  list.innerHTML = wins.map(w => `
+    <div class="win-item">
+      <div class="win-avatar"></div>
+      <div>
+        <div class="win-user">${w.u}</div>
+        <div class="win-game">${w.g}</div>
+      </div>
+      <div class="win-amt">+৳${w.a.toLocaleString()}</div>
+    </div>
+  `).join('');
+}
+renderWins();
+setInterval(renderWins, 6000);
+
+// ============ NAVIGATION ============
+function go(name) {
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  const target = document.querySelector(`.screen[data-screen="${name}"]`);
+  if (target) target.classList.add('active');
+  document.querySelectorAll('.rail-item').forEach(b => b.classList.toggle('active', b.dataset.nav === name));
+}
+document.querySelectorAll('.rail-item').forEach(b => {
+  b.addEventListener('click', () => go(b.dataset.nav));
+});
+
+// ============ MODALS ============
+function openModal(id) { document.getElementById(id).classList.add('show'); }
+function closeModal(id) { document.getElementById(id).classList.remove('show'); }
+
+// ============ GAME LAUNCH ============
+function playGame(name, provider) {
+  document.getElementById('game-modal-name').textContent = name.toUpperCase();
+  document.getElementById('game-modal-provider').textContent = provider ? `— ${provider} —` : 'Preparing thy table...';
+  document.getElementById('game-name-big').textContent = '⬢';
+  document.getElementById('load-bar').style.width = '0';
+  openModal('game-modal');
+  setTimeout(() => { document.getElementById('load-bar').style.width = '100%'; }, 50);
+}
+
+// ============ TOAST ============
+let toastT;
+function toast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  clearTimeout(toastT);
+  toastT = setTimeout(() => t.classList.remove('show'), 2400);
+}
+
+// ============ COPY REFERRAL ============
+function copyRef() {
+  if (navigator.clipboard) navigator.clipboard.writeText('https://rajabaji.net?ref=RAJA8842');
+  toast('Referral link copied!');
+}
+
+// ============ TAB SWITCH UX ============
+document.querySelectorAll('.tab-bar').forEach(bar => {
+  bar.addEventListener('click', e => {
+    const t = e.target.closest('.tab');
+    if (!t) return;
+    bar.querySelectorAll('.tab').forEach(x => x.classList.toggle('active', x === t));
+  });
+});
+document.querySelectorAll('.provider-bar').forEach(bar => {
+  bar.addEventListener('click', e => {
+    const t = e.target.closest('.provider-chip');
+    if (!t) return;
+    bar.querySelectorAll('.provider-chip').forEach(x => x.classList.toggle('active', x === t));
+  });
+});
+document.querySelectorAll('.amt-grid').forEach(bar => {
+  bar.addEventListener('click', e => {
+    const t = e.target.closest('.amt-chip');
+    if (!t) return;
+    bar.querySelectorAll('.amt-chip').forEach(x => x.classList.toggle('active', x === t));
+  });
+});
+document.querySelectorAll('.method-row').forEach(bar => {
+  bar.addEventListener('click', e => {
+    const t = e.target.closest('.method-btn');
+    if (!t) return;
+    bar.querySelectorAll('.method-btn').forEach(x => x.classList.toggle('active', x === t));
+  });
+});
+
+// ============ ESC closes modals ============
+document.addEventListener('keydown', e => {
+  if (e.key === 'Escape') document.querySelectorAll('.modal-overlay.show').forEach(m => m.classList.remove('show'));
+});
+</script>
+
+</body>
+</html>

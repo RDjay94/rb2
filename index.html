@@ -107,11 +107,15 @@
     </div>
     <div class="v-toggle" id="v-toggle">
       <button data-v="v1"><span>V1</span><span class="badge">FROZEN</span></button>
-      <button data-v="v2" class="active"><span>V2</span><span class="badge">3D</span></button>
+      <button data-v="v2"><span>V2</span><span class="badge">3D</span></button>
+      <button data-v="v3"><span>V3</span><span class="badge">ARCANE</span></button>
+      <button data-v="v4" class="active"><span>V4</span><span class="badge">TURBO</span></button>
     </div>
     <div class="shell-meta">
       <a href="v1/" target="_blank" title="Open V1 in new tab">V1 ↗</a>
       <a href="v2/" target="_blank" title="Open V2 in new tab">V2 ↗</a>
+      <a href="v3/" target="_blank" title="Open V3 in new tab">V3 ↗</a>
+      <a href="v4/" target="_blank" title="Open V4 in new tab">V4 ↗</a>
     </div>
   </header>
   <div class="frame-wrap">
@@ -161,9 +165,10 @@
   const frame = document.getElementById('version-frame');
   const overlay = document.getElementById('switching');
   const label = document.getElementById('switching-label');
-  const SRC = { v1: 'v1/index.html', v2: 'v2/index.html' };
-  // Initial active button — try restoring from URL hash or default to v2
-  const initialV = (location.hash.replace('#','') === 'v1') ? 'v1' : 'v2';
+  const SRC = { v1: 'v1/index.html', v2: 'v2/index.html', v3: 'v3/index.html', v4: 'v4/index.html' };
+  // Initial active button — try restoring from URL hash or default to v4 (newest)
+  const hashV = location.hash.replace('#','');
+  const initialV = SRC[hashV] ? hashV : 'v4';
   Array.from(toggle.children).forEach(b => b.classList.toggle('active', b.dataset.v === initialV));
   frame.src = SRC[initialV];
   toggle.addEventListener('click', (e) => {
